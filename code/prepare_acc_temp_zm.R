@@ -11,13 +11,11 @@ pacman::p_load(
 
 # Specify paths -----------------------------------------------------------
 
-
+# Path to mat files:
 mat_files_path <-
-# on windows use the following path
-  # "E:/screens_children_mat_files/followup"
-# on linux use the following path
 "/media/esben/My Passport/screens_children_mat_files/followup"
 
+# Path to z machine files 
 zm_files_path <-
   "data/raw/screens_zmachine/"
 
