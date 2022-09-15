@@ -14,7 +14,7 @@ fup <-
 
 
 
-# Here we are calculating features in 30-sec overlapping rolling windows.
+# Calculating features in 30-sec overlapping rolling windows.
 create_feats <- function(tbl) {
   tbl |>
     mutate(
@@ -41,17 +41,19 @@ create_feats <- function(tbl) {
     )
 }
 
-# furrr multisession 
+# furrr multisession with 12 CPU cores
 plan(multisession, workers = 12)
 
 bsl |>
   group_split(id) |>
-  future_map_dfr(~ create_feats(.x)) |> 
+  future_map_dfr(~ create_feats(.x),
+                 .progress = TRUE) |>
   write_feather("data/processed/bsl_features.feather")
 
-fup |> 
+fup |>
   group_split(id) |>
-  future_map_dfr(~ create_feats(.x)) |> 
+  future_map_dfr(~ create_feats(.x),
+                 .progress = TRUE) |>
   write_feather("data/processed/fup_features.feather")
 
 # TODO next step is to create the sensor-independent features
