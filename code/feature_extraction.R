@@ -57,3 +57,5 @@ fup |>
   write_feather("data/processed/fup_features.feather")
 
 # TODO next step is to create the sensor-independent features
+
+plan(sequential)
