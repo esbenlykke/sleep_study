@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 pacman::p_load(
   tidyverse,
   vroom,
