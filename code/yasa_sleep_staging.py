@@ -9,7 +9,7 @@ import glob
 
 # path = input("Path to .edf files: ")
 # path = "C:/Users/eskovgaard/Desktop/sleep/data/raw/edf/test"
-path = "C:/Users/eskovgaard/Desktop/sleep/data/raw/somno_edf"
+path = "data/raw/somno_data/somno_edf"
 
 # new_dir_name = input('Path to output folder: ')
 # new_dir = pathlib.Path(
