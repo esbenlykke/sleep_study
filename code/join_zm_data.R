@@ -1,20 +1,19 @@
-pacman::p_load(tidyverse,
-               vroom)
+#!/usr/bin/env Rscript
+
+library(tidyverse)
+library(lubridate)
 
 # Path to zm zmachine files
-path <- "data/raw/screens_zmachine"
 
 files <-
-  list.files(path, ".csv", full.names = TRUE)
+  list.files("data/raw/screens_zmachine", ".csv", full.names = TRUE)
 
-vroom(files, id = "id", col_types = "??iiiii") %>%
+read_csv(files, id = "id", col_types = "??iiiii") %>%
   janitor::clean_names() %>%
+  unite("datetime", date:time, sep = " ") |> 
   mutate(
-    date = anytime::anydate(date),
-    time = hms::parse_hms(time),
-    id = parse_number(id),
-    datetime = lubridate::ymd_hms(paste0(date, time))
+    datetime = as_datetime(datetime),
+    id = parse_number(id)
   ) %>%
-  relocate(datetime, .after = time) %>%
   arrange(id) %>%
-  vroom_write("data/processed/zm_scores.tsv")
+  write_tsv("data/processed/zm_scores.tsv")

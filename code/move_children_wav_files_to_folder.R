@@ -14,10 +14,12 @@ info_followup <-
 # screens filenames -------------------------------------------------------
 
 
-fnames_baseline <- tibble(filenames = list.files("E:/SCREENS/Baseline/",
+fnames_baseline <- 
+  tibble(filenames = list.files("E:/SCREENS/Baseline/",
   full.names = TRUE
 ))
-fnames_followup <- tibble(filenames = list.files("E:/SCREENS/Followup/",
+fnames_followup <- 
+  tibble(filenames = list.files("E:/SCREENS/Followup/",
   full.names = TRUE
 ))
 
