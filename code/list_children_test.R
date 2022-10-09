@@ -1,4 +1,6 @@
-pacman::p_load(tidyverse)
+#!/usr/bin/env Rscript
+
+library(tidyverse)
 
 
 # participant info --------------------------------------------------------
@@ -15,13 +17,13 @@ info_followup <-
 
 
 fnames_baseline <- 
-  tibble(filenames = list.files("E:/SCREENS/Baseline/",
-  full.names = TRUE
-))
+  tibble(filenames = list.files("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline",
+                                full.names = TRUE
+  ))
 fnames_followup <- 
-  tibble(filenames = list.files("E:/SCREENS/Followup/",
-  full.names = TRUE
-))
+  tibble(filenames = list.files("/media/esbenlykke/My Passport/screens_all_cwa_files/followup",
+                                full.names = TRUE
+  ))
 
 clean_ids <-
   function(tbl) {
@@ -37,11 +39,11 @@ clean_ids <-
   }
 
 baseline <-
-  fnames_baseline %>%
+  fnames_baseline |> 
   clean_ids() 
 
 followup <-
-  fnames_followup %>%
+  fnames_followup |> 
   clean_ids() 
 
 
@@ -52,32 +54,22 @@ join_fnames_info <- function(x, y) {
     janitor::clean_names() %>%
     filter(age < 18) %>%
     pivot_longer(thigh:back,
-      names_to = "sensor_location",
-      values_to = "sensor_id"
+                 names_to = "sensor_location",
+                 values_to = "sensor_id"
     ) %>%
     left_join(y, by = c("id", "sensor_id")) %>%
+    mutate(filenames = str_extract(filenames, "\\w+.cwa$")) |>
     drop_na()
 }
 
-baseline_children <-
-  info_baseline %>%
+info_baseline %>%
   join_fnames_info(baseline)%>%
-  arrange(id)
+  arrange(id) |>
+  pull(filenames) |> 
+  write_lines("data/temp/bsl_list_children_cwa.txt")
 
-followup_children <-
-  info_followup %>%
+info_followup %>%
   join_fnames_info(followup)%>%
-  arrange(id)
-
-
-# copy children to folder -------------------------------------------------
-
-
-baseline_children %>%
-  slice(1:3) %>%
-  pull(filenames) %>%
-  file.copy(from = ., to = "E:/SCREENS/Baseline/children")
-
-followup_children %>%
-  pull(filenames) %>%
-  file.copy(from = ., to = "E:/SCREENS/Followup/children", )
+  arrange(id) |> 
+  pull(filenames) |> 
+  write_lines("data/temp/fup_list_children_cwa.txt")
