@@ -6,11 +6,13 @@ library(slider)
 library(feather)
 library(furrr)
 
-args <- commandArgs(trailingOnly = TRUE)
+args <- R.utils::commandArgs(trailingOnly = TRUE)
 
 epoch_length <- as.integer(args[1]) # epoch length in seconds
-dest <- as.character(args[2]) # destination filename
-cwa_path <- as.character(args[3]) # path to cwa files
+dest <- args[2] # destination filename
+cwa_path <- args[3] # path to cwa files
+parallel <- args[4] # should the script be run in parallel?
+cores <- as.integer(args[5]) # number of cores when in parallel
 
 dir.create("data/temp", recursive = TRUE)
 
@@ -45,15 +47,26 @@ temp_files <-
     list.files(cwa_path, "cwa"), "cwa", "feather"
   ))
 
-plan("multisession", workers = 5)
 
-future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
-             .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE)
+if (parallel) {
+  plan("multisession", workers = cores)
 
-plan(sequential)
+  future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
+    .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE
+  )
 
-list.files("data/temp", "feather", full.names = TRUE) |> 
-  map_dfr(read_feather) |> 
-  write_feather(dest)
+  plan(sequential)
+
+  list.files("data/temp", "feather", full.names = TRUE) |>
+    map_dfr(read_feather) |>
+    write_feather(dest)
+} else {
+  walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y))
+  
+  list.files("data/temp", "feather", full.names = TRUE) |>
+    map_dfr(read_feather) |>
+    write_feather(dest)
+}
+
 
 unlink("data/temp", recursive = TRUE)

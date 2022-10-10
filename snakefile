@@ -1,45 +1,34 @@
 import os
-import glob
 
 somno_paths = os.listdir("data/raw/somno_data/somno_analyses_data/")
 
 zm_files = os.listdir("data/raw/screens_zmachine/")
 
-my_cwa = glob.glob("data/raw/my_study_acc_data/cwa/" + ".cwa", recursive=False)
+my_cwa = os.listdir("data/raw/my_study_acc_data/cwa/")
 
-# files list for rule make_list_cwa_children and rule cp_children_cwa (latter rule currently not working)
-screens_bsl = glob.glob("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline" + "cwa", recursive = False)
-screens_fup = glob.glob("/media/esbenlykke/My Passport/screens_all_cwa_files/followup" + "cwa", recursive = False)
-
-# file lists for rule prepare_screens_cwa
-screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
-screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
+# filenames for rule make_list_cwa_children and rule cp_children_cwa
+screens_bsl = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline")
+screens_fup = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/followup")
 
 # create file lists for "rule cp_children_cwa" 
-# TODO in the works
 list_file_bsl = open("data/processed/bsl_children_cwa.txt", "r")
-list_cwa_bsl = list_file_bsl.readlines()
+list_cwa_bsl = list_file_bsl.read().splitlines()
 list_file_fup = open("data/processed/fup_children_cwa.txt", "r")
-list_cwa_fup = list_file_fup.readlines()
+list_cwa_fup = list_file_fup.read().splitlines()
+
+# screens baseline and followup samples
+SAMPLE = ["baseline", "followup"]
 
 path_bsl = "/media/esbenlykke/My Passport/screens_cwa_children/baseline/"
 path_fup = "/media/esbenlykke/My Passport/screens_cwa_children/followup/"
 
-bsl_lines = [path_bsl + str(x) for x in list_cwa_bsl]
-fup_lines = [path_fup + str(x) for x in list_cwa_fup]
+bsl_children_paths = [path_bsl + str(x) for x in list_cwa_bsl]
+fup_children_paths = [path_fup + str(x) for x in list_cwa_fup]
 
-cwa_list_bls = []
+# file lists for rule prepare_screens_cwa
+# screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
+# screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
 
-for element in bsl_lines:
-    cwa_list_bls.append(element.strip())
-
-cwa_list_fup = []
-
-for element in fup_lines:
-    cwa_list_fup.append(element.strip())
-
-# screens baseline and followup samples
-SAMPLE = ["bls", "fup"]
 
 ### MASTER RULE
 
@@ -47,12 +36,13 @@ rule targets:
   input:
     "data/processed/somno_sleep_profiles.tsv",
     "data/processed/zm_scores.tsv",
-    "data/processed/acc_temp_psg_study.feather",
     "data/processed/bsl_children_cwa.txt",
     "data/processed/fup_children_cwa.txt",
-    # expand("{sample}/{id}", id = cwa_list_bls, sample = SAMPLE), # targets for rule cp_children_cwa (currently not working)
+    expand("{path}", path = bsl_children_paths),
+    expand("{path}", path = fup_children_paths),
     "data/processed/acc_temp_psg_study.feather",
-    expand("data/processed/acc_temp_screens_{sample}.feather", sample = SAMPLE)
+    "data/processed/acc_temp_screens_baseline.feather"
+    # "data/processed/acc_temp_screens_followup.feather"
     
 
 ###
@@ -76,19 +66,6 @@ rule get_all_zm_data:
   shell:
     "{input.r_script}"
 
-rule prepare_my_cwa:
-  input:
-    r_script = "code/downsample_and_concatenate_cwa.R",
-    data = expand("data/raw/my_study_acc_data/cwa/{id}", id = my_cwa)
-  params:
-    epoch_length = 5,
-    dest = "data/processed/acc_temp_psg_study.feather",
-    cwa_path = "data/raw/my_study_acc_data/cwa"
-  output:
-    "data/processed/acc_temp_psg_study.feather"
-  shell:
-    "{input.r_script} {params.epoch_length} {params.dest} {params.cwa_path}"
-
 rule make_list_cwa_children:
   input:
     r_script = "code/list_children_cwa_files.R",
@@ -102,31 +79,56 @@ rule make_list_cwa_children:
   shell:
     "{input.r_script}"
 
-
-# TODO rule cp_children_cwa does not work!
-
 rule cp_children_cwa:
   input:
-    bsl_cwa_files = expand("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline/{id}", id = screens_bsl),
-    fup_cwa_files = expand("/media/esbenlykke/My Passport/screens_all_cwa_files/followup/{id}", id = screens_fup),
-    cp_bsl = "data/processed/bsl_children_cwa.txt",
-    cp_fup = "data/processed/fup_children_cwa.txt",
+    bsl_cp_from = expand("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline/{id}", id = screens_bsl),
+    fup_cp_from = expand("/media/esbenlykke/My Passport/screens_all_cwa_files/followup/{id}", id = screens_fup),
+    bsl_text = "data/processed/bsl_children_cwa.txt",
+    fup_text = "data/processed/fup_children_cwa.txt",
     script = "code/move_children_cwa.sh"
   output:
-    cp_to_bsl = expand("{path}", path = cwa_list_bls),
-    cp_to_fup = expand("{path}", path = cwa_list_fup)
+    cp_to_bsl = expand("{path}", path = bsl_children_paths),
+    cp_to_fup = expand("{path}", path = fup_children_paths)
   shell:
     "{input.script}"
 
-rule prepare_screens_cwa:
+rule prepare_my_cwa:
   input:
     r_script = "code/downsample_and_concatenate_cwa.R",
-    data = expand("/media/esbenlykke/My Passport/screens_cwa_children/{sample}/{id}", id = screens_children_cwa_bsl, sample = SAMPLE)
+    data = expand("data/raw/my_study_acc_data/cwa/{id}", id = my_cwa)
   params:
     epoch_length = 5,
-    dest = expand("data/processed/acc_temp_screens_{sample}.feather", sample = SAMPLE),
-    cwa_path = expand("/media/esbenlykke/My Passport/screens_cwa_children/{sample}/", sample = SAMPLE)
+    dest = "data/processed/acc_temp_psg_study.feather",
+    cwa_path = "data/raw/my_study_acc_data/cwa",
+    parallel = "TRUE",
+    cores = 5
   output:
-    expand("data/processed/acc_temp_screens_{sample}.feather", sample = SAMPLE)
+    "data/processed/acc_temp_psg_study.feather"
   shell:
-    "{input.r_script} {params.epoch_length} {params.dest} {params.cwa_path}"
+    """
+    {input.r_script} \
+    {params.epoch_length} \
+    {params.dest} \
+    {params.cwa_path} \
+    {params.parallel} \
+    {params.cores}
+    """
+
+# TODO not working. Creates empty tibble...
+rule prepare_screens_cwa_baseline:
+  input:
+    r_script = "code/downsample_and_concatenate_cwa.R",
+    bsl_files = expand("{path}", path = bsl_children_paths)
+  params:
+    epoch_length = 5,
+    dest = "data/processed/acc_temp_screens_baseline.feather",
+    cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/baseline",
+    parallel = "FALSE"
+  output:
+    expand("data/processed/acc_temp_screens_baseline.feather")
+  shell:
+    "{input.r_script} {params.epoch_length} {params.dest} {params.cwa_path} {params.parallel}"
+
+# print(expand("{path}", path = bsl_children_paths))
+
+# TODO make rule prepare_screens_cwa bsl/fup individually
