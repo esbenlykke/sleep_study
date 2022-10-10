@@ -8,11 +8,10 @@ library(furrr)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 
-epoch_length <- as.integer(args[1]) # epoch length in seconds
+epoch_length <- args[1] # epoch length in seconds
 dest <- args[2] # destination filename
 cwa_path <- args[3] # path to cwa files
-parallel <- args[4] # should the script be run in parallel?
-cores <- as.integer(args[5]) # number of cores when in parallel
+cores <- args[4] # number of cores when in parallel
 
 dir.create("data/temp", recursive = TRUE)
 
@@ -48,7 +47,7 @@ temp_files <-
   ))
 
 
-if (parallel) {
+if (cores > 1) {
   plan("multisession", workers = cores)
 
   future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),

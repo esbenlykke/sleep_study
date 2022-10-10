@@ -41,8 +41,8 @@ rule targets:
     expand("{path}", path = bsl_children_paths),
     expand("{path}", path = fup_children_paths),
     "data/processed/acc_temp_psg_study.feather",
-    "data/processed/acc_temp_screens_baseline.feather"
-    # "data/processed/acc_temp_screens_followup.feather"
+    "data/processed/acc_temp_screens_baseline.feather",
+    "data/processed/acc_temp_screens_followup.feather"
     
 
 ###
@@ -100,7 +100,6 @@ rule prepare_my_cwa:
     epoch_length = 5,
     dest = "data/processed/acc_temp_psg_study.feather",
     cwa_path = "data/raw/my_study_acc_data/cwa",
-    parallel = "TRUE",
     cores = 5
   output:
     "data/processed/acc_temp_psg_study.feather"
@@ -110,7 +109,6 @@ rule prepare_my_cwa:
     {params.epoch_length} \
     {params.dest} \
     {params.cwa_path} \
-    {params.parallel} \
     {params.cores}
     """
 
@@ -123,12 +121,34 @@ rule prepare_screens_cwa_baseline:
     epoch_length = 5,
     dest = "data/processed/acc_temp_screens_baseline.feather",
     cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/baseline",
-    parallel = "FALSE"
+    cores = 1
   output:
-    expand("data/processed/acc_temp_screens_baseline.feather")
+    "data/processed/acc_temp_screens_baseline.feather"
   shell:
-    "{input.r_script} {params.epoch_length} {params.dest} {params.cwa_path} {params.parallel}"
-
-# print(expand("{path}", path = bsl_children_paths))
-
-# TODO make rule prepare_screens_cwa bsl/fup individually
+    """
+    {input.r_script} \
+    {params.epoch_length} \
+    {params.dest} \
+    {params.cwa_path} \
+    {params.cores}
+    """
+    
+rule prepare_screens_cwa_followup:
+  input:
+    r_script = "code/downsample_and_concatenate_cwa.R",
+    fup_files = expand("{path}", path = fup_children_paths)
+  params:
+    epoch_length = 5,
+    dest = "data/processed/acc_temp_screens_followup.feather",
+    cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/followup",
+    cores = 1
+  output:
+    "data/processed/acc_temp_screens_followup.feather"
+  shell:
+    """
+    {input.r_script} \
+    {params.epoch_length} \
+    {params.dest} \
+    {params.cwa_path} \
+    {params.cores}
+    """
