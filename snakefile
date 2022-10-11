@@ -112,7 +112,7 @@ rule prepare_my_cwa:
     {params.cores}
     """
 
-# TODO not working. Creates empty tibble...
+# TODO not working.
 rule prepare_screens_cwa_baseline:
   input:
     r_script = "code/downsample_and_concatenate_cwa.R",
@@ -132,16 +132,17 @@ rule prepare_screens_cwa_baseline:
     {params.cwa_path} \
     {params.cores}
     """
+# print(expand("{path}", path = bsl_children_paths))
     
 rule prepare_screens_cwa_followup:
   input:
-    r_script = "code/downsample_and_concatenate_cwa.R",
+    r_script = "code/[testing]_screens_cwa.R",
     fup_files = expand("{path}", path = fup_children_paths)
   params:
     epoch_length = 5,
     dest = "data/processed/acc_temp_screens_followup.feather",
-    cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/followup",
-    cores = 1
+    cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/followup"
+    # cores = 1
   output:
     "data/processed/acc_temp_screens_followup.feather"
   shell:
@@ -149,6 +150,5 @@ rule prepare_screens_cwa_followup:
     {input.r_script} \
     {params.epoch_length} \
     {params.dest} \
-    {params.cwa_path} \
-    {params.cores}
+    {params.cwa_path}
     """
