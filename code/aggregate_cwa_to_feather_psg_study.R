@@ -11,7 +11,7 @@ args <- R.utils::commandArgs(trailingOnly = TRUE)
 epoch_length <- as.integer(args[1]) # epoch length in seconds
 dest <- args[2] # destination filename
 cwa_path <- args[3] # path to cwa files
-cores <- args[4] # number of cores when in parallel
+cores <- as.integer(args[4]) # number of cores when in parallel
 
 dir.create("data/temp", recursive = TRUE)
 
@@ -31,7 +31,9 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     ) |>
     drop_na() |>
     mutate(
-      id = str_extract(cwa_file, "\\d+_\\w+"),
+      id = str_extract(cwa_file, "\\d+"),
+      placement = str_extract(cwa_file, "\\d+_\\w+"),
+      placement = str_remove(placement, "\\d+_"),
       .before = 1
     ) |>
     write_feather(temp_file)

@@ -6,9 +6,12 @@ zm_files = os.listdir("data/raw/screens_zmachine/")
 
 my_cwa = os.listdir("data/raw/my_study_acc_data/cwa/")
 
-# filenames for rule make_list_cwa_children and rule cp_children_cwa
+# filenames for ALL screens cwa files
 screens_bsl = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline")
 screens_fup = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/followup")
+
+# test
+test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
 
 # create file lists for "rule cp_children_cwa" 
 list_file_bsl = open("data/processed/bsl_children_cwa.txt", "r")
@@ -94,7 +97,7 @@ rule cp_children_cwa:
 
 rule prepare_my_cwa:
   input:
-    r_script = "code/downsample_and_concatenate_cwa.R",
+    r_script = "code/aggregate_cwa_to_feather_psg_study.R",
     data = expand("data/raw/my_study_acc_data/cwa/{id}", id = my_cwa)
   params:
     epoch_length = 5,
@@ -113,42 +116,47 @@ rule prepare_my_cwa:
     """
 
 # TODO not working.
-rule prepare_screens_cwa_baseline:
+rule baseline_screens_cwa_to_feather:
   input:
-    r_script = "code/downsample_and_concatenate_cwa.R",
+    bash_script = "code/screens_cwa_to_feather.sh",
+    r_script = "code/aggregate_cwa_to_feather_screens.R",
     bsl_files = expand("{path}", path = bsl_children_paths)
   params:
+    input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
     epoch_length = 5,
-    dest = "data/processed/acc_temp_screens_baseline.feather",
-    cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/baseline",
-    cores = 1
+    dest = "data/processed/acc_temp_screens_baseline.feather"
   output:
     "data/processed/acc_temp_screens_baseline.feather"
   shell:
-    """
-    {input.r_script} \
-    {params.epoch_length} \
-    {params.dest} \
-    {params.cwa_path} \
-    {params.cores}
-    """
-# print(expand("{path}", path = bsl_children_paths))
-    
-rule prepare_screens_cwa_followup:
+    "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
+
+rule followup_screens_cwa_to_feather:
   input:
-    r_script = "code/[testing]_screens_cwa.R",
+    bash_script = "code/screens_cwa_to_feather.sh",
+    r_script = "code/aggregate_cwa_to_feather_screens.R",
     fup_files = expand("{path}", path = fup_children_paths)
   params:
+    input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
     epoch_length = 5,
-    dest = "data/processed/acc_temp_screens_followup.feather",
-    cwa_path = "/media/esbenlykke/My Passport/screens_cwa_children/followup"
-    # cores = 1
+    dest = "data/processed/acc_temp_screens_followup.feather"
   output:
     "data/processed/acc_temp_screens_followup.feather"
   shell:
-    """
-    {input.r_script} \
-    {params.epoch_length} \
-    {params.dest} \
-    {params.cwa_path}
-    """
+    "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
+
+
+### TEST rule is working
+
+# rule test:
+#   input:
+#     bash_script = "code/screens_cwa_to_feather.sh",
+#     r_script = "code/aggregate_cwa_to_feather_screens.R",
+#     test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{path}", path = test)
+#   params:
+#     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/test",
+#     epoch_length = 5,
+#     dest = "data/processed/test.feather"
+#   output:
+#     "data/processed/test.feather"
+#   shell:
+#     "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
