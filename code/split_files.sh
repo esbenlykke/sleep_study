@@ -3,13 +3,11 @@
 # If an argument is given then it is the name of the directory containing the
 # files to split.  Otherwise, the files in the working directory are split.
 if [ $# -gt 0 ]; then
-       dir=$1
-     epoch_length=$2
-     dest=$3
-     else
-       echo Please provide additional arguments.;
-     exit;
-     fi
+  dir=$1
+else
+  echo Please provide arguments.;
+    exit;
+fi
 
 # create temp dir
 mkdir -p "$1/temp"

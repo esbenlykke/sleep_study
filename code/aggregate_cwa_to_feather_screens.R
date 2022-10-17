@@ -5,12 +5,13 @@ library(read.cwa)
 library(slider)
 library(feather)
 library(furrr)
+library(glue)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 
 epoch_length <- as.integer(args[1]) # epoch length in seconds
-dest <- as.character(args[2]) # destination filename
-cwa_path <- as.character(args[3]) # path to cwa files
+dest <- args[2] # destination filename
+cwa_path <- args[3] # path to temp cwa files
 # cores <- args[4] # number of cores when in parallel
 
 dir.create("data/temp", recursive = TRUE)
@@ -20,8 +21,15 @@ cwa_files <-
 
 temp_files <-
   paste0("data/temp/", str_replace(
-    list.files(cwa_path, "cwa"), "cwa", "feather"
+    list.files(cwa_path), "cwa", "feather"
   ))
+
+print(cwa_path)
+
+glue("Number of temp cwa files is {length(cwa_files)}
+     Number of target feather files is {length(temp_files)}")
+
+stopifnot("Number of temp cwa split files not equal to target feather files." = length(cwa_files) == length(temp_files))
 
 downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
   read_cwa(cwa_file,

@@ -29,9 +29,6 @@ fup_children_paths = [path_fup + str(x) for x in list_cwa_fup]
 screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
 screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
 
-# test
-test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
-
 ### MASTER RULE
 
 rule targets:
@@ -142,13 +139,15 @@ rule fup_cwa_to_feather:
   shell:
     "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
 
-# ### TEST rule is working
-
+### TEST rule
+# 
+# test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
+# 
 # rule test:
 #   input:
 #     bash_script = "code/screens_cwa_to_feather.sh",
 #     r_script = "code/aggregate_cwa_to_feather_screens.R",
-#     test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{path}", path = test)
+#     batch1_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{id}", id = test)
 #   params:
 #     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/test",
 #     epoch_length = 5,
