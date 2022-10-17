@@ -23,6 +23,9 @@ fi
 # esac
 
 # create temp dir
+mkdir -p "$1/temp"
+
+tmp="$1/temp"
 
 # The shell glob expands to all the files in the target directory; a different
 # glob pattern could be used if you want to restrict splitting to a subset,
@@ -33,13 +36,8 @@ for file in "$dir"/*; do
   # into pieces named by appending a sequence number to the original file's
   # name. The original file is left in place.
   split --verbose -b 10M --numeric-suffixes "$file" "$file"
+  mv -t "$tmp" "$1/"*[0-99]
 done
-
-mkdir -p "$1/temp"
-
-tmp="$1/temp"
-
-mv -t "$tmp" "$1/"*[0-99]
 
 code/testing_aggregate_screens_cwa.R "$2" "$3" "$tmp"
 

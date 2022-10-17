@@ -7,13 +7,21 @@ library(feather)
 library(furrr)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
-#
+
 epoch_length <- as.integer(args[1]) # epoch length in seconds
-dest <- args[2] # destination filename
-cwa_path <- args[3] # path to cwa files
+dest <- as.character(args[2]) # destination filename
+cwa_path <- as.character(args[3]) # path to cwa files
 # cores <- args[4] # number of cores when in parallel
-#
+
 dir.create("data/temp", recursive = TRUE)
+
+cwa_files <-
+  list.files(cwa_path, full.names = TRUE)
+
+temp_files <-
+  paste0("data/temp/", str_replace(
+    list.files(cwa_path, "cwa"), "cwa", "feather"
+  ))
 
 downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
   read_cwa(cwa_file,
@@ -38,16 +46,6 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     ) |>
     write_feather(temp_file)
 }
-
-
-cwa_files <-
-  list.files(cwa_path, "cwa", full.names = TRUE)
-
-
-temp_files <-
-  paste0("data/temp/", str_replace(
-    list.files(cwa_path, "cwa"), "cwa", "feather"
-  ))
 
 plan("multisession", workers = 10)
 

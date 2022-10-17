@@ -10,9 +10,6 @@ my_cwa = os.listdir("data/raw/my_study_acc_data/cwa/")
 screens_bsl = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline")
 screens_fup = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/followup")
 
-# test
-test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
-
 # create file lists for "rule cp_children_cwa" 
 list_file_bsl = open("data/processed/bsl_children_cwa.txt", "r")
 list_cwa_bsl = list_file_bsl.read().splitlines()
@@ -29,9 +26,11 @@ bsl_children_paths = [path_bsl + str(x) for x in list_cwa_bsl]
 fup_children_paths = [path_fup + str(x) for x in list_cwa_fup]
 
 # file lists for rule prepare_screens_cwa
-# screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
-# screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
+screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
+screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
 
+# test
+test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
 
 ### MASTER RULE
 
@@ -114,13 +113,12 @@ rule prepare_my_cwa:
     {params.cwa_path} \
     {params.cores}
     """
-
-# TODO not working.
-rule baseline_screens_cwa_to_feather:
+    
+rule bsl_cwa_to_feather:
   input:
     bash_script = "code/screens_cwa_to_feather.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
-    bsl_files = expand("{path}", path = bsl_children_paths)
+    bsl_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
     epoch_length = 5,
@@ -130,11 +128,11 @@ rule baseline_screens_cwa_to_feather:
   shell:
     "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
 
-rule followup_screens_cwa_to_feather:
+rule fup_cwa_to_feather:
   input:
     bash_script = "code/screens_cwa_to_feather.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
-    fup_files = expand("{path}", path = fup_children_paths)
+    fup_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
     epoch_length = 5,
@@ -144,8 +142,7 @@ rule followup_screens_cwa_to_feather:
   shell:
     "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
 
-
-### TEST rule is working
+# ### TEST rule is working
 
 # rule test:
 #   input:

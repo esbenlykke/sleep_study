@@ -41,12 +41,12 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
 
 
 cwa_files <-
-  list.files("/media/esbenlykke/My\ Passport/screens_cwa_children/test/temp", "cwa", full.names = TRUE)
+  list.files("/media/esbenlykke/My\ Passport/screens_cwa_children/baseline/temp", "cwa", full.names = TRUE)
 
 
 temp_files <-
   paste0("data/temp/", str_replace(
-    list.files("/media/esbenlykke/My\ Passport/screens_cwa_children/test/temp", "cwa"), "cwa", "feather"
+    list.files("/media/esbenlykke/My\ Passport/screens_cwa_children/baseline/temp", "cwa"), "cwa", "feather"
   ))
 
 epoch_length <- 5
