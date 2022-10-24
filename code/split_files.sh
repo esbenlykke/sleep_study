@@ -1,22 +1,20 @@
 #!/usr/bin/env bash
 
-# If an argument is given then it is the name of the directory containing the
-# files to split.  Otherwise, the files in the working directory are split.
-if [ $# -gt 0 ]; then
-  dir=$1
-else
-  echo Please provide arguments.;
-    exit;
-fi
+cd "$1" || exit
 
 # create temp dir
-mkdir -p "$1/temp"
-tmp="$1/temp"
-     
-for file in "$dir"/*; do
-  # Details of the split command are up to you.  This one splits each file
-  # into pieces named by appending a sequence number to the original file's
-  # name. The original file is left in place.
-  split --verbose -b 10M --numeric-suffixes "$file" "$file"
-  mv -t "$tmp" "$1/"*[0-99]
+rm -rf temp && mkdir temp || exit
+mkdir ~/sleep_study/data/temp/
+
+# split files to temp
+for file in *; do
+    if [ -f "$file" ]; then
+        split --verbose -b 20M --numeric-suffixes "$file" temp/"$file"
+        ~/sleep_study/code/aggregate_cwa_to_feather_screens.R "$2" "$1"
+        rm -rf temp/*
+    fi
 done
+
+~/sleep_study/code/merge_feathers.R "$3"
+
+rm -rf temp

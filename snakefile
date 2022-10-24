@@ -113,46 +113,64 @@ rule prepare_my_cwa:
     
 rule bsl_cwa_to_feather:
   input:
-    bash_script = "code/screens_cwa_to_feather.sh",
+    bash_script = "code/split_files.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
-    bsl_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
+    test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
     epoch_length = 5,
-    dest = "data/processed/acc_temp_screens_baseline.feather"
+    dest = "~/sleep_study/data/processed/acc_temp_baseline.feather"
+    # num_cores = 1
   output:
     "data/processed/acc_temp_screens_baseline.feather"
   shell:
-    "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
+    """
+    {input.bash_script} \
+    {params.input_dir} \
+    {params.epoch_length} \
+    {params.dest}
+    """
 
 rule fup_cwa_to_feather:
   input:
-    bash_script = "code/screens_cwa_to_feather.sh",
+    bash_script = "code/split_files.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
-    fup_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
+    test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
     epoch_length = 5,
-    dest = "data/processed/acc_temp_screens_followup.feather"
+    dest = "~/sleep_study/data/processed/acc_temp_followup.feather"
+    # num_cores = 1
   output:
     "data/processed/acc_temp_screens_followup.feather"
   shell:
-    "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
+    """
+    {input.bash_script} \
+    {params.input_dir} \
+    {params.epoch_length} \
+    {params.dest}
+    """
 
 ### TEST rule
-# 
+
 # test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
 # 
 # rule test:
 #   input:
-#     bash_script = "code/screens_cwa_to_feather.sh",
+#     bash_script = "code/split_files.sh",
 #     r_script = "code/aggregate_cwa_to_feather_screens.R",
-#     batch1_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{id}", id = test)
+#     test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{id}", id = test)
 #   params:
 #     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/test",
 #     epoch_length = 5,
-#     dest = "data/processed/test.feather"
+#     dest = "~/sleep_study/data/processed/test.feather"
+#     # num_cores = 1
 #   output:
 #     "data/processed/test.feather"
 #   shell:
-#     "{input.bash_script} {params.input_dir} {params.epoch_length} {params.dest}"
+#     """
+#     {input.bash_script} \
+#     {params.input_dir} \
+#     {params.epoch_length} \
+#     {params.dest}
+#     """

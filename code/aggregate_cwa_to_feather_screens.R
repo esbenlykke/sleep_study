@@ -10,39 +10,55 @@ library(glue)
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 
 epoch_length <- as.integer(args[1]) # epoch length in seconds
-dest <- args[2] # destination filename
-cwa_path <- args[3] # path to temp cwa files
+# dest <- args[2] # destination filename
+cwa_path <- args[2] # path to temp cwa files
 # cores <- args[4] # number of cores when in parallel
 
-dir.create("data/temp", recursive = TRUE)
+# dir.create("~/sleep_study/data/temp/", recursive = TRUE)
 
 cwa_files <-
-  list.files(cwa_path, full.names = TRUE)
+  list.files(str_c(cwa_path, "/temp"), full.names = TRUE)
 
 temp_files <-
-  paste0("data/temp/", str_replace(
-    list.files(cwa_path), "cwa", "feather"
+  paste0("~/sleep_study/data/temp/", str_replace(
+    list.files(str_c(cwa_path, "/temp")), "cwa", "feather"
   ))
-
-print(cwa_path)
 
 glue("Number of temp cwa files is {length(cwa_files)}
      Number of target feather files is {length(temp_files)}")
 
-stopifnot("Number of temp cwa split files not equal to target feather files." = length(cwa_files) == length(temp_files))
+stopifnot(
+  "Number of temp cwa split files not equal to target feather files." =
+    length(cwa_files) == length(temp_files)
+)
+
+get_sf <- function(tbl) {
+  tbl |>
+    slice_head(n = 1000) |>
+    mutate(unix = as.integer(as.numeric(time))) |>
+    group_by(unix) |>
+    summarise(freq = round(n())) |>
+    summarise(freq = round(median(freq), -1)) |>
+    pull(freq)
+}
 
 downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
-  read_cwa(cwa_file,
-    xyz_only = FALSE,
-    verbose = TRUE
-  ) |>
+  tbl <-
+    read_cwa(cwa_file,
+      xyz_only = FALSE,
+      verbose = FALSE
+    ) |>
     pluck("data") |>
-    select(time, x = X, y = Y, z = Z, temp = temperature) |>
+    select(time, x = X, y = Y, z = Z, temp = temperature)
+
+  sf <- get_freq(tbl)
+
+  tbl |>
     mutate(
       across(x:temp, ~ slide_dbl(.x,
         mean,
-        .after = 50 * epoch_length,
-        .step = 50 * epoch_length
+        .after = sf * epoch_length,
+        .step = sf * epoch_length
       ))
     ) |>
     drop_na() |>
@@ -55,18 +71,36 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     write_feather(temp_file)
 }
 
-plan("multisession", workers = 10)
+plan("multisession", workers = 8)
 
-future_walk2(
-  cwa_files, temp_files,
-  ~ downsample_and_write_cwa_to_feather(.x, .y),
+future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
   .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE
 )
 
-plan("sequential")
+plan(sequential)
 
-list.files("data/temp", "feather", full.names = TRUE) |>
-  map_dfr(read_feather) |>
-  write_feather(dest)
+# list.files("~/sleep_study/data/temp/", "feather", full.names = TRUE) |>
+#   map_dfr(read_feather) |>
+#   write_feather(dest)
 
-unlink("data/temp", recursive = TRUE)
+# if (cores > 1) {
+#   plan("multisession", workers = cores)
+#
+#   future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
+#     .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE
+#   )
+#
+#   plan(sequential)
+#
+#   list.files("data/temp", "feather", full.names = TRUE) |>
+#     map_dfr(read_feather) |>
+#     write_feather(dest)
+# } else {
+#   walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y))
+#
+#   list.files("data/temp", "feather", full.names = TRUE) |>
+#     map_dfr(read_feather) |>
+#     write_feather(dest)
+# }
+
+# unlink("~/sleep_study/data/temp/", recursive = TRUE)
