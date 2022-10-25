@@ -1,10 +1,10 @@
 #!/usr/bin/env Rscript
 
-library(tidyverse)
+suppressMessages(library(tidyverse))
 library(read.cwa)
 library(slider)
 library(feather)
-library(furrr)
+suppressMessages(library(furrr))
 library(glue)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
@@ -24,8 +24,7 @@ temp_files <-
     list.files(str_c(cwa_path, "/temp")), "cwa", "feather"
   ))
 
-glue("Number of temp cwa files is {length(cwa_files)}
-     Number of target feather files is {length(temp_files)}")
+glue("Number of temp cwa files is {length(cwa_files)}")
 
 stopifnot(
   "Number of temp cwa split files not equal to target feather files." =
@@ -51,7 +50,7 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     pluck("data") |>
     select(time, x = X, y = Y, z = Z, temp = temperature)
 
-  sf <- get_freq(tbl)
+  sf <- get_sf(tbl)
 
   tbl |>
     mutate(
@@ -71,11 +70,13 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     write_feather(temp_file)
 }
 
-plan("multisession", workers = 8)
+plan("multisession", workers = 10)
 
 future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
   .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE
 )
+
+cat("\n")
 
 plan(sequential)
 

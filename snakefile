@@ -119,7 +119,7 @@ rule bsl_cwa_to_feather:
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
     epoch_length = 5,
-    dest = "~/sleep_study/data/processed/acc_temp_baseline.feather"
+    dest = "~/sleep_study/data/processed/acc_temp_screens_baseline.feather"
     # num_cores = 1
   output:
     "data/processed/acc_temp_screens_baseline.feather"
@@ -139,7 +139,7 @@ rule fup_cwa_to_feather:
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
     epoch_length = 5,
-    dest = "~/sleep_study/data/processed/acc_temp_followup.feather"
+    dest = "~/sleep_study/data/processed/acc_temp_screens_followup.feather"
     # num_cores = 1
   output:
     "data/processed/acc_temp_screens_followup.feather"
@@ -153,24 +153,24 @@ rule fup_cwa_to_feather:
 
 ### TEST rule
 
-# test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
-# 
-# rule test:
-#   input:
-#     bash_script = "code/split_files.sh",
-#     r_script = "code/aggregate_cwa_to_feather_screens.R",
-#     test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{id}", id = test)
-#   params:
-#     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/test",
-#     epoch_length = 5,
-#     dest = "~/sleep_study/data/processed/test.feather"
-#     # num_cores = 1
-#   output:
-#     "data/processed/test.feather"
-#   shell:
-#     """
-#     {input.bash_script} \
-#     {params.input_dir} \
-#     {params.epoch_length} \
-#     {params.dest}
-#     """
+test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
+
+rule test:
+  input:
+    bash_script = "code/split_files.sh",
+    r_script = "code/aggregate_cwa_to_feather_screens.R",
+    test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{id}", id = test)
+  params:
+    input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/test",
+    epoch_length = 5,
+    dest = "~/sleep_study/data/processed/test.feather"
+    # num_cores = 1
+  output:
+    "data/processed/test.feather"
+  shell:
+    """
+    {input.bash_script} \
+    {params.input_dir} \
+    {params.epoch_length} \
+    {params.dest}
+    """
