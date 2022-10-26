@@ -41,7 +41,12 @@ rule targets:
     expand("{path}", path = fup_children_paths),
     "data/processed/acc_temp_psg_study.feather",
     "data/processed/acc_temp_screens_baseline.feather",
-    "data/processed/acc_temp_screens_followup.feather"
+    "data/processed/acc_temp_screens_followup.feather",
+    "data/processed/screens_baseline.parquet",
+    "data/processed/screens_followup.parquet",
+    "data/processed/somno_acc.parquet",
+    "data/processed/screens_all_baseline.parquet",
+    "data/processed/screens_all_followup.parquet"
     
 
 ###
@@ -151,26 +156,59 @@ rule fup_cwa_to_feather:
     {params.dest}
     """
 
-### TEST rule
-
-test = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/test/")
-
-rule test:
+rule join_info_bsl:
   input:
-    bash_script = "code/split_files.sh",
-    r_script = "code/aggregate_cwa_to_feather_screens.R",
-    test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/test/{id}", id = test)
-  params:
-    input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/test",
-    epoch_length = 5,
-    dest = "~/sleep_study/data/processed/test.feather"
-    # num_cores = 1
+    r_script = "code/join_participant_info.R",
+    feather = "data/processed/acc_temp_screens_baseline.feather",
+    info = "data/participant_info/screens_baseline_info.xlsx"
   output:
-    "data/processed/test.feather"
+    dest = "data/processed/screens_baseline.parquet"
   shell:
     """
-    {input.bash_script} \
-    {params.input_dir} \
-    {params.epoch_length} \
-    {params.dest}
+    {input.r_script} {input.feather} {input.info} {output.dest}
     """
+    
+rule join_info_fup:
+  input:
+    r_script = "code/join_participant_info.R",
+    feather = "data/processed/acc_temp_screens_followup.feather",
+    info = "data/participant_info/screens_followup_info.xlsx"
+  output:
+    dest = "data/processed/screens_followup.parquet"
+  shell:
+    """
+    {input.r_script} {input.feather} {input.info} {output.dest}
+    """
+
+rule somno_join_acc:
+  input:
+    "data/processed/acc_temp_psg_study.feather",
+    "data/processed/somno_sleep_profiles.tsv"
+  output:
+    "data/processed/somno_acc.parquet"
+  shell:
+    "code/somno_join_acc.R"
+
+rule zm_join_acc_bsl:
+  input:
+    r_script = "code/zm_join_sceens_acc.R",
+    zm = "data/processed/zm_scores.tsv",
+    acc = "data/processed/screens_baseline.parquet"
+  params:
+    dest = "data/processed/screens_all_baseline.parquet"
+  output:
+    "data/processed/screens_all_baseline.parquet"
+  shell:
+    "{input.r_script} {input.acc} {params.dest}"
+
+rule zm_join_acc_fup:
+  input:
+    r_script = "code/zm_join_sceens_acc.R",
+    zm = "data/processed/zm_scores.tsv",
+    acc = "data/processed/screens_followup.parquet"
+  params:
+    dest = "data/processed/screens_all_followup.parquet"
+  output:
+    "data/processed/screens_all_followup.parquet"
+  shell:
+    "{input.r_script} {input.acc} {params.dest}"
