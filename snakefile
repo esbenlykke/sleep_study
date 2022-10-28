@@ -10,24 +10,24 @@ my_cwa = os.listdir("data/raw/my_study_acc_data/cwa/")
 screens_bsl = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/baseline")
 screens_fup = os.listdir("/media/esbenlykke/My Passport/screens_all_cwa_files/followup")
 
-# create file lists for "rule cp_children_cwa" 
-list_file_bsl = open("data/processed/bsl_children_cwa.txt", "r")
-list_cwa_bsl = list_file_bsl.read().splitlines()
-list_file_fup = open("data/processed/fup_children_cwa.txt", "r")
-list_cwa_fup = list_file_fup.read().splitlines()
-
 # screens baseline and followup samples
 SAMPLE = ["baseline", "followup"]
 
 path_bsl = "/media/esbenlykke/My Passport/screens_cwa_children/baseline/"
 path_fup = "/media/esbenlykke/My Passport/screens_cwa_children/followup/"
 
-bsl_children_paths = [path_bsl + str(x) for x in list_cwa_bsl]
-fup_children_paths = [path_fup + str(x) for x in list_cwa_fup]
-
 # file lists for rule prepare_screens_cwa
 screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
 screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
+
+# create file lists for "rule cp_children_cwa" 
+list_file_bsl = open("data/processed/bsl_children_cwa.txt", "r")
+list_cwa_bsl = list_file_bsl.read().splitlines()
+list_file_fup = open("data/processed/fup_children_cwa.txt", "r")
+list_cwa_fup = list_file_fup.read().splitlines()
+
+bsl_children_paths = [path_bsl + str(x) for x in list_cwa_bsl]
+fup_children_paths = [path_fup + str(x) for x in list_cwa_fup]
 
 ### MASTER RULE
 
@@ -46,7 +46,8 @@ rule targets:
     "data/processed/screens_followup.parquet",
     "data/processed/somno_acc.parquet",
     "data/processed/screens_all_baseline.parquet",
-    "data/processed/screens_all_followup.parquet"
+    "data/processed/screens_all_followup.parquet",
+    "data/processed/yasa_preds.tsv"
     
 
 ###
@@ -106,7 +107,7 @@ rule prepare_my_cwa:
     cwa_path = "data/raw/my_study_acc_data/cwa",
     cores = 5
   output:
-    "data/processed/acc_temp_psg_study.feather"
+    temp("data/processed/acc_temp_psg_study.feather")
   shell:
     """
     {input.r_script} \
@@ -120,14 +121,14 @@ rule bsl_cwa_to_feather:
   input:
     bash_script = "code/split_files.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
-    test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
+    files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
     epoch_length = 5,
     dest = "~/sleep_study/data/processed/acc_temp_screens_baseline.feather"
     # num_cores = 1
   output:
-    "data/processed/acc_temp_screens_baseline.feather"
+    protected("data/processed/acc_temp_screens_baseline.feather")
   shell:
     """
     {input.bash_script} \
@@ -140,14 +141,14 @@ rule fup_cwa_to_feather:
   input:
     bash_script = "code/split_files.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
-    test_files = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
+    iles = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
     epoch_length = 5,
     dest = "~/sleep_study/data/processed/acc_temp_screens_followup.feather"
     # num_cores = 1
   output:
-    "data/processed/acc_temp_screens_followup.feather"
+    protected("data/processed/acc_temp_screens_followup.feather")
   shell:
     """
     {input.bash_script} \
@@ -162,7 +163,7 @@ rule join_info_bsl:
     feather = "data/processed/acc_temp_screens_baseline.feather",
     info = "data/participant_info/screens_baseline_info.xlsx"
   output:
-    dest = "data/processed/screens_baseline.parquet"
+    dest = temp("data/processed/screens_baseline.parquet")
   shell:
     """
     {input.r_script} {input.feather} {input.info} {output.dest}
@@ -174,7 +175,7 @@ rule join_info_fup:
     feather = "data/processed/acc_temp_screens_followup.feather",
     info = "data/participant_info/screens_followup_info.xlsx"
   output:
-    dest = "data/processed/screens_followup.parquet"
+    dest = temp("data/processed/screens_followup.parquet")
   shell:
     """
     {input.r_script} {input.feather} {input.info} {output.dest}
@@ -212,3 +213,17 @@ rule zm_join_acc_fup:
     "data/processed/screens_all_followup.parquet"
   shell:
     "{input.r_script} {input.acc} {params.dest}"
+
+EDF = os.listdir("data/raw/somno_data/somno_edf/")
+
+rule get_yasa_preds:
+  input:
+    py_script = "code/yasa_sleep_staging.py",
+    r_script = "code/combine_yasa_preds.R",
+    edf = expand("data/raw/somno_data/somno_edf/{id}", id = EDF)
+  output:
+    "data/processed/yasa_preds.tsv"
+  shell:
+    """
+    code/yasa_sleep_staging.py && code/combine_yasa_preds.R && rm data/raw/somno_data/somno_edf/*csv
+    """
