@@ -107,7 +107,7 @@ rule prepare_my_cwa:
     cwa_path = "data/raw/my_study_acc_data/cwa",
     cores = 5
   output:
-    temp("data/processed/acc_temp_psg_study.feather")
+    "data/processed/acc_temp_psg_study.feather"
   shell:
     """
     {input.r_script} \
@@ -163,7 +163,7 @@ rule join_info_bsl:
     feather = "data/processed/acc_temp_screens_baseline.feather",
     info = "data/participant_info/screens_baseline_info.xlsx"
   output:
-    dest = temp("data/processed/screens_baseline.parquet")
+    dest = "data/processed/screens_baseline.parquet"
   shell:
     """
     {input.r_script} {input.feather} {input.info} {output.dest}
@@ -175,7 +175,7 @@ rule join_info_fup:
     feather = "data/processed/acc_temp_screens_followup.feather",
     info = "data/participant_info/screens_followup_info.xlsx"
   output:
-    dest = temp("data/processed/screens_followup.parquet")
+    dest = "data/processed/screens_followup.parquet"
   shell:
     """
     {input.r_script} {input.feather} {input.info} {output.dest}
