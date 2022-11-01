@@ -1,12 +1,9 @@
 #!/usr/bin/env Rscript
 
-pacman::p_load(
-  tidyverse,
-  vroom,
-  feather,
-  slider,
-  furrr
-)
+library(tidyverse)
+library(arrow)
+library(slider)
+library(furrr)
 
 bsl <-
   read_feather("data/processed/bsl.feather")
@@ -14,7 +11,7 @@ bsl <-
 fup <-
   read_feather("data/processed/fup.feather")
 
-
+# for temp tp celcius conversion: (temp - 171) / 3.413)
 
 # Calculating features in 30-sec overlapping rolling windows.
 create_feats <- function(tbl) {
@@ -22,8 +19,8 @@ create_feats <- function(tbl) {
     mutate(
       across(x_thigh:z_back,
         list(
-          trim_mean = ~ slide_dbl(.x, ~ mean(.x, trim = .1), .after = 6),
-          MAD = ~ slide_dbl(.x, ~ mad(.x), .after = 6),
+          trim_mean = ~ slide_dbl(.x, ~ mean(.x, trim = .1), .after = 6), # fix trim =
+          MAD = ~ slide_dbl(.x, ~ mad(.x), .after = 6), #fix center = 
           max = ~ slide_dbl(.x, ~ abs(max(.x)), .after = 6),
           IQR = ~ slide_dbl(.x, ~ IQR(.x), .after = 6, .step = 1)
         ),

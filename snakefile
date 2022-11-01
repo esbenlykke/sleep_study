@@ -45,8 +45,8 @@ rule targets:
     "data/processed/screens_baseline.parquet",
     "data/processed/screens_followup.parquet",
     "data/processed/somno_acc.parquet",
-    "data/processed/screens_all_baseline.parquet",
-    "data/processed/screens_all_followup.parquet",
+    # "data/processed/screens_all_baseline.parquet",
+    # "data/processed/screens_all_followup.parquet",
     "data/processed/yasa_preds.tsv"
     
 
@@ -183,6 +183,7 @@ rule join_info_fup:
 
 rule somno_join_acc:
   input:
+    "code/somno_join_acc.R",
     "data/processed/acc_temp_psg_study.feather",
     "data/processed/somno_sleep_profiles.tsv"
   output:
@@ -190,29 +191,29 @@ rule somno_join_acc:
   shell:
     "code/somno_join_acc.R"
 
-rule zm_join_acc_bsl:
-  input:
-    r_script = "code/zm_join_sceens_acc.R",
-    zm = "data/processed/zm_scores.tsv",
-    acc = "data/processed/screens_baseline.parquet"
-  params:
-    dest = "data/processed/screens_all_baseline.parquet"
-  output:
-    "data/processed/screens_all_baseline.parquet"
-  shell:
-    "{input.r_script} {input.acc} {params.dest}"
-
-rule zm_join_acc_fup:
-  input:
-    r_script = "code/zm_join_sceens_acc.R",
-    zm = "data/processed/zm_scores.tsv",
-    acc = "data/processed/screens_followup.parquet"
-  params:
-    dest = "data/processed/screens_all_followup.parquet"
-  output:
-    "data/processed/screens_all_followup.parquet"
-  shell:
-    "{input.r_script} {input.acc} {params.dest}"
+# rule zm_join_acc_bsl:
+#   input:
+#     r_script = "code/zm_join_sceens_acc.R",
+#     zm = "data/processed/zm_scores.tsv",
+#     acc = "data/processed/screens_baseline.parquet"
+#   params:
+#     dest = "data/processed/screens_all_baseline.parquet"
+#   output:
+#     "data/processed/screens_all_baseline.parquet"
+#   shell:
+#     "{input.r_script} {input.acc} {params.dest}"
+# 
+# rule zm_join_acc_fup:
+#   input:
+#     r_script = "code/zm_join_sceens_acc.R",
+#     zm = "data/processed/zm_scores.tsv",
+#     acc = "data/processed/screens_followup.parquet"
+#   params:
+#     dest = "data/processed/screens_all_followup.parquet"
+#   output:
+#     "data/processed/screens_all_followup.parquet"
+#   shell:
+#     "{input.r_script} {input.acc} {params.dest}"
 
 EDF = os.listdir("data/raw/somno_data/somno_edf/")
 
