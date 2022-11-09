@@ -3,7 +3,7 @@
 suppressMessages(library(tidyverse))
 library(read.cwa)
 library(slider)
-library(feather)
+library(arrow)
 suppressMessages(library(furrr))
 library(glue)
 
@@ -54,19 +54,25 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
 
   tbl |>
     mutate(
-      across(x:temp, ~ slide_dbl(.x,
-        mean,
-        .after = sf * epoch_length,
-        .step = sf * epoch_length
-      ))
+      across(x:temp, list(
+        mean = ~ slide_dbl(.x, mean, .after = sf * epoch_length, .step = sf * epoch_length),
+        sd = ~ slide_dbl(.x, sd, .after = sf * epoch_length, .step = sf * epoch_length)
+        ))
     ) |>
     drop_na() |>
     mutate(
       id = str_extract(cwa_file, "\\d{10}"),
       id = str_remove(id, "^0+"),
       sensor_code = str_extract(cwa_file, "\\d{5}"),
+      weekday = wday(time),
+      incl = 180 / pi * acos(x / sqrt(x^2 + y^2 + z^2)),
       .before = 1
     ) |>
+    rowwise() |> 
+    mutate(
+      sd_max = max(c(x_sd, y_sd, z_sd))
+    ) |> 
+    ungroup() |> 
     write_feather(temp_file)
 }
 
@@ -79,29 +85,3 @@ future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y
 cat("\n")
 
 plan(sequential)
-
-# list.files("~/sleep_study/data/temp/", "feather", full.names = TRUE) |>
-#   map_dfr(read_feather) |>
-#   write_feather(dest)
-
-# if (cores > 1) {
-#   plan("multisession", workers = cores)
-#
-#   future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
-#     .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE
-#   )
-#
-#   plan(sequential)
-#
-#   list.files("data/temp", "feather", full.names = TRUE) |>
-#     map_dfr(read_feather) |>
-#     write_feather(dest)
-# } else {
-#   walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y))
-#
-#   list.files("data/temp", "feather", full.names = TRUE) |>
-#     map_dfr(read_feather) |>
-#     write_feather(dest)
-# }
-
-# unlink("~/sleep_study/data/temp/", recursive = TRUE)

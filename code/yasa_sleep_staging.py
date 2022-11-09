@@ -28,7 +28,7 @@ for f in files:
 
     confidence = sls.predict_proba().max(1)
 
-    df_pred = pd.DataFrame({'stage': y_pred, 'confidence': confidence})
+    df_pred = pd.DataFrame({'stage': y_pred, 'confidence': confidence, 'start': raw.info['meas_date']})
     print("Predictions from", sls, "put into dataframe")
 
     new_file = f.replace(".edf", ".csv")

@@ -11,8 +11,15 @@ dependencies:
   - r-arrow=9.0.0.2
   - r-janitor=2.1.0
   - r-read.cwa=0.2.1
-  - quarto=1.1.145
+  - r-tidymodels
+  - r-pls
+  - r-mixOmics
+  - r-earth
   - r-stringi=1.7.8
+  - r-xgboost
+  - r-lme4
+  - r-devtools
+  - quarto=1.1.145
   - snakemake=7.14.0
   - graphviz=6.0.1
   - torch=0.9.0
@@ -21,3 +28,4 @@ dependencies:
   - mne=1.2.1
   - gcc=12.1.0
   - lightgbm=3.3.3
+  - morfist
