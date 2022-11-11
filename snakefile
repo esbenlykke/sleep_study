@@ -20,7 +20,7 @@ path_fup = "/media/esbenlykke/My Passport/screens_cwa_children/followup/"
 screens_children_cwa_bsl = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/baseline")
 screens_children_cwa_fup = os.listdir("/media/esbenlykke/My Passport/screens_cwa_children/followup")
 
-# create file lists for "rule cp_children_cwa" 
+# create filse lists for "rule cp_children_cwa" 
 list_file_bsl = open("data/processed/bsl_children_cwa.txt", "r")
 list_cwa_bsl = list_file_bsl.read().splitlines()
 list_file_fup = open("data/processed/fup_children_cwa.txt", "r")
@@ -234,3 +234,7 @@ rule remove_nonwear:
     "data/processed/model_data/bsl_thigh.parquet"
   shell:
     "code/remove_nonwear.R"
+
+rule model_in_bed:
+  input:
+    

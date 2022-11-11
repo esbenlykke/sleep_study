@@ -32,6 +32,7 @@ bsl |>
   ) |>
   ungroup() |>
   augment(x = nw_mod) |>
+  filter(.pred_class == 0) |> 
   write_parquet("data/processed/model_data/bsl_thigh.parquet")
 
 
