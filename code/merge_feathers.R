@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressMessages(library(tidyverse))
-library(feather)
+library(arrow)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 

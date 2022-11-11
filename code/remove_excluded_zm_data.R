@@ -5,12 +5,14 @@ library(hms)
 library(lubridate)
 library(arrow)
 
+epoch_length <- 10
+
 bsl_int <-
   read_parquet("data/processed/screens_baseline.parquet") |>
   rename(datetime = time) %>%
   mutate(
     day = day(datetime),
-    datetime = as.integer(datetime) %/% 5 * 5,
+    datetime = as.integer(datetime) %/% epoch_length * epoch_length,
     .after = 1
   ) |>
   select(-sensor_code)
@@ -23,10 +25,10 @@ bsl_days <-
 zm_int <-
   read_tsv("data/processed/zm_scores.tsv") |>
   # filter(score != -5) |>
-  slice(rep(1:n(), each = 30 / 5)) %>%
+  slice(rep(1:n(), each = 30 / epoch_length)) %>%
   mutate(
     day = day(datetime),
-    datetime = as.integer(datetime + rep_len(seq(0, 25, 5), length.out = nrow(.))) %/% 5 * 5,
+    datetime = as.integer(datetime + rep_len(seq(0, 25, 5), length.out = nrow(.))) %/% epoch_length * epoch_length,
     .after = 1
   ) |>
   select(id, datetime, day, score) |>

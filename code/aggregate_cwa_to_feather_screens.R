@@ -6,6 +6,7 @@ library(slider)
 library(arrow)
 suppressMessages(library(furrr))
 library(glue)
+library(lubridate)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 
@@ -79,7 +80,7 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
 plan("multisession", workers = 10)
 
 future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
-  .options = furrr_options(seed = 123, lazy = TRUE), .progress = TRUE
+  .options = furrr_options(seed = 123), .progress = TRUE
 )
 
 cat("\n")

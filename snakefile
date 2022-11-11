@@ -46,7 +46,8 @@ rule targets:
     "data/processed/screens_followup.parquet",
     "data/processed/somno_acc.parquet",
     "data/processed/yasa_preds.tsv",
-    "data/processed/yasa_preds.parquet"
+    "data/processed/yasa_preds.parquet",
+    "data/processed/model_data/bsl_thigh.parquet"
     
 
 ###
@@ -120,6 +121,7 @@ rule bsl_cwa_to_feather:
   input:
     bash_script = "code/split_files.sh",
     r_script = "code/aggregate_cwa_to_feather_screens.R",
+    merge_r = "code/merge_feathers.R",
     files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
@@ -136,25 +138,26 @@ rule bsl_cwa_to_feather:
     {params.dest}
     """
 
-rule fup_cwa_to_feather:
-  input:
-    bash_script = "code/split_files.sh",
-    r_script = "code/aggregate_cwa_to_feather_screens.R",
-    iles = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
-  params:
-    input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
-    epoch_length = 5,
-    dest = "~/sleep_study/data/processed/acc_temp_screens_followup.feather"
-    # num_cores = 1
-  output:
-    "data/processed/acc_temp_screens_followup.feather"
-  shell:
-    """
-    {input.bash_script} \
-    {params.input_dir} \
-    {params.epoch_length} \
-    {params.dest}
-    """
+# rule fup_cwa_to_feather:
+#   input:
+#     bash_script = "code/split_files.sh",
+#     r_script = "code/aggregate_cwa_to_feather_screens.R",
+#     merge_r = "code/merge_feathers.R",
+#     iles = expand("/media/esbenlykke/My Passport/screens_cwa_children/followup/{id}", id = screens_children_cwa_fup)
+#   params:
+#     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/followup",
+#     epoch_length = 5,
+#     dest = "~/sleep_study/data/processed/acc_temp_screens_followup.feather"
+#     # num_cores = 1
+#   output:
+#     "data/processed/acc_temp_screens_followup.feather"
+#   shell:
+#     """
+#     {input.bash_script} \
+#     {params.input_dir} \
+#     {params.epoch_length} \
+#     {params.dest}
+#     """
 
 rule join_info_bsl:
   input:
@@ -168,17 +171,17 @@ rule join_info_bsl:
     {input.r_script} {input.feather} {input.info} {output.dest}
     """
     
-rule join_info_fup:
-  input:
-    r_script = "code/join_participant_info.R",
-    feather = "data/processed/acc_temp_screens_followup.feather",
-    info = "data/participant_info/screens_followup_info.xlsx"
-  output:
-    dest = "data/processed/screens_followup.parquet"
-  shell:
-    """
-    {input.r_script} {input.feather} {input.info} {output.dest}
-    """
+# rule join_info_fup:
+#   input:
+#     r_script = "code/join_participant_info.R",
+#     feather = "data/processed/acc_temp_screens_followup.feather",
+#     info = "data/participant_info/screens_followup_info.xlsx"
+#   output:
+#     dest = "data/processed/screens_followup.parquet"
+#   shell:
+#     """
+#     {input.r_script} {input.feather} {input.info} {output.dest}
+#     """
 
 rule somno_join_acc:
   input:
@@ -213,11 +216,21 @@ rule clean_yasa_preds:
   shell:
     "code/prepare_yasa_preds.R"
 
-# rule prepare_model_data:
-#   input:
-#     "data/processed/screens_baseline.parquet",
-#     "data/processed/zm_scores.tsv"
-#   params:
-#   output:
-#   shell:
+rule remove_excluded_zm_data:
+  input:
+    "data/processed/screens_baseline.parquet",
+    "data/processed/zm_scores.tsv",
+    "code/remove_excluded_zm_data.R"
+  output:
+    "data/processed/bsl_thigh_no_bad_zm.parquet"
+  shell:
+    "code/remove_excluded_zm_data.R"
     
+rule remove_nonwear:
+  input:
+    "data/processed/bsl_thigh_no_bad_zm.parquet",
+    "code/remove_nonwear.R"
+  output:
+    "data/processed/model_data/bsl_thigh.parquet"
+  shell:
+    "code/remove_nonwear.R"
