@@ -20,7 +20,7 @@ ctrl <-
     verbose = TRUE,
     verbose_elim = TRUE,
     allow_par = TRUE,
-    parallel_over = "everything"
+    parallel_over = "resamples"
   )
 
 my_metrics <-
@@ -34,13 +34,13 @@ data <-
   read_parquet("data/processed/model_data/bsl_thigh.parquet") 
 
 set.seed(123)
-# spl <- 
-#   group_initial_split(data, group = id)
+spl <-
+  group_initial_split(data, group = id)
 
-spl <- 
-  data |> 
-  filter(id %in% c(3404, 338304)) |> 
-  group_initial_split(group = id, prop = 1/2)
+# spl <- 
+#   data |> 
+#   filter(id %in% c(3404, 338304)) |> 
+#   group_initial_split(group = id, prop = 1/2)
 
 train <- training(spl)
 test <- testing(spl)

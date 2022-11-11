@@ -18,10 +18,11 @@ nw_mod$fit$fit$preproc[[1]] |> cat(sep = " | ")
 # sdacc_y | sdacc_z | sdmax | incl | temp | wear_ml_pred | wear_heuristic | wear_time_cz
 
 bsl |>
-  group_by(id) |>
+  group_by(id, day) |>
   mutate(
-    idx = 0,
-    time_day = seq(0, 1, length.out = n()),
+    time_day = seq(0, 1, length.out = n())) |> 
+  ungroup() |> 
+  mutate(
     location = if_else(placement == "thigh", 0, 1),
     temp = (temp - 171) / 3.413,
     temp_mean = (temp - 171) / 3.413
@@ -30,9 +31,9 @@ bsl |>
     macc_x = x_mean, macc_y = y_mean, macc_z = z_mean,
     sdacc_x = x_sd, sdacc_y = y_sd, sdacc_z = z_sd, sdmax = sd_max
   ) |>
-  ungroup() |>
   augment(x = nw_mod) |>
   filter(.pred_class == 0) |> 
+  select(-c(contains(".pred"), location, weekday)) |> 
   write_parquet("data/processed/model_data/bsl_thigh.parquet")
 
 
