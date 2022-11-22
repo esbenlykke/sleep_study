@@ -20,6 +20,16 @@ dependencies:
   - r-lme4
   - r-devtools
   - r-janitor
+  - r-liblinear
+  - r-ranger
+  - r-shape
+  - r-glmnet
+  - r-kernlab
+  - r-kknn
+  - r-baguette
+  - r-stacks
+  - r-BBmisc
+  - r-signal
   - quarto=1.1.145
   - snakemake=7.14.0
   - graphviz=6.0.1

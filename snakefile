@@ -47,7 +47,10 @@ rule targets:
     "data/processed/somno_acc.parquet",
     "data/processed/yasa_preds.tsv",
     "data/processed/yasa_preds.parquet",
-    "data/processed/model_data/bsl_thigh.parquet"
+    "data/processed/model_data/bsl_thigh.parquet",
+    "data/models/race_results.rds",
+    "data/models/in_bed_model_stack.rds",
+    "data/processed/model_data/bsl_thigh_sensor_independent_features.parquet"
     
 
 ###
@@ -120,7 +123,7 @@ rule prepare_my_cwa:
 rule bsl_cwa_to_feather:
   input:
     bash_script = "code/split_files.sh",
-    r_script = "code/aggregate_cwa_to_feather_screens.R",
+    r_script = "code/resample_and_extract_features_screens.R",
     merge_r = "code/merge_feathers.R",
     files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
   params:
@@ -216,7 +219,7 @@ rule clean_yasa_preds:
   shell:
     "code/prepare_yasa_preds.R"
 
-rule remove_excluded_zm_data:
+rule filter_join_included_zm_data:
   input:
     "data/processed/screens_baseline.parquet",
     "data/processed/zm_scores.tsv",
@@ -234,7 +237,22 @@ rule remove_nonwear:
     "data/processed/model_data/bsl_thigh.parquet"
   shell:
     "code/remove_nonwear.R"
-
-rule model_in_bed:
-  input:
     
+rule create_sensor_independent_features:
+  input:
+    "data/processed/model_data/bsl_thigh.parquet",
+    "code/sensor_independent_features.R"
+  output:
+    "data/processed/model_data/bsl_thigh_sensor_independent_features.parquet"
+  shell:
+    "code/sensor_independent_features.R"
+
+rule in_bed_stacked_models:
+  input:
+    r_script = "code/in_bed_stacked_models.R",
+    data = "data/processed/model_data/bsl_thigh_sensor_independent_features.parquet"
+  output:
+    "data/models/race_results.rds",
+    "data/models/in_bed_model_stack.rds"
+  shell:
+    "code/in_bed_stacked_moels.R"

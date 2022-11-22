@@ -1,12 +1,13 @@
 #!/usr/bin/env Rscript
 
 suppressMessages(library(tidyverse))
-library(read.cwa)
-library(slider)
-library(arrow)
 suppressMessages(library(furrr))
-library(glue)
-library(lubridate)
+suppressMessages(library(slider))
+suppressMessages(library(arrow))
+suppressMessages(library(read.cwa))
+suppressMessages(library(glue))
+suppressMessages(library(lubridate))
+suppressMessages(library(signal))
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 
@@ -25,13 +26,14 @@ temp_files <-
     list.files(str_c(cwa_path, "/temp")), "cwa", "feather"
   ))
 
-glue("Number of temp cwa files is {length(cwa_files)}")
+glue("{length(cwa_files)} split cwa files in this chunk")
 
 stopifnot(
   "Number of temp cwa split files not equal to target feather files." =
     length(cwa_files) == length(temp_files)
 )
 
+# define function to extract sampling frequency
 get_sf <- function(tbl) {
   tbl |>
     slice_head(n = 1000) |>
@@ -41,6 +43,10 @@ get_sf <- function(tbl) {
     summarise(freq = round(median(freq), -1)) |>
     pull(freq)
 }
+
+# Create 4th order Butterworth low-pass 5 Hz filter 
+bf <- signal::butter(4, .05, type = "low")
+
 
 downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
   tbl <-
@@ -54,35 +60,51 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
   sf <- get_sf(tbl)
 
   tbl |>
+    # apply Butterworth filter
+    mutate(across(x:z, ~ signal::filter(bf, .x))) |>
+    # aggregate in 2 sec overlapping windows
     mutate(
       across(x:temp, list(
-        mean = ~ slide_dbl(.x, mean, .after = sf * epoch_length, .step = sf * epoch_length),
-        sd = ~ slide_dbl(.x, sd, .after = sf * epoch_length, .step = sf * epoch_length)
-        ))
+        mean = ~ slide_dbl(.x, mean, .after = (sf * 2) * 2, .step = sf * 2),
+        sd = ~ slide_dbl(.x, sd, .after = (sf * 2) * 2, .step = sf * 2)
+      ))
     ) |>
     drop_na() |>
+    # aggregate in 10 sec non-overlapping windows
+    mutate(
+      across(x:temp, list(
+        mean = ~ slide_dbl(.x, mean, .after = sf * 5, .step = sf * 5),
+        sd = ~ slide_dbl(.x, sd, .after = sf * 5, .step = sf * 5)
+      ))
+    ) |>
     mutate(
       id = str_extract(cwa_file, "\\d{10}"),
       id = str_remove(id, "^0+"),
       sensor_code = str_extract(cwa_file, "\\d{5}"),
       weekday = wday(time),
-      incl = 180 / pi * acos(x / sqrt(x^2 + y^2 + z^2)),
+      incl = 180 / pi * acos(y_mean / sqrt(x_mean^2 + y_mean^2 + z_mean^2)),
+      theta = 180 / pi * asin(z_mean / sqrt(x_mean^2 + y_mean^2 + z_mean^2)),
       .before = 1
     ) |>
-    rowwise() |> 
+    rowwise() |>
     mutate(
       sd_max = max(c(x_sd, y_sd, z_sd))
-    ) |> 
-    ungroup() |> 
+    ) |>
+    ungroup() |>
     write_feather(temp_file)
 }
+
+
+# execute the whole thing in parallel. ETA ~ 4-5 hrs
 
 plan("multisession", workers = 10)
 
 future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
-  .options = furrr_options(seed = 123), .progress = TRUE
+  .options = furrr_options(seed = 123), .progress = FALSE
 )
 
 cat("\n")
 
 plan(sequential)
+
+# TODO work out a sensible progress bar 
