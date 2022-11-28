@@ -12,6 +12,9 @@ dependencies:
   - r-janitor=2.1.0
   # - r-read.cwa
   - r-tidymodels
+  - r-beepr
+  - r-doParallel
+  - r-finetune
   - r-pls
   - r-mixOmics
   - r-earth
