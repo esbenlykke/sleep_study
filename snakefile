@@ -125,6 +125,7 @@ rule bsl_cwa_to_feather:
     bash_script = "code/split_files.sh",
     r_script = "code/resample_and_extract_features_screens.R",
     merge_r = "code/merge_feathers.R",
+    # files = "/media/esbenlykke/My Passport/screens_cwa_children/baseline/25415_0001026705.cwa"
     files = expand("/media/esbenlykke/My Passport/screens_cwa_children/baseline/{id}", id = screens_children_cwa_bsl)
   params:
     input_dir = "/media/esbenlykke/My\ Passport/screens_cwa_children/baseline",
@@ -249,10 +250,10 @@ rule create_sensor_independent_features:
 
 rule in_bed_stacked_models:
   input:
-    r_script = "code/in_bed_stacked_models.R",
+    r_script = "code/in_bed_and_sleep_stacked_models.R",
     data = "data/processed/model_data/bsl_thigh_sensor_independent_features.parquet"
   output:
     "data/models/race_results.rds",
     "data/models/in_bed_model_stack.rds"
   shell:
-    "code/in_bed_stacked_moels.R"
+    "code/in_bed_and_sleep_stacked_models.R"

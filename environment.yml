@@ -30,6 +30,9 @@ dependencies:
   - r-stacks
   - r-BBmisc
   - r-signal
+  - r-keras
+  - r-feasts
+  - r-tsibble
   - quarto=1.1.145
   - snakemake=7.14.0
   - graphviz=6.0.1
@@ -40,3 +43,4 @@ dependencies:
   - gcc=12.1.0
   - lightgbm=3.3.3
   - morfist
+  - tensorflow=2.9.3

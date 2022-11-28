@@ -10,7 +10,7 @@ mkdir -p ~/sleep_study/data/temp/
 for file in *; do
     if [ -f "$file" ]; then
         split --verbose -b 25M --numeric-suffixes "$file" temp/"$file"
-        ~/sleep_study/code/aggregate_cwa_to_feather_screens.R "$2" "$1"
+        ~/sleep_study/code/resample_and_extract_features_screens.R "$2" "$1"
         rm -rf temp/*
     fi
 done

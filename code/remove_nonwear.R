@@ -1,21 +1,16 @@
 #!/usr/bin/env Rscript
 
-library(tidyverse)
-library(tidymodels)
-library(arrow)
+suppressMessages(library(tidyverse))
+suppressMessages(library(tidymodels))
+suppressMessages(library(arrow))
 
-# dir.create("data/models")
+cat("Removing nonwear using decision tree model...")
 
 bsl <-
   read_parquet("data/processed/bsl_thigh_no_bad_zm.parquet")
 
 nw_mod <-
   read_rds("data/models/nonwear_model.rds")
-
-nw_mod$fit$fit$preproc[[1]] |> cat(sep = " | ")
-
-# idx | weekday | time_day | location | macc_x | macc_y | macc_z | sdacc_x |
-# sdacc_y | sdacc_z | sdmax | incl | temp | wear_ml_pred | wear_heuristic | wear_time_cz
 
 bsl |>
   group_by(id, noon_day) |>

@@ -44,9 +44,6 @@ get_sf <- function(tbl) {
     pull(freq)
 }
 
-# Create 4th order Butterworth low-pass 5 Hz filter 
-bf <- signal::butter(4, .05, type = "low")
-
 
 downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
   tbl <-
@@ -59,9 +56,12 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
 
   sf <- get_sf(tbl)
 
+  # Create 4th order Butterworth low-pass 5 Hz filter 
+  bf <- signal::butter(4, 5 / (sf / 2), type = "low")
+  
   tbl |>
     # apply Butterworth filter
-    mutate(across(x:z, ~ signal::filter(bf, .x))) |>
+    mutate(across(x:z, ~ signal::filtfilt(bf, .x))) |>
     # aggregate in 2 sec overlapping windows
     mutate(
       across(x:temp, list(
@@ -73,10 +73,11 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     # aggregate in 10 sec non-overlapping windows
     mutate(
       across(x:temp, list(
-        mean = ~ slide_dbl(.x, mean, .after = sf * 5, .step = sf * 5),
-        sd = ~ slide_dbl(.x, sd, .after = sf * 5, .step = sf * 5)
+        mean = ~ slide_dbl(.x, mean, .after = 5, .step = 5),
+        sd = ~ slide_dbl(.x, sd, .after = 5, .step = 5)
       ))
     ) |>
+    drop_na() |> 
     mutate(
       id = str_extract(cwa_file, "\\d{10}"),
       id = str_remove(id, "^0+"),
@@ -94,16 +95,13 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     write_feather(temp_file)
 }
 
-
-# execute the whole thing in parallel. ETA ~ 4-5 hrs
+cat("Execute the whole thing in parallel. ETA ~ 4-5 hrs")
 
 plan("multisession", workers = 10)
 
 future_walk2(cwa_files, temp_files, ~ downsample_and_write_cwa_to_feather(.x, .y),
   .options = furrr_options(seed = 123), .progress = FALSE
 )
-
-cat("\n")
 
 plan(sequential)
 

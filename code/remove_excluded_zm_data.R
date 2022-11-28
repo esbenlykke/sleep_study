@@ -1,9 +1,11 @@
 #!/usr/bin/env Rscript
 
-library(tidyverse)
-library(hms)
-library(lubridate)
-library(arrow)
+suppressMessages(library(tidyverse))
+suppressMessages(library(hms))
+suppressMessages(library(lubridate))
+suppressMessages(library(arrow))
+
+cat("Only including valid zm data. Lots of filter joins going on here...")
 
 epoch_length <- 10
 
@@ -27,7 +29,7 @@ bsl_noon_days <-
   arrange(id)
 
 zm_int <-
-  read_tsv("data/processed/zm_scores.tsv") |>
+  read_tsv("data/processed/zm_scores.tsv", progress = FALSE) |>
   # filter(score != -5) |>
   slice(rep(1:n(), each = 30 / epoch_length)) %>%
   mutate(
