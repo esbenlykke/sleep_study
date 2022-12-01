@@ -200,7 +200,7 @@ grid_ctrl <-
   control_grid(
     verbose = TRUE,
     allow_par = TRUE,
-    parallel_over = "resamples",
+    parallel_over = "everything",
     save_pred = TRUE,
     save_workflow = TRUE
   )
