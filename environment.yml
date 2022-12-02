@@ -37,6 +37,8 @@ dependencies:
   - r-feasts
   - r-tsibble
   - r-essentials
+  - r-rpart.plot
+  - r-ggdendro
   - quarto=1.1.145
   - snakemake=7.14.0
   - graphviz=6.0.1

@@ -78,17 +78,6 @@ mars_spec <-
   set_engine("earth") |>
   set_mode("classification")
 
-# svm_linear_spec <-
-#   svm_linear(cost = tune()) |>
-#   set_engine("kernlab") |>
-#   set_mode("classification")
-
-
-cart_spec <-
-  decision_tree(cost_complexity = tune(), min_n = tune(), tree_depth = tune()) |>
-  set_engine("rpart") |>
-  set_mode("classification")
-
 # rf_spec <-
 # rand_forest(mtry = tune(), min_n = tune(), trees = tune()) |>
 # set_engine("ranger") |>
@@ -144,7 +133,7 @@ no_preproc_in_bed_wf <-
     ),
     models = list(
       MARS = mars_spec, # works in parallel
-      CART = cart_spec, # works in parallel
+      random_forest = rf_spec, # works in parallel
       xgboost = xgb_spec # works in parallel
     ),
     cross = FALSE
@@ -157,7 +146,7 @@ no_preproc_sleep_wf <-
     ),
     models = list(
       MARS = mars_spec, # works in parallel
-      CART = cart_spec, # works in parallel
+      # random_forest = rf_spec, # works in parallel
       xgboost = xgb_spec # works in parallel
     ),
     cross = FALSE
@@ -190,7 +179,8 @@ grid_ctrl <-
     allow_par = TRUE,
     parallel_over = "everything",
     save_pred = FALSE,
-    save_workflow = TRUE
+    save_workflow = FALSE,
+    event_level = "second"
   )
 
 in_bed_grid_results <-
@@ -206,22 +196,12 @@ in_bed_grid_results <-
   )
 tictoc::toc()
 
-write_rds(in_bed_grid_results, "data/models/in_bed_grid_results.rds", compress = "gz")
+write_rds(in_bed_grid_results, "data/models/in_bed_workflowsets_results.rds")
 
 # Sleep
 
 cat("Tuning the following workflows:\n")
 all_sleep_workflows
-
-tictoc::tic()
-grid_ctrl <-
-  control_grid(
-    verbose = TRUE,
-    allow_par = TRUE,
-    parallel_over = "everything",
-    save_pred = FALSE,
-    save_workflow = TRUE
-  )
 
 sleep_grid_results <-
   all_in_bed_workflows |>
@@ -236,7 +216,7 @@ sleep_grid_results <-
   )
 tictoc::toc()
 
-write_rds(sleep_grid_results, "data/models/sleep_grid_results.rds", compress = "gz")
+write_rds(sleep_grid_results, "data/models/sleep_workflowsets_results.rds")
 
 # Tuning models with race method ------------------------------------------
 
