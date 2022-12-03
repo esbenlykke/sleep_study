@@ -15,7 +15,7 @@ cat("Packages loaded...\n")
 cat("Spending data budget...\n")
 
 data <-
-  read_parquet("data/processed/model_data/bsl_thigh_sensor_independent_features.parquet") |>
+  read_parquet("data/processed/data_for_modelling//bsl_thigh_sensor_independent_features.parquet") |>
   mutate(
     in_bed = as_factor(in_bed),
     sleep = as_factor(sleep)
@@ -133,7 +133,7 @@ no_preproc_in_bed_wf <-
     ),
     models = list(
       MARS = mars_spec, # works in parallel
-      random_forest = rf_spec, # works in parallel
+      # random_forest = rf_spec, # works in parallel
       xgboost = xgb_spec # works in parallel
     ),
     cross = FALSE
