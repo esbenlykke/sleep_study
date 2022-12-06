@@ -18,8 +18,10 @@ sleep_CART_fit <- read_rds("data/models/fitted_models/sleep_simple_CART_fit")
 zm_stats <-
   read_csv("data/processed/all_zm_stats.csv") |>
   janitor::clean_names() |>
-  mutate(day = day(start_date),
-         month = month(start_date)) |>
+  mutate(
+    day = day(start_date),
+    month = month(start_date)
+  ) |>
   select(id, day, month, spt_hrs, tst_hrs, se_percent, lps_min, waso_min) |>
   rename_with(.cols = -c(id, day, month), ~ paste0("zm_", .))
 
@@ -53,7 +55,8 @@ pred_stats <-
     .groups = "drop"
   )
 
-pred_stats |> 
-  inner_join(zm_stats, by = c("id", "noon_day" = "day", "month")) 
 
-zm_stats |> count(day, month)
+pred_stats |>
+  inner_join(zm_stats, by = c("id", "noon_day" = "day", "month")) |> 
+  write_parquet("data/processed/pred_stats_zm_stats.parquet")
+
