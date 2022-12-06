@@ -38,6 +38,7 @@ dependencies:
   - r-rpart.plot=3.1.1
   - r-patchwork
   - r-svglite=2.1.0
+  - r-showtext=0.9_5
   - quarto=1.1.145
   - snakemake=7.18.2
   - graphviz=6.0.1

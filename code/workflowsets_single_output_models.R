@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 suppressMessages(library(tidyverse))
-suppressMessages(library(finetune))
+# suppressMessages(library(finetune))
 suppressMessages(library(tidymodels))
 suppressMessages(library(arrow))
 
@@ -13,7 +13,7 @@ cat("Packages loaded...\n")
 
 # Spend data budget -------------------------------------------------------
 cat("Spending data budget...\n")
-
+set.seed(123)
 data <-
   read_parquet("data/processed/data_for_modelling//bsl_thigh_sensor_independent_features.parquet") |>
   mutate(
@@ -114,16 +114,17 @@ normalized_in_bed_wf <-
       neural_network = nnet_spec # works in parallel
     ),
     cross = FALSE
-  ) |> 
-option_add(param_info = nnet_param, id = "in_bed_neural_network")
+  ) |>
+  option_add(param_info = nnet_param, id = "in_bed_neural_network")
 
-normalized_sleep_wf <- 
+normalized_sleep_wf <-
   workflow_set(
     preproc = list(sleep = sleep_norm_rec),
-    models = list(logistic_regression = glmnet_spec, # works in parallel
-                  neural_network = nnet_spec # works in parallel)
-  ),
-  cross = FALSE
+    models = list(
+      logistic_regression = glmnet_spec, # works in parallel
+      neural_network = nnet_spec # works in parallel)
+    ),
+    cross = FALSE
   )
 
 no_preproc_in_bed_wf <-
@@ -153,9 +154,9 @@ no_preproc_sleep_wf <-
   )
 
 all_in_bed_workflows <-
-  bind_rows(normalized_in_bed_wf, no_preproc_in_bed_wf) 
+  bind_rows(normalized_in_bed_wf, no_preproc_in_bed_wf)
 
-all_sleep_workflows <- 
+all_sleep_workflows <-
   bind_rows(normalized_sleep_wf, no_preproc_sleep_wf)
 
 
@@ -204,7 +205,7 @@ cat("Tuning the following workflows:\n")
 all_sleep_workflows
 
 sleep_grid_results <-
-  all_in_bed_workflows |>
+  all_sleep_workflows |>
   workflow_map(
     seed = 123,
     "tune_grid",
@@ -229,8 +230,8 @@ write_rds(sleep_grid_results, "data/models/sleep_workflowsets_results.rds")
 #     parallel_over = "resamples",
 #     save_workflow = TRUE
 #   )
-# 
-# 
+#
+#
 # race_results <-
 #   all_workflows |>
 #   workflow_map(
@@ -242,7 +243,6 @@ write_rds(sleep_grid_results, "data/models/sleep_workflowsets_results.rds")
 #     metrics = metric_set(f_meas, roc_auc),
 #     verbose = TRUE
 #   )
-# 
+#
 # write_rds(race_results, "data/models/race_results.rds")
 # tictoc::toc()
-

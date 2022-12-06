@@ -3,6 +3,7 @@
 library(tidyverse)
 library(arrow)
 library(patchwork)
+library(showtext)
 
 stats <-
   read_parquet("data/processed/pred_stats_zm_stats.parquet")
@@ -39,8 +40,13 @@ summary_stats <-
   )
 
 
-# BA plots ----------------------------------------------------------------
 
+# BA plots for simple trees -----------------------------------------------
+
+
+font_add_google("Mukta", family = "mukta")
+font_add_google("IBM Plex Serif", family = "ibm")
+showtext_auto()
 
 ba_plot <- function(diff_stats, avg, diff, mean_diff, lower, upper, title, x_axis = "", y_axis = "") {
   diff_stats |>
@@ -60,7 +66,11 @@ ba_plot <- function(diff_stats, avg, diff, mean_diff, lower, upper, title, x_axi
       x = x_axis,
       y = y_axis
     ) +
-    theme_light()
+    theme_minimal() +
+    theme(
+      axis.title = element_text(family = "mukta", size = 16),
+      plot.title = element_text(family = "ibm", size = 22, face = "bold")
+    )
 }
 
 spt <- 
@@ -86,12 +96,11 @@ lps <-
 waso <- 
   ba_plot(diff_stats, avg_waso_min, diff_waso_min, summary_stats$diff_waso_min_mean, 
           summary_stats$diff_waso_min_lower, summary_stats$diff_waso_min_upper,
-          "Wake After Sleep Onset (min)")
+          "Wake After Sleep Onset (min)", "Average of Two Measurements")
 
 
 list(spt, tst, se_percent, lps, waso) |> 
-  wrap_plots(ncol = 2) + 
-  patchwork::
+  wrap_plots(ncol = 1) 
 
 ggsave("visuals/ba_plots_from_simple_trees_predictions.png", 
-       height = 8, width = 8, dpi = 400)
+       height = 12, width = 6)
