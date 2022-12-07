@@ -170,34 +170,33 @@ doParallel::registerDoParallel(cores = 6)
 # Tuning models with regular grid search ----------------------------------
 # In bed
 
-cat("Tuning the following workflows:\n")
-all_in_bed_workflows
-
-tictoc::tic()
+# cat("Tuning the following workflows:\n")
+# all_in_bed_workflows
+# 
+# tictoc::tic()
 grid_ctrl <-
   control_grid(
     verbose = TRUE,
     allow_par = TRUE,
     parallel_over = "everything",
     save_pred = FALSE,
-    save_workflow = FALSE,
-    event_level = "second"
+    save_workflow = FALSE
   )
-
-in_bed_grid_results <-
-  all_in_bed_workflows |>
-  workflow_map(
-    seed = 123,
-    "tune_grid",
-    resamples = folds,
-    grid = 5,
-    control = grid_ctrl,
-    metrics = metric_set(f_meas, roc_auc),
-    verbose = TRUE
-  )
-tictoc::toc()
-
-write_rds(in_bed_grid_results, "data/models/in_bed_workflowsets_results.rds")
+# 
+# in_bed_grid_results <-
+#   all_in_bed_workflows |>
+#   workflow_map(
+#     seed = 123,
+#     "tune_grid",
+#     resamples = folds,
+#     grid = 5,
+#     control = grid_ctrl,
+#     metrics = metric_set(f_meas, roc_auc),
+#     verbose = TRUE
+#   )
+# tictoc::toc()
+# 
+# write_rds(in_bed_grid_results, "data/models/in_bed_workflowsets_results.rds")
 
 # Sleep
 

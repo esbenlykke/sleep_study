@@ -4,11 +4,11 @@ library(tidyverse)
 library(tidymodels)
 library(arrow)
 
-in_bed_CART_fit <-  read_rds("data/models/fitted_models/in_bed_simple_CART_fit")
-sleep_CART_fit <-  read_rds("data/models/fitted_models/sleep_simple_CART_fit")
+in_bed_CART_fit <-  read_rds("data/models/fitted_models/in_bed_simple_CART_fit.rds")
+sleep_CART_fit <-  read_rds("data/models/fitted_models/sleep_simple_CART_fit.rds")
 
 
-test <- read_parquet("data/processed/screens_test_data.parquet")
+test <- read_parquet("data/processed/screens_bsl_test_data.parquet")
 
 # Metrics and plots -------------------------------------------------------
 
@@ -18,7 +18,9 @@ my_metrics <-
 
 in_bed_CART_fit |>
   augment(test) |>
-  my_metrics(truth = in_bed, estimate = .pred_class)
+  my_metrics(truth = in_bed, estimate = .pred_class) |> 
+  ggplot(aes(.metric, .estimate)) +
+  geom_col()
 
 rpart.plot::rpart.plot(in_bed_CART_fit |> extract_fit_engine(), roundint = FALSE)
 
@@ -27,3 +29,4 @@ sleep_CART_fit |>
   my_metrics(truth = sleep, estimate = .pred_class)
 
 rpart.plot::rpart.plot(sleep_CART_fit |> extract_fit_engine(), roundint = FALSE)
+
