@@ -21,10 +21,6 @@ wfs[[1]] |>
   write_rds("data/models/fitted_models/in_bed_logistic_fit.rds")
 
 wfs[[2]] |> 
-  fit(train) |>
-  axe_data() |> 
-  axe_call() |> 
-  axe_fitted() |> 
   write_rds("data/models/fitted_models/in_bed_MARS_fit.rds")
 
 wfs[[3]] |> 

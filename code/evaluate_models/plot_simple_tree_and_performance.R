@@ -4,9 +4,19 @@ library(tidyverse)
 library(tidymodels)
 library(arrow)
 
-in_bed_CART_fit <-  read_rds("data/models/fitted_models/in_bed_simple_CART_fit.rds")
-sleep_CART_fit <-  read_rds("data/models/fitted_models/sleep_simple_CART_fit.rds")
+in_bed_fits_files <- list.files("data/models/fitted_models", full.names = TRUE) |>
+  str_subset("mars", negate = TRUE) |>
+  str_subset("in_bed")
 
+sleep_fits_files <- list.files("data/models/fitted_models", full.names = TRUE) |>
+  str_subset("mars", negate = TRUE) |>
+  str_subset("sleep")
+
+in_bed_fits <- map(in_bed_fits_files, read_rds) |> 
+  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
+
+sleep_fits <- map(sleep_fits_files, read_rds) |> 
+  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
 
 test <- read_parquet("data/processed/screens_bsl_test_data.parquet")
 
@@ -16,17 +26,32 @@ test <- read_parquet("data/processed/screens_bsl_test_data.parquet")
 my_metrics <-
   metric_set(f_meas, accuracy, sensitivity, specificity)
 
-in_bed_CART_fit |>
-  augment(test) |>
-  my_metrics(truth = in_bed, estimate = .pred_class) |> 
-  ggplot(aes(.metric, .estimate)) +
-  geom_col()
+get_in_bed_metrics <- function(in_bed_fit) {
+  in_bed_fit |>
+    augment(test) |>
+    my_metrics(truth = in_bed, estimate = .pred_class)
+}
 
-rpart.plot::rpart.plot(in_bed_CART_fit |> extract_fit_engine(), roundint = FALSE)
+in_bed_metrics <-
+  map(in_bed_fits, get_in_bed_metrics) |>
+  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
 
-sleep_CART_fit |>
-  augment(test) |>
-  my_metrics(truth = sleep, estimate = .pred_class)
+get_sleep_metrics <- function(in_bed_fit) {
+  in_bed_fit |>
+    augment(test) |>
+    my_metrics(truth = sleep, estimate = .pred_class, event_level = "second") 
+}
 
-rpart.plot::rpart.plot(sleep_CART_fit |> extract_fit_engine(), roundint = FALSE)
+in_bed_metrics <-
+  map_dfr(in_bed_fits, get_in_bed_metrics, .id = "model")
 
+sleep_metrics <-
+  map_dfr(sleep_fits, get_sleep_metrics, .id = "model") 
+
+in_bed_metrics |> 
+  select(-.estimator) |> 
+  pivot_wider(names_from = model, values_from = .estimate)
+
+sleep_metrics |> 
+  select(-.estimator) |> 
+  pivot_wider(names_from = model, values_from = .estimate)
