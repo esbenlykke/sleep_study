@@ -15,7 +15,7 @@ cat("Packages loaded...\n")
 cat("Spending data budget...\n")
 set.seed(123)
 data <-
-  read_parquet("data/processed/data_for_modelling//bsl_thigh_sensor_independent_features.parquet") |>
+  read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
   mutate(
     in_bed = as_factor(in_bed),
     sleep = as_factor(sleep)

@@ -32,14 +32,14 @@ get_diff_stats <-
     avg_lps_min = mean(c(lps_min, zm_lps_min)),
     avg_waso_min = mean(c(waso_min, zm_waso_min))
   ) |>
-  ungroup() |>
-  filter(se_percent > 0 & lps_min > 0) # TODO why are these numbers fucked?
+  ungroup() 
+  # filter(se_percent > 0 & lps_min > 0) # TODO why are these numbers fucked?
 }
 
 get_summary_stats <- 
   function(tbl){
     tbl |>
-  filter(se_percent > 0) |>
+  # filter(se_percent > 0) |>
   summarise(
     across(contains("diff"), list(
       upper = ~ mean(.x) + 1.96 * sd(.x),

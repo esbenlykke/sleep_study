@@ -7,13 +7,12 @@ suppressMessages(library(arrow))
 cat("Creating sensor-independent features. This won't take long...")
 
 data <-
-  read_parquet("data/processed/model_data/bsl_thigh.parquet")
+  read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
 
 
 # Subject-level in-bed time -----------------------------------------------
 
-suppressWarnings({
-  clock_proxy <-
+clock_proxy <-
     data |>
     # filter((id != 604804 | noon_day != 9) &
     #   (id != 757104 | !noon_day %in% c(1, 2, 29)) &
@@ -50,7 +49,7 @@ suppressWarnings({
       .after = 1
     ) |>
     ungroup() # |>count(id, noon_day) |> print(n = Inf)
-})
+
 
 # x <- warnings()
 
@@ -65,15 +64,15 @@ static_proxy <-
     (id == 2596204 & noon_day == 28)) |>
   group_by(id, noon_day) |>
   mutate(
-    clock_group = if_else((hms::as_hms(datetime) > hms("18:00:00") | hms::as_hms(datetime) < hms("08:00:00")), 1, 0),
+    clock_group = if_else((hms::as_hms(datetime) > hms("21:00:00") | hms::as_hms(datetime) < hms("07:00:00")), 1, 0),
     .after = 1
   ) |>
   group_by(id, noon_day, clock_group) |>
   mutate(
-    static_proxy_cos = if_else(hms::as_hms(datetime) > hms("18:00:00") | hms::as_hms(datetime) < hms("08:00:00"),
+    static_proxy_cos = if_else(hms::as_hms(datetime) > hms("21:00:00") | hms::as_hms(datetime) < hms("07:00:00"),
       cos(seq(-(pi / 2), pi / 2, length.out = n())), 0
     ),
-    static_proxy_linear = if_else(hms::as_hms(datetime) > hms("18:00:00") | hms::as_hms(datetime) < hms("08:00:00"),
+    static_proxy_linear = if_else(hms::as_hms(datetime) > hms("21:00:00") | hms::as_hms(datetime) < hms("07:00:00"),
       seq(0, 1, length.out = n()), 0
     ),
     .after = 1
@@ -100,7 +99,7 @@ clock_proxy |>
     id, datetime, unix_time, day, noon_day, age, placement,
     clock_proxy_cos, clock_proxy_linear, incl, theta, temp:time_day
   ) |>
-  write_parquet("data/processed/model_data/bsl_thigh_sensor_independent_features.parquet")
+  write_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet")
 
 
 # Exploratory stuff on weekdays and time in bed ---------------------------

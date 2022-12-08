@@ -7,7 +7,16 @@ library(slider)
 library(lubridate)
 
 test <-
-  read_parquet("data/processed/screens_bsl_test_data.parquet")
+  read_parquet("data/processed/screens_bsl_test_data.parquet") |> 
+  filter(!(id == 649105 & noon_day == 31),
+         !(id == 757104 & noon_day == 29),
+         !(id == 846005 & noon_day == 31),
+         !(id == 1055204 & noon_day == 31),
+         !(id == 2304105 & noon_day == 28),
+         !(id == 2584704 & noon_day == 28),
+         !(id == 2584706 & noon_day == 28),
+         !(id == 2627304 & noon_day == 28),
+         !(id == 2627305 & noon_day == 28)) # TODO find a way around the night across two months problem
 
 # Load models -------------------------------------------------------------
 
@@ -55,14 +64,14 @@ create_stats <-
         in_bed_72 = slide_sum(in_bed_pred, before = 36, after = 36),
         sleep_72 = slide_sum(sleep_pred, before = 36, after = 36),
         in_bed_sleep = if_else(in_bed_72 > 60 & sleep_72 > 60, 1, 0),
-        in_bed_no_sleep = if_else(in_bed_pred == 1 & sleep_pred == 0, 1, 0)
-      ) |>
+        in_bed_no_sleep = if_else(in_bed_72 > 60 & sleep_72 < 60, 1, 0)
+      ) |> 
       group_by(id, noon_day, month) |>
       summarise(
-        spt_hrs = ((max(row_number()[in_bed_72 == 1]) - min(row_number()[in_bed_72 == 36])) * 10) / 60 / 60,
+        spt_hrs = ((max(row_number()[in_bed_72 == 60] + 30) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60 / 60,
         tst_hrs = (sum(in_bed_sleep) * 10) / 60 / 60,
         se_percent = 100 * (tst_hrs / spt_hrs),
-        lps_min = (((min(row_number()[sleep_72 == 36])) - min(row_number()[in_bed_72 == 36])) * 10) / 60,
+        lps_min = abs((((min(row_number()[sleep_72 == 60])) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60),
         waso_min = (sum(in_bed_no_sleep) * 10) / 60,
         .groups = "drop"
       ) |>
