@@ -39,6 +39,9 @@ dependencies:
   - r-patchwork
   - r-svglite=2.1.0
   - r-showtext=0.9_5
+  - r-gt=0.8.0
+  - r-webshot=0.5.4
+  - r-tinytex
   - quarto=1.1.145
   - snakemake=7.18.2
   - graphviz=6.0.1
