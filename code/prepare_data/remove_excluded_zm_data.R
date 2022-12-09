@@ -9,8 +9,8 @@ cat("Only including valid zm data. Lots of filter joins going on here...")
 
 epoch_length <- 10
 
-bsl_int <-
-  read_parquet("data/processed/screens_baseline.parquet") |>
+data <-
+  read_parquet("data/processed/screens_followup.parquet") |>
   rename(datetime = time) %>%
   mutate(
     day = day(datetime),
@@ -19,12 +19,11 @@ bsl_int <-
     datetime = as_datetime(unix_time),
     .after = 1
   ) |>
-  arrange(id) |>
   select(id, datetime, unix_time, day, noon_day, age:sd_max, -sensor_code)
 
-# filter join the bsl_days from the zm data
-bsl_noon_days <-
-  bsl_int |>
+# filter join the days from the zm data
+noon_days <-
+  data |>
   distinct(id, noon_day) |>
   arrange(id)
 
@@ -40,7 +39,7 @@ zm_int <-
     .after = 1
   ) |>
   select(id, datetime, unix_time, day, noon_day, score, -unix_time, -day) |>
-  semi_join(bsl_noon_days)
+  semi_join(noon_days)
 
 # valid zm days are determined by as a minimum to be including sleep
 # (i.e., score %in% c(2, 3, 5))
@@ -54,14 +53,14 @@ valid_zm_days <-
 # the case_when() replaces up to 20 consecutive NAs with in-bed times (blips of NAs
 # is random noise produced by clock synchronization errors, I believe)
 temp <-
-  bsl_int |>
-  semi_join(valid_zm_days, by = c("id", "noon_day")) |>
-  filter(placement == "thigh") |>
+  data |>
+  semi_join(valid_zm_days, by = c("id", "noon_day")) |> 
   left_join(zm_int, by = c("id", "datetime", "noon_day")) |>
   mutate(
     score = if_else(score == -5, NA_real_, score),
     in_bed = if_else(is.na(score), 0, 1),
     sleep = if_else(score %in% c(NA, 0), 0, 1),
+    # this is so much not DRY. Same can be achieved with a rolling sum window...
     in_bed = case_when(
       is.na(score) & (lag(in_bed == 1, default = 0) & lead(in_bed == 1, default = 0)) ~ 1,
       is.na(score) & (lag(in_bed == 1, default = 0, n = 2) & lead(in_bed == 1, default = 0, n = 2)) ~ 1,
@@ -90,7 +89,7 @@ temp <-
     in_bed_cumsum = cumsum(in_bed)
   )
 
-rm(bsl_int, zm_int)
+rm(data, zm_int)
 gc()
 
 # Find in-bed periods shorter than 7 hrs and longer than 12 hrs
@@ -127,5 +126,5 @@ temp |>
   anti_join(bad_in_bed_periods, by = c("id", "noon_day")) |>
   semi_join(only_in_bed_days, by = c("id", "noon_day")) |>
   select(-c(score, group, in_bed_cumsum)) |>
-  arrange(id) |>
-  write_parquet("data/processed/bsl_thigh_no_bad_zm.parquet")
+  arrange(id) |> 
+  write_parquet("data/processed/fup_thigh_no_bad_zm.parquet")

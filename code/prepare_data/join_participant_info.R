@@ -19,5 +19,6 @@ info <-
 
 info |> 
   pivot_longer(-c(id, age), names_to = "placement", values_to = "sensor_code") |> 
-  right_join(feather, by = c("id", "sensor_code")) |> 
+  right_join(feather, by = c("id", "sensor_code")) |>
+  filter(placement == "thigh") |> 
   write_parquet(dest)

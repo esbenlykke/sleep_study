@@ -44,6 +44,7 @@ tab_performance <-
   ) |>
   tab_options(table.font.names = "ibm") |>
   cols_width(everything() ~ px(100)) |> 
-  cols_align(align = "center")
+  cols_align(align = "center") |> 
+  data_color(columns = decision_tree, colors = "lightblue", alpha = .6)
 
 gtsave(tab_performance, "visuals/table_permance_metrics.html")

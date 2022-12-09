@@ -7,7 +7,7 @@ suppressMessages(library(arrow))
 cat("Creating sensor-independent features. This won't take long...")
 
 data <-
-  read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
+  read_parquet("data/processed/data_for_modelling/fup_thigh.parquet")
 
 
 # Subject-level in-bed time -----------------------------------------------
@@ -22,7 +22,7 @@ clock_proxy <-
     mutate(
       threshold_in_bed = sdacc_y < .1 & incl < 45 &
         (hms::as_hms(datetime) > hms("17:00:00") & hms::as_hms(datetime) < hms("23:59:00")),
-      threshold_out_bed = sdacc_y > .1 & incl > 75 & # TODO snak med Jan om denne threshold!
+      threshold_out_bed = sdacc_y > .1 & incl > 75 & 
         (hms::as_hms(datetime) > hms("06:00:00") & hms::as_hms(datetime) < hms("11:00:00")),
       proxy = if_else(row_number() > max(row_number()[threshold_in_bed == TRUE]) &
         row_number() < min(row_number()[threshold_out_bed == TRUE]),
@@ -32,6 +32,7 @@ clock_proxy <-
     ) |>
     group_by(id, noon_day, proxy) |>
     mutate(
+      # TODO for IDs where clock_proxy can not be set, filter for IDs with all noon_day proxy and process them with static_proxy
       clock_proxy_cos = case_when(
         (id == 604804 & noon_day == 9) |
           (id == 757104 & noon_day %in% c(1, 2, 29)) |
@@ -48,7 +49,7 @@ clock_proxy <-
       ),
       .after = 1
     ) |>
-    ungroup() # |>count(id, noon_day) |> print(n = Inf)
+    ungroup()
 
 
 # x <- warnings()

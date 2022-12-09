@@ -1,31 +1,29 @@
 #!/usr/bin/env RscriptsuppressMessages(library(tidyverse))
 
-suppressMessages(library(tidyverse))
-suppressMessages(library(tidymodels))
-suppressMessages(library(arrow))
+library(tidyverse)
+library(tidymodels)
+library(arrow)
 library(slider)
 library(lubridate)
 
 test <-
-  read_parquet("data/processed/screens_bsl_test_data.parquet") |> 
-  filter(!(id == 649105 & noon_day == 31),
-         !(id == 757104 & noon_day == 29),
-         !(id == 846005 & noon_day == 31),
-         !(id == 1055204 & noon_day == 31),
-         !(id == 2304105 & noon_day == 28),
-         !(id == 2584704 & noon_day == 28),
-         !(id == 2584706 & noon_day == 28),
-         !(id == 2627304 & noon_day == 28),
-         !(id == 2627305 & noon_day == 28)) # TODO find a way around the night across two months problem
+  read_parquet("data/processed/screens_bsl_test_data.parquet") |>
+  filter(
+    !id == 757104
+  ) # TODO fix the leap year february problem in ID = 757104
 
 # Load models -------------------------------------------------------------
 
 # in_bed_fits <-
 in_bed_fit_files <-
-  list.files("data/models/fitted_models", full.names = TRUE) |> str_subset("in_bed")
+  list.files("data/models/fitted_models", full.names = TRUE) |>
+  str_subset("in_bed") |>
+  str_subset("MARS", negate = TRUE) # for some reason the MARS did not train properly, exclude it.
 
 sleep_fit_files <-
-  list.files("data/models/fitted_models", full.names = TRUE) |> str_subset("sleep")
+  list.files("data/models/fitted_models", full.names = TRUE) |>
+  str_subset("sleep") |>
+  str_subset("MARS", negate = TRUE)
 
 in_bed_fits <-
   in_bed_fit_files |>
@@ -60,19 +58,19 @@ create_stats <-
       ) |>
       mutate(across(in_bed_pred:sleep_pred, as.integer) - 1) |>
       mutate(
-        month = month(datetime),
+        month = month(datetime - hours(12)),
         in_bed_72 = slide_sum(in_bed_pred, before = 36, after = 36),
         sleep_72 = slide_sum(sleep_pred, before = 36, after = 36),
         in_bed_sleep = if_else(in_bed_72 > 60 & sleep_72 > 60, 1, 0),
         in_bed_no_sleep = if_else(in_bed_72 > 60 & sleep_72 < 60, 1, 0)
-      ) |> 
+      ) |>
       group_by(id, noon_day, month) |>
       summarise(
         spt_hrs = ((max(row_number()[in_bed_72 == 60] + 30) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60 / 60,
         tst_hrs = (sum(in_bed_sleep) * 10) / 60 / 60,
         se_percent = 100 * (tst_hrs / spt_hrs),
         lps_min = abs((((min(row_number()[sleep_72 == 60])) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60),
-        waso_min = (sum(in_bed_no_sleep) * 10) / 60,
+        waso_min = ((sum(in_bed_no_sleep) - lps_min) * 10) / 60,
         .groups = "drop"
       ) |>
       inner_join(zm_stats, by = c("id", "noon_day" = "day", "month"))
@@ -80,7 +78,7 @@ create_stats <-
 
 dfs <- map2(in_bed_fits, sleep_fits, create_stats)
 
-names(dfs) <- c(str_replace_all(sleep_fit_files, "fit.rds", "stats.parquet")) |> 
-                  str_replace_all("data/models/fitted_models/sleep_", "data/processed/stats_predictions/")
+names(dfs) <- c(str_replace_all(sleep_fit_files, "fit.rds", "stats.parquet")) |>
+  str_replace_all("data/models/fitted_models/sleep_", "data/processed/stats_predictions/")
 
 walk2(dfs, names(dfs), ~ write_parquet(.x, .y))

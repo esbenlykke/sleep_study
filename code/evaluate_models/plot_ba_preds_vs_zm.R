@@ -90,7 +90,8 @@ all_plots <-
         theme_minimal() +
         theme(
           axis.title = element_text(family = "mukta", size = 16),
-          plot.title = element_text(family = "ibm", size = 22, face = "bold")
+          plot.title = element_text(family = "ibm", size = 22, face = "bold"),
+          panel.grid.minor = element_blank()
         )
     }
 
@@ -98,35 +99,40 @@ all_plots <-
         ba_plot(diffs, avg_spt_hrs, diff_spt_hrs, summaries$diff_spt_hrs_mean,
                 summaries$diff_spt_hrs_lower, summaries$diff_spt_hrs_upper,
         "Sleep Period Time (hrs)"
-      )
+      ) +
+      scale_y_continuous(breaks = seq(-10, 10, 2))
 
     tst <-
       ba_plot(
         diffs, avg_tst_hrs, diff_tst_hrs, summaries$diff_tst_hrs_mean,
         summaries$diff_tst_hrs_lower, summaries$diff_tst_hrs_upper,
         "Total Sleep Time (hrs)"
-      )
+      ) +
+      scale_y_continuous(breaks = seq(-10, 10, 2))
 
     se_percent <-
       ba_plot(diffs, avg_se_percent, diff_se_percent, summaries$diff_se_percent_mean,
               summaries$diff_se_percent_lower, summaries$diff_se_percent_upper,
         "Sleep Efficiency (%)",
         y_axis = "Difference Between Methods"
-      )
+      ) +
+      scale_y_continuous(breaks = seq(-30, 30, 10))
 
     lps <-
       ba_plot(
         diffs, avg_lps_min, diff_lps_min, summaries$diff_lps_min_mean,
         summaries$diff_lps_min_lower, summaries$diff_lps_min_upper,
         "Latency until Persistent Sleep (min)"
-      )
+      ) +
+      scale_y_continuous(breaks = seq(-200, 200, 50))
 
     waso <-
       ba_plot(
         diffs, avg_waso_min, diff_waso_min, summaries$diff_waso_min_mean,
         summaries$diff_waso_min_lower, summaries$diff_waso_min_upper,
         "Wake After Sleep Onset (min)", "Average of Two Measurements"
-      )
+      ) +
+      scale_y_continuous(breaks = seq(-200, 200, 50))
 
 
     list(spt, tst, se_percent, lps, waso) |>

@@ -11,9 +11,9 @@ suppressMessages(library(signal))
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 
-epoch_length <- as.integer(args[1]) # epoch length in seconds
+# epoch_length <- as.integer(args[1]) # epoch length in seconds
+cwa_path <- args[1] # path to temp cwa files
 # dest <- args[2] # destination filename
-cwa_path <- args[2] # path to temp cwa files
 # cores <- args[4] # number of cores when in parallel
 
 # dir.create("~/sleep_study/data/temp/", recursive = TRUE)
@@ -29,7 +29,7 @@ temp_files <-
 glue("{length(cwa_files)} split cwa files in this chunk")
 
 stopifnot(
-  "Number of temp cwa split files not equal to target feather files." =
+  "Number of temp cwa split files not equal to number of target feather files." =
     length(cwa_files) == length(temp_files)
 )
 
@@ -94,8 +94,6 @@ downsample_and_write_cwa_to_feather <- function(cwa_file, temp_file) {
     ungroup() |>
     write_feather(temp_file)
 }
-
-cat("Execute the whole thing in parallel. ETA ~ 4-5 hrs")
 
 plan("multisession", workers = 10)
 

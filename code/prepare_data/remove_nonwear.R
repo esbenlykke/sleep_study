@@ -6,13 +6,13 @@ suppressMessages(library(arrow))
 
 cat("Removing nonwear using decision tree model...")
 
-bsl <-
-  read_parquet("data/processed/bsl_thigh_no_bad_zm.parquet")
+data <-
+  read_parquet("data/processed/fup_thigh_no_bad_zm.parquet")
 
 nw_mod <-
   read_rds("data/models/nonwear_model.rds")
 
-bsl |>
+data |>
   group_by(id, noon_day) |>
   mutate(
     time_day = seq(0, 1, length.out = n())) |> 
@@ -29,7 +29,7 @@ bsl |>
   augment(x = nw_mod) |>
   filter(.pred_class == 0) |> 
   select(-c(contains(".pred"), location, weekday)) |> 
-  write_parquet("data/processed/model_data/bsl_thigh.parquet")
+  write_parquet("data/processed/data_for_modelling/fup_thigh.parquet")
 
 
 # test |>

@@ -73,10 +73,10 @@ nnet_spec <-
   set_engine("nnet", MaxNWts = 500) |> # MaxNWts is a regularization term based on number of predictors
   set_mode("classification")
 
-mars_spec <-
-  mars(prod_degree = tune(), num_terms = tune()) |> #<- use GCV to choose terms
-  set_engine("earth") |>
-  set_mode("classification")
+# mars_spec <-
+#   mars(prod_degree = tune(), num_terms = tune()) |> #<- use GCV to choose terms
+#   set_engine("earth") |>
+#   set_mode("classification")
 
 # rf_spec <-
 # rand_forest(mtry = tune(), min_n = tune(), trees = tune()) |>
@@ -133,7 +133,7 @@ no_preproc_in_bed_wf <-
       in_bed = in_bed_rec
     ),
     models = list(
-      MARS = mars_spec, # works in parallel
+      # MARS = mars_spec, # works in parallel
       # random_forest = rf_spec, # works in parallel
       xgboost = xgb_spec # works in parallel
     ),
@@ -146,7 +146,7 @@ no_preproc_sleep_wf <-
       sleep = sleep_rec
     ),
     models = list(
-      MARS = mars_spec, # works in parallel
+      # MARS = mars_spec, # works in parallel
       # random_forest = rf_spec, # works in parallel
       xgboost = xgb_spec # works in parallel
     ),
@@ -170,10 +170,10 @@ doParallel::registerDoParallel(cores = 6)
 # Tuning models with regular grid search ----------------------------------
 # In bed
 
-# cat("Tuning the following workflows:\n")
-# all_in_bed_workflows
-# 
-# tictoc::tic()
+cat("Tuning the following workflows:\n")
+all_in_bed_workflows
+
+tictoc::tic()
 grid_ctrl <-
   control_grid(
     verbose = TRUE,
@@ -182,21 +182,21 @@ grid_ctrl <-
     save_pred = FALSE,
     save_workflow = FALSE
   )
-# 
-# in_bed_grid_results <-
-#   all_in_bed_workflows |>
-#   workflow_map(
-#     seed = 123,
-#     "tune_grid",
-#     resamples = folds,
-#     grid = 5,
-#     control = grid_ctrl,
-#     metrics = metric_set(f_meas, roc_auc),
-#     verbose = TRUE
-#   )
-# tictoc::toc()
-# 
-# write_rds(in_bed_grid_results, "data/models/in_bed_workflowsets_results.rds")
+
+in_bed_grid_results <-
+  all_in_bed_workflows |>
+  workflow_map(
+    seed = 123,
+    "tune_grid",
+    resamples = folds,
+    grid = 5,
+    control = grid_ctrl,
+    metrics = metric_set(f_meas, roc_auc),
+    verbose = TRUE
+  )
+tictoc::toc()
+
+write_rds(in_bed_grid_results, "data/models/in_bed_workflowsets_results.rds")
 
 # Sleep
 
