@@ -6,6 +6,7 @@ library(showtext)
 
 
 metric_data <- read_csv("data/processed/performance_metrics.csv")
+comb_metric_data <- read_csv("data/processed/combined_preds_performance_metrics.csv")
 
 # Create table ------------------------------------------------------------
 
@@ -14,7 +15,7 @@ font_add_google("IBM Plex Serif", family = "ibm")
 showtext_auto()
 
 tab_performance <-
-  metric_data |> 
+  comb_metric_data |> 
   mutate(
     .metric = factor(.metric, 
                      levels = c("f_meas", "accuracy", "sensitivity", "specificity"),
@@ -47,4 +48,4 @@ tab_performance <-
   cols_align(align = "center") |> 
   data_color(columns = decision_tree, colors = "lightblue", alpha = .6)
 
-gtsave(tab_performance, "visuals/table_permance_metrics.html")
+gtsave(tab_performance, "visuals/table_combined_preds_performance_metrics.html")
