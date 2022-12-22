@@ -16,6 +16,7 @@ cat("Spending data budget...\n")
 set.seed(123)
 data <-
   read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
+  bind_rows(read_parquet("data/processed/data_for_modelling/fup_thigh_sensor_independent_features.parquet")) |> 
   mutate(
     in_bed = as_factor(in_bed),
     sleep = as_factor(sleep)
@@ -28,6 +29,12 @@ spl <-
 
 train <- training(spl)
 test <- testing(spl)
+
+# write out train data for later fitting of optimized workflows
+# write_parquet(train, "data/processed/training_data.parquet")
+
+# write out test data for later evaluation
+# write_parquet(test, "data/processed/testing_data.parquet")
 
 folds <-
   group_vfold_cv(train, group = id, v = 5, balance = "groups")

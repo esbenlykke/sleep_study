@@ -1,4 +1,4 @@
-#!/usr/bin/env RscriptsuppressMessages(library(tidyverse))
+#!/usr/bin/env Rscript
 
 library(tidyverse)
 library(tidymodels)
@@ -7,10 +7,10 @@ library(slider)
 library(lubridate)
 
 test <-
-  read_parquet("data/processed/screens_bsl_test_data.parquet") |>
+  read_parquet("data/processed/testing_data.parquet") |>
   filter(
-    !id == 757104
-  ) # TODO fix the leap year february problem in ID = 757104
+    id != 757104 & id != 1377205
+  ) # TODO fix the leap year February problem in ID = 757104
 
 # Load models -------------------------------------------------------------
 

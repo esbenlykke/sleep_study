@@ -17,6 +17,7 @@ cat("Spending data budget...\n")
 set.seed(123)
 data <-
   read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
+  bind_rows(read_parquet("data/processed/data_for_modelling/fup_thigh_sensor_independent_features.parquet")) |> 
   mutate(
     in_bed = as_factor(in_bed),
     sleep = as_factor(sleep)

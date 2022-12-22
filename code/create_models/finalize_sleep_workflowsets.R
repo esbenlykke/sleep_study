@@ -42,15 +42,15 @@ nn_wf <-
 # MARS model --------------------------------------------------------------
 
 
-best_sleep_MARS_result <-
-  all_sleep_wf %>%
-  extract_workflow_set_result("sleep_MARS") |> 
-  select_best(metric = "f_meas") 
-
-MARS_wf <- 
-  all_sleep_wf |> 
-  extract_workflow("sleep_MARS") |> 
-  finalize_workflow(best_sleep_MARS_result) 
+# best_sleep_MARS_result <-
+#   all_sleep_wf %>%
+#   extract_workflow_set_result("sleep_MARS") |> 
+#   select_best(metric = "f_meas") 
+# 
+# MARS_wf <- 
+#   all_sleep_wf |> 
+#   extract_workflow("sleep_MARS") |> 
+#   finalize_workflow(best_sleep_MARS_result) 
 
 # XGboost -----------------------------------------------------------------
 
@@ -65,6 +65,8 @@ xgboost_wf <-
   extract_workflow("sleep_xgboost") |> 
   finalize_workflow(best_sleep_xgboost_result) 
 
-list(logistic_wf, nn_wf, MARS_wf, xgboost_wf) |> 
-  setNames(nm = c("logistic_wf", "nn_wf", "MARS_wf", "xgboost_wf")) %>%
+# Write
+
+list(logistic_wf, nn_wf, xgboost_wf) |> 
+  setNames(nm = c("logistic_wf", "nn_wf", "xgboost_wf")) %>%
   walk2(names(.), ~write_rds(.x, file = paste0("data/models/finalized_workflows/sleep_", .y, ".rds")))

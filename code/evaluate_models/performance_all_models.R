@@ -18,7 +18,7 @@ in_bed_fits <- map(in_bed_fits_files, read_rds) |>
 sleep_fits <- map(sleep_fits_files, read_rds) |>
   set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
 
-test <- read_parquet("data/processed/screens_bsl_test_data.parquet")
+test <- read_parquet("data/processed/testing_data.parquet")
 
 # Metrics and plots -------------------------------------------------------
 

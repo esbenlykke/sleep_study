@@ -9,55 +9,51 @@ stats_files <-
   list.files("data/processed/stats_predictions", full.names = TRUE)
 
 all_stats <-
-  map(stats_files, read_parquet)
+  map(stats_files, read_parquet) |>
+  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
 
-simple_stats <-
-  read_parquet("data/processed/stats_predictions/simple_CART_stats.parquet")
-
-get_diff_stats <- 
-  function(tbl){
-  tbl |>
-  mutate(
-    diff_spt_hrs = spt_hrs - zm_spt_hrs,
-    diff_tst_hrs = tst_hrs - zm_tst_hrs,
-    diff_se_percent = se_percent - zm_se_percent,
-    diff_lps_min = lps_min - zm_lps_min,
-    diff_waso_min = waso_min - zm_waso_min
-  ) |>
-  rowwise() |>
-  mutate(
-    avg_spt_hrs = mean(c(spt_hrs, zm_spt_hrs)),
-    avg_tst_hrs = mean(c(tst_hrs, zm_tst_hrs)),
-    avg_se_percent = mean(c(se_percent, zm_se_percent)),
-    avg_lps_min = mean(c(lps_min, zm_lps_min)),
-    avg_waso_min = mean(c(waso_min, zm_waso_min))
-  ) |>
-  ungroup() 
-  # filter(se_percent > 0 & lps_min > 0) # TODO why are these numbers fucked?
-}
-
-get_summary_stats <- 
-  function(tbl){
+get_diff_stats <-
+  function(tbl) {
     tbl |>
-  # filter(se_percent > 0) |>
-  summarise(
-    across(contains("diff"), list(
-      upper = ~ mean(.x) + 1.96 * sd(.x),
-      lower = ~ mean(.x) - 1.96 * sd(.x),
-      mean = ~ mean(.x)
-    ))
-  )
-}
+      mutate(
+        diff_spt_hrs = spt_hrs - zm_spt_hrs,
+        diff_tst_hrs = tst_hrs - zm_tst_hrs,
+        diff_se_percent = se_percent - zm_se_percent,
+        diff_lps_min = lps_min - zm_lps_min,
+        diff_waso_min = waso_min - zm_waso_min
+      ) |>
+      rowwise() |>
+      mutate(
+        avg_spt_hrs = mean(c(spt_hrs, zm_spt_hrs)),
+        avg_tst_hrs = mean(c(tst_hrs, zm_tst_hrs)),
+        avg_se_percent = mean(c(se_percent, zm_se_percent)),
+        avg_lps_min = mean(c(lps_min, zm_lps_min)),
+        avg_waso_min = mean(c(waso_min, zm_waso_min))
+      ) |>
+      ungroup()
+    # filter(se_percent > 0 & lps_min > 0) # TODO why are these numbers fucked?
+  }
 
+get_summary_stats <-
+  function(tbl) {
+    tbl |>
+      # filter(se_percent > 0) |>
+      summarise(
+        across(contains("diff"), list(
+          upper = ~ mean(.x) + 1.96 * sd(.x),
+          lower = ~ mean(.x) - 1.96 * sd(.x),
+          mean = ~ mean(.x)
+        ))
+      )
+  }
 
-
-all_diffs <- 
-  all_stats |> 
-  map(get_diff_stats) 
-
-all_summaries <- 
+all_diffs <-
   all_stats |>
-  map(get_diff_stats) |> 
+  map(get_diff_stats)
+
+all_summaries <-
+  all_stats |>
+  map(get_diff_stats) |>
   map(get_summary_stats)
 
 # BA plots for simple trees -----------------------------------------------
@@ -96,8 +92,9 @@ all_plots <-
     }
 
     spt <-
-        ba_plot(diffs, avg_spt_hrs, diff_spt_hrs, summaries$diff_spt_hrs_mean,
-                summaries$diff_spt_hrs_lower, summaries$diff_spt_hrs_upper,
+      ba_plot(
+        diffs, avg_spt_hrs, diff_spt_hrs, summaries$diff_spt_hrs_mean,
+        summaries$diff_spt_hrs_lower, summaries$diff_spt_hrs_upper,
         "Sleep Period Time (hrs)"
       ) +
       scale_y_continuous(breaks = seq(-10, 10, 2))
@@ -112,7 +109,7 @@ all_plots <-
 
     se_percent <-
       ba_plot(diffs, avg_se_percent, diff_se_percent, summaries$diff_se_percent_mean,
-              summaries$diff_se_percent_lower, summaries$diff_se_percent_upper,
+        summaries$diff_se_percent_lower, summaries$diff_se_percent_upper,
         "Sleep Efficiency (%)",
         y_axis = "Difference Between Methods"
       ) +
@@ -139,11 +136,12 @@ all_plots <-
       wrap_plots(ncol = 1)
   }
 
-plots <- map2(all_diffs, all_summaries, all_plots) 
+plots <- map2(all_diffs, all_summaries, all_plots)
 
-names(plots) <- c(str_replace_all(stats_files, "data/processed/stats_predictions/", 
-                                  "visuals/ba_plots_")) |> 
+names(plots) <- c(str_replace_all(
+  stats_files, "data/processed/stats_predictions/",
+  "visuals/ba_plots_"
+)) |>
   str_replace_all(".parquet", ".png")
 
 walk2(plots, names(plots), ~ ggsave(plot = .x, filename = .y, height = 12, width = 6))
-

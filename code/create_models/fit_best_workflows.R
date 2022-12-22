@@ -5,12 +5,13 @@ suppressMessages(library(tidymodels))
 suppressMessages(library(arrow))
 
 train <-
-  read_parquet("data/processed/screens_bsl_train_data.parquet")
+  read_parquet("data/processed/training_data.parquet")
 
 # In-bed ------------------------------------------------------------------
 
 
-in_bed_list <- list.files("data/models/finalized_workflows", full.names = TRUE)
+in_bed_list <- list.files("data/models/finalized_workflows", full.names = TRUE) |> 
+  str_subset("MARS", negate = TRUE)
 
 wfs <-
   in_bed_list |> 
@@ -21,13 +22,10 @@ wfs[[1]] |>
   write_rds("data/models/fitted_models/in_bed_logistic_fit.rds")
 
 wfs[[2]] |> 
-  write_rds("data/models/fitted_models/in_bed_MARS_fit.rds")
-
-wfs[[3]] |> 
   fit(train) |> 
   write_rds("data/models/fitted_models/in_bed_neural_net_fit.rds")
 
-wfs[[4]] |> 
+wfs[[3]] |> 
   fit(train) |> 
   write_rds("data/models/fitted_models/in_bed_xg_boost_fit.rds")
 
@@ -36,18 +34,14 @@ wfs[[4]] |>
 # Sleep -------------------------------------------------------------------
 
 
-wfs[[5]] |> 
+wfs[[4]] |> 
   fit(train) |> 
   write_rds("data/models/fitted_models/sleep_logistic_fit.rds")
 
-wfs[[6]] |> 
-  fit(train) |> 
-  write_rds("data/models/fitted_models/sleep_MARS_fit.rds")
-
-wfs[[7]] |> 
+wfs[[5]] |> 
   fit(train) |> 
   write_rds("data/models/fitted_models/sleep_neural_net_fit.rds")
 
-wfs[[8]] |> 
+wfs[[6]] |> 
   fit(train) |> 
   write_rds("data/models/fitted_models/sleep_xg_boost_fit.rds")
