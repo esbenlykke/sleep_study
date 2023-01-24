@@ -1,0 +1,172 @@
+---
+title: "Machine Learned Models for Estimation of Sleep Quality in Free-Living Accelerometer Data"
+subtitle: "(working title)"
+author: "Esben Lykke, PhD student"
+date: "`r format(Sys.Date(), '%d %B, %Y')`"
+format:
+  revealjs: 
+    scrollable: true
+    smaller: true
+    theme: moon
+    slide-number: true
+    chalkboard: 
+      buttons: false
+    preview-links: auto
+    logo: images/SDU_WHITE_RGB-png.png
+    footer: https://github.com/esbenlykke/sleep_study
+    css: my_styles.css
+editor_options: 
+  chunk_output_type: console
+smooth-scroll: true
+---
+
+## Background {.scrollable transition="convex"}
+
+Lists can optionally be displayed incrementally:
+
+::: incremental
+-   First item
+-   Second item
+-   Third item
+:::
+
+. . .
+
+Insert pauses to make other types of content display incrementally.
+
+::: footer
+Learn more: [Incremental Lists](https://quarto.org/docs/presentations/revealjs/#incremental-lists)
+:::
+
+## Methods {.scrollable transition="zoom"}
+
+::: {.fragment .fade-in-then-semi-out}
+Hello there
+:::
+
+:::{.fragment .fade-in-then-semi-out}
+hi there
+:::
+
+---
+
+## {.smaller .scrollable transition="convex" .column}
+
+```{r}
+source("~/sleep_study/presentation/code/tables_performance.R")
+
+tab_1
+```
+
+Performance of the models to predict each class <span style="color:gold">**seperately**</span>, i.e., "sleep" and "in-bed". 
+
+## {.smaller .scrollable transition="convex" .column}
+
+```{r}
+tab_2
+```
+
+Performance of the models to predict each <span style="color:gold">**combined**</span> class, i.e., "sleep" + "in-bed". 
+
+---
+
+## Bland-Altman Plots {.smaller transition="convex"}
+
+::: {.panel-tabset}
+
+### Decision Tree
+
+```{r}
+#| echo: false
+source("~/sleep_study/presentation/code/ba_plots.R")
+plots$decision_tree[[1]]
+
+plots$decision_tree[[2]]
+
+plots$decision_tree[[3]]
+
+plots$decision_tree[[4]]
+
+plots$decision_tree[[5]]
+```
+
+### Logistic Regression
+
+```{r}
+plots$logistic_regression[[1]]
+
+plots$logistic_regression[[2]]
+
+plots$logistic_regression[[3]]
+
+plots$logistic_regression[[4]]
+
+plots$logistic_regression[[5]]
+```
+
+### XGBoost
+
+```{r}
+plots$xgboost[[1]]
+
+plots$xgboost[[2]]
+
+plots$xgboost[[3]]
+
+plots$xgboost[[4]]
+
+plots$xgboost[[5]]
+```
+
+
+### Neural Net
+
+```{r}
+plots$neural_net[[1]]
+
+plots$neural_net[[2]]
+
+plots$neural_net[[3]]
+
+plots$neural_net[[4]]
+
+plots$neural_net[[5]]
+```
+
+:::
+
+---
+
+### Tree Plots {.smaller .scrollable transition="zoom" .column}
+
+```{r}
+#| echo: false
+library(arrow)
+library(visNetwork)
+library(tidymodels)
+
+in_bed_tree <-
+  read_rds("~/sleep_study/data/models/fitted_models/in_bed_simple_CART_fit.rds")
+
+in_bed_tree |>
+  extract_fit_engine() |>
+  visTree(
+    height = "800px",
+    nodesPopSize = TRUE,
+    minNodeSize = 10,
+    maxNodeSize = 30,
+    fallenLeaves = TRUE,
+    legend = FALSE,
+    digits = 3,
+    direction = "LR"
+  ) |>
+  visNodes(font = list(
+    color = "#EEE8D5",
+    strokeWidth = 1
+  )) |>
+  visEdges(font = list(
+    color = "#EEE8D5",
+    strokeWidth = 1
+  )) |> 
+  visLegend(addEdges = list(font = list(color = "#EEE8D5")))
+```

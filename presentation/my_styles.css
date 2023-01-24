@@ -1,0 +1,17 @@
+{css, include=FALSE}
+
+.title {
+  font-size: 70px !important;
+}
+
+.author {
+  font-size: 60px;
+}
+
+.date {
+  font-size: 20px;
+}
+
+.column {
+text-align: center;
+}

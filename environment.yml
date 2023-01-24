@@ -43,7 +43,6 @@ dependencies:
   - r-webshot=0.5.4
   - r-tinytex
   - r-pacman=0.5.1
-  - quarto=1.1.145
   - snakemake=7.18.2
   - graphviz=6.0.1
   - cudatoolkit=11.3.1
@@ -53,3 +52,4 @@ dependencies:
   - lightgbm=3.3.3
   # - morfist
   - tensorflow
+  - quarto
