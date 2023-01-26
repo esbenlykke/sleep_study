@@ -15,3 +15,8 @@
 .column {
 text-align: center;
 }
+
+.slide {
+    height: 750px;
+    overflow-y: auto !important;
+}

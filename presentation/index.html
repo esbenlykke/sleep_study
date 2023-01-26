@@ -28,6 +28,25 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+    }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }
   </style>
   <link rel="stylesheet" href="index_files/libs/revealjs/dist/theme/quarto.css" id="theme">
   <link rel="stylesheet" href="my_styles.css">
@@ -246,7 +265,6 @@
     }
     .reveal .slide:not(.center) {
       height: 100%;
-      overflow-y: auto;
     }
     .reveal .slide.scrollable {
       overflow-y: auto;
@@ -327,11 +345,6 @@
   <link href="index_files/libs/vis-9.1.0/vis-network.min.css" rel="stylesheet">
   <script src="index_files/libs/vis-9.1.0/vis-network.min.js"></script>
   <script src="index_files/libs/visNetwork-binding-2.1.2/visNetwork.js"></script>
-  <script src="index_files/libs/FileSaver-1.1.20151003/FileSaver.min.js"></script>
-  <script src="index_files/libs/Blob-1.0/Blob.js"></script>
-  <script src="index_files/libs/canvas-toBlob-1.0/canvas-toBlob.js"></script>
-  <script src="index_files/libs/html2canvas-0.5.0/html2canvas.js"></script>
-  <script src="index_files/libs/jspdf-1.3.2/jspdf.debug.js"></script>
   <script src="index_files/libs/jquery-1.11.3/jquery.min.js"></script>
   <link href="index_files/libs/jquery-sparkline-2.1.2/jquery.sparkline.css" rel="stylesheet">
   <script src="index_files/libs/jquery-sparkline-2.1.2/jquery.sparkline.js"></script>
@@ -345,11 +358,14 @@
   <h1 class="title">Machine Learned Models for Estimation of Sleep Quality in Free-Living Accelerometer Data</h1>
   <p class="subtitle">(working title)</p>
   <p class="author">Esben Lykke, PhD student</p>
-  <p class="date">24 januar, 2023</p>
+  <p class="date">26 januar, 2023</p>
 </section>
 
 <section id="background" class="slide level2 scrollable" data-transition="convex">
 <h2>Background</h2>
+<div class="cell">
+
+</div>
 <p>Lists can optionally be displayed incrementally:</p>
 <div>
 <ul>
@@ -365,26 +381,85 @@
 </div>
 </div>
 </section>
-<section id="methods" class="slide level2 scrollable" data-transition="zoom">
+<section id="methods" class="slide level2" data-transition="convex">
 <h2>Methods</h2>
-<div class="fragment fade-in-then-semi-out">
-<p>Hello there</p>
-</div>
-<div class="fragment fade-in-then-semi-out">
-<p>hi there</p>
+<p>Overview Network plot of data preparation steps</p>
+<div class="fragment">
+<p>network plot</p>
 </div>
 </section>
-<section id="section" class="slide level2 smaller scrollable column" data-transition="convex">
+<section id="features" class="slide level2 smaller" data-transition="fade">
+<h2>Features</h2>
+<div class="columns">
+<div class="column" style="width:30%;">
+<div class="fragment">
+<p><strong>Basic Features</strong></p>
+<ul>
+<li>Weekday</li>
+<li>Time of Day</li>
+<li>Placement</li>
+<li>Temperature</li>
+</ul>
+</div>
+</div><div class="column" style="width:30%;">
+<div class="fragment">
+<p><strong>ACC derived features</strong><sup>1</sup></p>
+<ul>
+<li>Mean ACC X</li>
+<li>Mean ACC Y</li>
+<li>Mean ACC Z</li>
+<li>Standard Deviation X</li>
+<li>Standard Deviation Y</li>
+<li>Standard Deviation Z</li>
+<li>Max Standard Deviation</li>
+<li>Inclination</li>
+</ul>
+</div>
+</div><div class="column" style="width:40%;">
+<div class="fragment">
+<p><strong>Sensor-Independent Features</strong><sup>2</sup></p>
+<ul>
+<li>Clock Proxy Linear</li>
+<li>Clock Proxy Cosinus</li>
+</ul>
+</div>
+</div>
+</div>
+
+<aside><div>
+
+</div><ol class="aside-footnotes"><li id="fn1"><p><span class="citation" data-cites="skotte_detection_2014">Skotte et al. (<a href="#/sleep-classification-flow" role="doc-biblioref" onclick="">2014</a>)</span></p></li><li id="fn2"><p><span class="citation" data-cites="walch_sleep_2019">Walch et al. (<a href="#/sleep-classification-flow" role="doc-biblioref" onclick="">2019</a>)</span>, <span class="citation" data-cites="forger_simpler_1999">Forger, Jewett, and Kronauer (<a href="#/sleep-classification-flow" role="doc-biblioref" onclick="">1999</a>)</span></p></li></ol></aside></section>
+<section id="human-circadian-clock" class="slide level2 smaller" data-transition="convex">
+<h2>Human Circadian Clock</h2>
+<p><span class="citation" data-cites="forger_simpler_1999">Forger, Jewett, and Kronauer (<a href="#/sleep-classification-flow" role="doc-biblioref" onclick="">1999</a>)</span>: a so-called cubic van der Pol equation</p>
+<div class="fragment">
+<p><span class="math display">\[\frac{dx_c}{dt}=\frac{\pi}{12}\begin{cases}\mu(x_c-\frac{4x^3}{3})-x\begin{bmatrix}(\frac{24}{0.99669\tau_x})^2+kB\end{bmatrix}\end{cases}\]</span></p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p>This thing is dependent on ambient light and body temperature!</p>
+</div>
+<div class="fragment fade-in-then-semi-out">
+<p><span class="citation" data-cites="walch_sleep_2019">Walch et al. (<a href="#/sleep-classification-flow" role="doc-biblioref" onclick="">2019</a>)</span> incorporated this feature using step counts from the Apple Watch</p>
+</div>
+<div class="fragment">
+<p>But as demonstrated by <span class="citation" data-cites="walch_sleep_2019">Walch et al. (<a href="#/sleep-classification-flow" role="doc-biblioref" onclick="">2019</a>)</span>, a simple cosine function does the tricks just as well :)</p>
+</div>
+</section>
+<section id="circadian-proxy-features" class="slide level2 smaller" data-transition="convex">
+<h2>Circadian Proxy Features</h2>
+
+<img data-src="index_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"></section>
+<section id="section" class="slide level2 smaller column" data-transition="convex">
 <h2></h2>
 <div class="cell">
 <div class="cell-output-display">
 
-<div id="yrlffbidht" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="yyedkbsbau" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: ibm;
 }
 
-#yrlffbidht .gt_table {
+#yyedkbsbau .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -409,7 +484,7 @@
   border-left-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_heading {
+#yyedkbsbau .gt_heading {
   background-color: #002B36;
   text-align: center;
   border-bottom-color: #002B36;
@@ -421,12 +496,12 @@
   border-right-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_caption {
+#yyedkbsbau .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#yrlffbidht .gt_title {
+#yyedkbsbau .gt_title {
   color: #EEE8D5;
   font-size: 125%;
   font-weight: initial;
@@ -438,7 +513,7 @@
   border-bottom-width: 0;
 }
 
-#yrlffbidht .gt_subtitle {
+#yyedkbsbau .gt_subtitle {
   color: #EEE8D5;
   font-size: 85%;
   font-weight: initial;
@@ -450,13 +525,13 @@
   border-top-width: 0;
 }
 
-#yrlffbidht .gt_bottom_border {
+#yyedkbsbau .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_col_headings {
+#yyedkbsbau .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -471,7 +546,7 @@
   border-right-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_col_heading {
+#yyedkbsbau .gt_col_heading {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -491,7 +566,7 @@
   overflow-x: hidden;
 }
 
-#yrlffbidht .gt_column_spanner_outer {
+#yyedkbsbau .gt_column_spanner_outer {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -503,15 +578,15 @@
   padding-right: 4px;
 }
 
-#yrlffbidht .gt_column_spanner_outer:first-child {
+#yyedkbsbau .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#yrlffbidht .gt_column_spanner_outer:last-child {
+#yyedkbsbau .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#yrlffbidht .gt_column_spanner {
+#yyedkbsbau .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -523,7 +598,7 @@
   width: 100%;
 }
 
-#yrlffbidht .gt_group_heading {
+#yyedkbsbau .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -549,7 +624,7 @@
   text-align: left;
 }
 
-#yrlffbidht .gt_empty_group_heading {
+#yyedkbsbau .gt_empty_group_heading {
   padding: 0.5px;
   color: #EEE8D5;
   background-color: #002B36;
@@ -564,15 +639,15 @@
   vertical-align: middle;
 }
 
-#yrlffbidht .gt_from_md > :first-child {
+#yyedkbsbau .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#yrlffbidht .gt_from_md > :last-child {
+#yyedkbsbau .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#yrlffbidht .gt_row {
+#yyedkbsbau .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -591,7 +666,7 @@
   overflow-x: hidden;
 }
 
-#yrlffbidht .gt_stub {
+#yyedkbsbau .gt_stub {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -604,7 +679,7 @@
   padding-right: 5px;
 }
 
-#yrlffbidht .gt_stub_row_group {
+#yyedkbsbau .gt_stub_row_group {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -618,11 +693,11 @@
   vertical-align: top;
 }
 
-#yrlffbidht .gt_row_group_first td {
+#yyedkbsbau .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#yrlffbidht .gt_summary_row {
+#yyedkbsbau .gt_summary_row {
   color: #EEE8D5;
   background-color: #002B36;
   text-transform: inherit;
@@ -632,16 +707,16 @@
   padding-right: 5px;
 }
 
-#yrlffbidht .gt_first_summary_row {
+#yyedkbsbau .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_first_summary_row.thick {
+#yyedkbsbau .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#yrlffbidht .gt_last_summary_row {
+#yyedkbsbau .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -651,7 +726,7 @@
   border-bottom-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_grand_summary_row {
+#yyedkbsbau .gt_grand_summary_row {
   color: #EEE8D5;
   background-color: #002B36;
   text-transform: inherit;
@@ -661,7 +736,7 @@
   padding-right: 5px;
 }
 
-#yrlffbidht .gt_first_grand_summary_row {
+#yyedkbsbau .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -671,11 +746,11 @@
   border-top-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_striped {
+#yyedkbsbau .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#yrlffbidht .gt_table_body {
+#yyedkbsbau .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -684,7 +759,7 @@
   border-bottom-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_footnotes {
+#yyedkbsbau .gt_footnotes {
   color: #EEE8D5;
   background-color: #002B36;
   border-bottom-style: none;
@@ -698,7 +773,7 @@
   border-right-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_footnote {
+#yyedkbsbau .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -707,7 +782,7 @@
   padding-right: 5px;
 }
 
-#yrlffbidht .gt_sourcenotes {
+#yyedkbsbau .gt_sourcenotes {
   color: #EEE8D5;
   background-color: #002B36;
   border-bottom-style: none;
@@ -721,7 +796,7 @@
   border-right-color: #D3D3D3;
 }
 
-#yrlffbidht .gt_sourcenote {
+#yyedkbsbau .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -729,64 +804,64 @@
   padding-right: 5px;
 }
 
-#yrlffbidht .gt_left {
+#yyedkbsbau .gt_left {
   text-align: left;
 }
 
-#yrlffbidht .gt_center {
+#yyedkbsbau .gt_center {
   text-align: center;
 }
 
-#yrlffbidht .gt_right {
+#yyedkbsbau .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#yrlffbidht .gt_font_normal {
+#yyedkbsbau .gt_font_normal {
   font-weight: normal;
 }
 
-#yrlffbidht .gt_font_bold {
+#yyedkbsbau .gt_font_bold {
   font-weight: bold;
 }
 
-#yrlffbidht .gt_font_italic {
+#yyedkbsbau .gt_font_italic {
   font-style: italic;
 }
 
-#yrlffbidht .gt_super {
+#yyedkbsbau .gt_super {
   font-size: 65%;
 }
 
-#yrlffbidht .gt_footnote_marks {
+#yyedkbsbau .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#yrlffbidht .gt_asterisk {
+#yyedkbsbau .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#yrlffbidht .gt_indent_1 {
+#yyedkbsbau .gt_indent_1 {
   text-indent: 5px;
 }
 
-#yrlffbidht .gt_indent_2 {
+#yyedkbsbau .gt_indent_2 {
   text-indent: 10px;
 }
 
-#yrlffbidht .gt_indent_3 {
+#yyedkbsbau .gt_indent_3 {
   text-indent: 15px;
 }
 
-#yrlffbidht .gt_indent_4 {
+#yyedkbsbau .gt_indent_4 {
   text-indent: 20px;
 }
 
-#yrlffbidht .gt_indent_5 {
+#yyedkbsbau .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -871,17 +946,17 @@
 </div>
 <p>Performance of the models to predict each class <span style="color:gold"><strong>seperately</strong></span>, i.e., “sleep” and “in-bed”.</p>
 </section>
-<section id="section-1" class="slide level2 smaller scrollable column" data-transition="convex">
+<section id="section-1" class="slide level2 smaller column" data-transition="convex">
 <h2></h2>
 <div class="cell">
 <div class="cell-output-display">
 
-<div id="szirhhstvw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="ilxktxfmjy" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: ibm;
 }
 
-#szirhhstvw .gt_table {
+#ilxktxfmjy .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -906,7 +981,7 @@
   border-left-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_heading {
+#ilxktxfmjy .gt_heading {
   background-color: #002B36;
   text-align: center;
   border-bottom-color: #002B36;
@@ -918,12 +993,12 @@
   border-right-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_caption {
+#ilxktxfmjy .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#szirhhstvw .gt_title {
+#ilxktxfmjy .gt_title {
   color: #EEE8D5;
   font-size: 125%;
   font-weight: initial;
@@ -935,7 +1010,7 @@
   border-bottom-width: 0;
 }
 
-#szirhhstvw .gt_subtitle {
+#ilxktxfmjy .gt_subtitle {
   color: #EEE8D5;
   font-size: 85%;
   font-weight: initial;
@@ -947,13 +1022,13 @@
   border-top-width: 0;
 }
 
-#szirhhstvw .gt_bottom_border {
+#ilxktxfmjy .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_col_headings {
+#ilxktxfmjy .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -968,7 +1043,7 @@
   border-right-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_col_heading {
+#ilxktxfmjy .gt_col_heading {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -988,7 +1063,7 @@
   overflow-x: hidden;
 }
 
-#szirhhstvw .gt_column_spanner_outer {
+#ilxktxfmjy .gt_column_spanner_outer {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -1000,15 +1075,15 @@
   padding-right: 4px;
 }
 
-#szirhhstvw .gt_column_spanner_outer:first-child {
+#ilxktxfmjy .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#szirhhstvw .gt_column_spanner_outer:last-child {
+#ilxktxfmjy .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#szirhhstvw .gt_column_spanner {
+#ilxktxfmjy .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1020,7 +1095,7 @@
   width: 100%;
 }
 
-#szirhhstvw .gt_group_heading {
+#ilxktxfmjy .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1046,7 +1121,7 @@
   text-align: left;
 }
 
-#szirhhstvw .gt_empty_group_heading {
+#ilxktxfmjy .gt_empty_group_heading {
   padding: 0.5px;
   color: #EEE8D5;
   background-color: #002B36;
@@ -1061,15 +1136,15 @@
   vertical-align: middle;
 }
 
-#szirhhstvw .gt_from_md > :first-child {
+#ilxktxfmjy .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#szirhhstvw .gt_from_md > :last-child {
+#ilxktxfmjy .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#szirhhstvw .gt_row {
+#ilxktxfmjy .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1088,7 +1163,7 @@
   overflow-x: hidden;
 }
 
-#szirhhstvw .gt_stub {
+#ilxktxfmjy .gt_stub {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -1101,7 +1176,7 @@
   padding-right: 5px;
 }
 
-#szirhhstvw .gt_stub_row_group {
+#ilxktxfmjy .gt_stub_row_group {
   color: #EEE8D5;
   background-color: #002B36;
   font-size: 100%;
@@ -1115,11 +1190,11 @@
   vertical-align: top;
 }
 
-#szirhhstvw .gt_row_group_first td {
+#ilxktxfmjy .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#szirhhstvw .gt_summary_row {
+#ilxktxfmjy .gt_summary_row {
   color: #EEE8D5;
   background-color: #002B36;
   text-transform: inherit;
@@ -1129,16 +1204,16 @@
   padding-right: 5px;
 }
 
-#szirhhstvw .gt_first_summary_row {
+#ilxktxfmjy .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_first_summary_row.thick {
+#ilxktxfmjy .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#szirhhstvw .gt_last_summary_row {
+#ilxktxfmjy .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1148,7 +1223,7 @@
   border-bottom-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_grand_summary_row {
+#ilxktxfmjy .gt_grand_summary_row {
   color: #EEE8D5;
   background-color: #002B36;
   text-transform: inherit;
@@ -1158,7 +1233,7 @@
   padding-right: 5px;
 }
 
-#szirhhstvw .gt_first_grand_summary_row {
+#ilxktxfmjy .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1168,11 +1243,11 @@
   border-top-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_striped {
+#ilxktxfmjy .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#szirhhstvw .gt_table_body {
+#ilxktxfmjy .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1181,7 +1256,7 @@
   border-bottom-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_footnotes {
+#ilxktxfmjy .gt_footnotes {
   color: #EEE8D5;
   background-color: #002B36;
   border-bottom-style: none;
@@ -1195,7 +1270,7 @@
   border-right-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_footnote {
+#ilxktxfmjy .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -1204,7 +1279,7 @@
   padding-right: 5px;
 }
 
-#szirhhstvw .gt_sourcenotes {
+#ilxktxfmjy .gt_sourcenotes {
   color: #EEE8D5;
   background-color: #002B36;
   border-bottom-style: none;
@@ -1218,7 +1293,7 @@
   border-right-color: #D3D3D3;
 }
 
-#szirhhstvw .gt_sourcenote {
+#ilxktxfmjy .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1226,64 +1301,64 @@
   padding-right: 5px;
 }
 
-#szirhhstvw .gt_left {
+#ilxktxfmjy .gt_left {
   text-align: left;
 }
 
-#szirhhstvw .gt_center {
+#ilxktxfmjy .gt_center {
   text-align: center;
 }
 
-#szirhhstvw .gt_right {
+#ilxktxfmjy .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#szirhhstvw .gt_font_normal {
+#ilxktxfmjy .gt_font_normal {
   font-weight: normal;
 }
 
-#szirhhstvw .gt_font_bold {
+#ilxktxfmjy .gt_font_bold {
   font-weight: bold;
 }
 
-#szirhhstvw .gt_font_italic {
+#ilxktxfmjy .gt_font_italic {
   font-style: italic;
 }
 
-#szirhhstvw .gt_super {
+#ilxktxfmjy .gt_super {
   font-size: 65%;
 }
 
-#szirhhstvw .gt_footnote_marks {
+#ilxktxfmjy .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#szirhhstvw .gt_asterisk {
+#ilxktxfmjy .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#szirhhstvw .gt_indent_1 {
+#ilxktxfmjy .gt_indent_1 {
   text-indent: 5px;
 }
 
-#szirhhstvw .gt_indent_2 {
+#ilxktxfmjy .gt_indent_2 {
   text-indent: 10px;
 }
 
-#szirhhstvw .gt_indent_3 {
+#ilxktxfmjy .gt_indent_3 {
   text-indent: 15px;
 }
 
-#szirhhstvw .gt_indent_4 {
+#ilxktxfmjy .gt_indent_4 {
   text-indent: 20px;
 }
 
-#szirhhstvw .gt_indent_5 {
+#ilxktxfmjy .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1376,44 +1451,6 @@
 <div id="tabset-1-1">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-3-2.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-3-3.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-3-4.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-3-5.png" width="960"></p>
-</div>
-</div>
-</div>
-<div id="tabset-1-2">
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-4-1.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-4-2.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-4-3.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-4-4.png" width="960"></p>
-</div>
-<div class="cell-output-display">
-<p><img data-src="index_files/figure-revealjs/unnamed-chunk-4-5.png" width="960"></p>
-</div>
-</div>
-</div>
-<div id="tabset-1-3">
-<div class="cell">
-<div class="cell-output-display">
 <p><img data-src="index_files/figure-revealjs/unnamed-chunk-5-1.png" width="960"></p>
 </div>
 <div class="cell-output-display">
@@ -1430,7 +1467,7 @@
 </div>
 </div>
 </div>
-<div id="tabset-1-4">
+<div id="tabset-1-2">
 <div class="cell">
 <div class="cell-output-display">
 <p><img data-src="index_files/figure-revealjs/unnamed-chunk-6-1.png" width="960"></p>
@@ -1449,23 +1486,81 @@
 </div>
 </div>
 </div>
-</div>
-</div>
-</section>
-<section class="slide level2">
-
-<h3 class="smaller scrollable column" data-transition="zoom" id="tree-plots">Tree Plots</h3>
+<div id="tabset-1-3">
 <div class="cell">
 <div class="cell-output-display">
-<div id="htmlwidget-e2f6d579472b758e070e" style="width:100%;height:800px;" class="visNetwork html-widget "></div>
-<script type="application/json" data-for="htmlwidget-e2f6d579472b758e070e">{"x":{"nodes":{"id":[1,2,4,5,10,11,22,23,3,6,12,24,25,13,7],"label":["clock_proxy_cos","sdmax","0","temp","0","incl","0","1","clock_proxy_cos","sdmax","macc_y","0","1","1","1"],"level":[1,2,5,3,5,4,5,5,2,3,4,5,5,5,5],"color":["#F1B8C2","#DAC49C","#7D91B6","#A9D1A5","#7D91B6","#8AD3D0","#7D91B6","#B9828C","#F1B8C2","#DAC49C","#B4C7ED","#7D91B6","#B9828C","#B9828C","#B9828C"],"value":[3150591,1940632,1666657,273975,107485,166490,22252,144238,1209959,212617,47336,1234,46102,165281,997342],"shape":["dot","dot","square","dot","square","dot","square","square","dot","dot","dot","square","square","square","square"],"title":["<div style=\"text-align:center;\">N : <b>100%<\/b> (3150591)<br>Complexity : <b>0.837<\/b><br>0 : <b>58.2%<\/b> (1833490)<br>1 : <b>41.8%<\/b> (1317101)<\/div>","<div style=\"text-align:center;\">N : <b>61.6%<\/b> (1940632)<br>Complexity : <b>0.009<\/b><br>0 : <b>91.7%<\/b> (1779527)<br>1 : <b>8.3%<\/b> (161105)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>52.9%<\/b> (1666657)<br>Complexity : <b>0<\/b><br>0 : <b>96.8%<\/b> (1613097)<br>1 : <b>3.2%<\/b> (53560)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> >= 0.003<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>8.7%<\/b> (273975)<br>Complexity : <b>0.009<\/b><br>0 : <b>60.7%<\/b> (166430)<br>1 : <b>39.3%<\/b> (107545)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>3.4%<\/b> (107485)<br>Complexity : <b>0<\/b><br>0 : <b>88%<\/b> (94610)<br>1 : <b>12%<\/b> (12875)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> < 32.962<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>5.3%<\/b> (166490)<br>Complexity : <b>0.008<\/b><br>0 : <b>43.1%<\/b> (71820)<br>1 : <b>56.9%<\/b> (94670)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 32.962<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.7%<\/b> (22252)<br>Complexity : <b>0<\/b><br>0 : <b>73%<\/b> (16250)<br>1 : <b>27%<\/b> (6002)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 32.962<br><b> incl <\/b> >= 118.517<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>4.6%<\/b> (144238)<br>Complexity : <b>0<\/b><br>0 : <b>38.5%<\/b> (55570)<br>1 : <b>61.5%<\/b> (88668)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 32.962<br><b> incl <\/b> < 118.517<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>38.4%<\/b> (1209959)<br>Complexity : <b>0<\/b><br>0 : <b>4.5%<\/b> (53963)<br>1 : <b>95.5%<\/b> (1155996)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> >= 0<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>6.7%<\/b> (212617)<br>Complexity : <b>0<\/b><br>0 : <b>15.3%<\/b> (32603)<br>1 : <b>84.7%<\/b> (180014)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>1.5%<\/b> (47336)<br>Complexity : <b>0<\/b><br>0 : <b>27.6%<\/b> (13085)<br>1 : <b>72.4%<\/b> (34251)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> >= 0.005<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0%<\/b> (1234)<br>Complexity : <b>0<\/b><br>0 : <b>65%<\/b> (802)<br>1 : <b>35%<\/b> (432)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> >= 0.005<br><b> macc_y <\/b> >= 0.639<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>1.5%<\/b> (46102)<br>Complexity : <b>0<\/b><br>0 : <b>26.6%<\/b> (12283)<br>1 : <b>73.4%<\/b> (33819)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> >= 0.005<br><b> macc_y <\/b> < 0.639<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>5.2%<\/b> (165281)<br>Complexity : <b>0<\/b><br>0 : <b>11.8%<\/b> (19518)<br>1 : <b>88.2%<\/b> (145763)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> < 0.005<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>31.7%<\/b> (997342)<br>Complexity : <b>0<\/b><br>0 : <b>2.1%<\/b> (21360)<br>1 : <b>97.9%<\/b> (975982)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> >= 0.272<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>"],"fixed":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],"colorClust":["#7D91B6","#7D91B6","#7D91B6","#7D91B6","#7D91B6","#B9828C","#7D91B6","#B9828C","#B9828C","#B9828C","#B9828C","#7D91B6","#B9828C","#B9828C","#B9828C"],"labelClust":["0","0","0","0","0","1","0","1","1","1","1","0","1","1","1"],"Leaf":[0,0,1,0,1,0,1,1,0,0,0,1,1,1,1],"font.size":[16,16,16,16,16,16,16,16,16,16,16,16,16,16,16],"scaling.min":[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],"scaling.max":[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]},"edges":{"id":["edge1","edge2","edge3","edge4","edge5","edge6","edge7","edge8","edge9","edge10","edge11","edge12","edge13","edge14"],"from":[1,2,2,5,5,11,11,1,3,6,12,12,6,3],"to":[2,4,5,10,11,22,23,3,6,12,24,25,13,7],"label":["< 0",">= 0.003","< 0.003","< 32.962",">= 32.962",">= 118.517","< 118.517",">= 0","< 0.272",">= 0.005",">= 0.639","< 0.639","< 0.005",">= 0.272"],"value":[1940632,1666657,273975,107485,166490,22252,144238,1209959,212617,47336,1234,46102,165281,997342],"title":["<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\"><0<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\">>=0.003<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\"><0.003<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\"><32.962<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\">>=32.962<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\">>=118.517<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\"><118.517<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\">>=0<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\"><0.272<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\">>=0.005<\/div>","<div style=\"text-align:center;\"><b>macc_y<\/b><\/div><div style=\"text-align:center;\">>=0.639<\/div>","<div style=\"text-align:center;\"><b>macc_y<\/b><\/div><div style=\"text-align:center;\"><0.639<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\"><0.005<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\">>=0.272<\/div>"],"color":["#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7"],"font.size":[14,14,14,14,14,14,14,14,14,14,14,14,14,14],"font.align":["horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal"],"smooth.enabled":[true,true,true,true,true,true,true,true,true,true,true,true,true,true],"smooth.type":["cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier"],"smooth.roundness":[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","font":{"color":"#EEE8D5","strokeWidth":1}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}},"interaction":{"dragNodes":false,"selectConnectedEdges":false,"tooltipDelay":500,"zoomSpeed":1},"edges":{"scaling":{"label":{"enabled":false}},"font":{"color":"#EEE8D5","strokeWidth":1}}},"groups":null,"width":"100%","height":"800px","idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-size:12px;text-align:center;"},"footer":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-size:12px;text-align:center;"},"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":true,"hoverNearest":false,"degree":{"from":50000,"to":0},"algorithm":"hierarchical","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":true,"resetHighlight":true,"clusterOptions":{"fixed":true,"physics":false},"keepCoord":true,"labelSuffix":"(cluster)"},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;\n                      white-space: nowrap;\n                      font-family: cursive;font-size:12px;font-color:purple;background-color: #E6E6E6;\n                      border-radius: 15px;","OnceEvents":{"stabilized":"function() { \n        this.setOptions({layout:{hierarchical:false}, physics:{solver:'barnesHut', enabled:true, stabilization : false}, nodes : {physics : false, fixed : true}});\n    }"},"tree":{"updateShape":true,"shapeVar":"dot","shapeY":"square","colorVar":{"variable":["clock_proxy_cos","sdmax","temp","incl","macc_y"],"color":["#F1B8C2","#DAC49C","#A9D1A5","#8AD3D0","#B4C7ED"]},"colorY":{"colorY":{"modality":["0","1"],"color":["#7D91B6","#B9828C"]},"vardecidedClust":["0","0","0","0","0","1","0","1","1","1","1","0","1","1","1"]}},"export":{"type":"png","css":"float:right;-webkit-border-radius: 10;\n                  -moz-border-radius: 10;\n                  border-radius: 10px;\n                  font-family: Arial;\n                  color: #ffffff;\n                  font-size: 12px;\n                  background: #090a0a;\n                  padding: 4px 8px 4px 4px;\n                  text-decoration: none;","background":"#fff","name":"network.png","label":"Export as png"},"legend":{"width":0.2,"useGroups":true,"position":"left","ncol":1,"stepX":100,"stepY":100,"zoom":true,"edges":{"font":{"color":"#EEE8D5"}},"edgesToDataframe":true}},"evals":["OnceEvents.stabilized"],"jsHooks":[]}</script>
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-7-1.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-7-2.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-7-3.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-7-4.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-7-5.png" width="960"></p>
 </div>
 </div>
-
-<img src="images/SDU_WHITE_RGB-png.png" class="slide-logo r-stretch"><div class="footer footer-default">
-<p>https://github.com/esbenlykke/sleep_study</p>
+</div>
+<div id="tabset-1-4">
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-8-1.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-8-2.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-8-3.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-8-4.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="index_files/figure-revealjs/unnamed-chunk-8-5.png" width="960"></p>
+</div>
+</div>
+</div>
+</div>
 </div>
 </section>
+<section id="in-bed-classification-flow" class="slide level2 smaller column" data-transition="zoom">
+<h2>In-bed classification flow</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div id="htmlwidget-13a527d2f44aa42f69e1" style="width:100%;height:550px;" class="visNetwork html-widget "></div>
+<script type="application/json" data-for="htmlwidget-13a527d2f44aa42f69e1">{"x":{"nodes":{"id":[1,2,4,5,10,11,22,23,3,6,12,24,25,13,7],"label":["clock_proxy_cos","sdmax","0","temp","0","incl","0","1","clock_proxy_cos","sdmax","macc_y","0","1","1","1"],"level":[1,2,5,3,5,4,5,5,2,3,4,5,5,5,5],"color":["#CC5500","#228B22","#7D91B6","#654321","#7D91B6","#8B0000","#7D91B6","#B9828C","#CC5500","#228B22","#FFD700","#7D91B6","#B9828C","#B9828C","#B9828C"],"value":[3150591,1940632,1666657,273975,107485,166490,22252,144238,1209959,212617,47336,1234,46102,165281,997342],"shape":["dot","dot","square","dot","square","dot","square","square","dot","dot","dot","square","square","square","square"],"title":["<div style=\"text-align:center;\">N : <b>100%<\/b> (3150591)<br>Complexity : <b>0.837<\/b><br>0 : <b>58.2%<\/b> (1833490)<br>1 : <b>41.8%<\/b> (1317101)<\/div>","<div style=\"text-align:center;\">N : <b>61.6%<\/b> (1940632)<br>Complexity : <b>0.009<\/b><br>0 : <b>91.7%<\/b> (1779527)<br>1 : <b>8.3%<\/b> (161105)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>52.9%<\/b> (1666657)<br>Complexity : <b>0<\/b><br>0 : <b>96.8%<\/b> (1613097)<br>1 : <b>3.2%<\/b> (53560)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> >= 0.003<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>8.7%<\/b> (273975)<br>Complexity : <b>0.009<\/b><br>0 : <b>60.7%<\/b> (166430)<br>1 : <b>39.3%<\/b> (107545)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>3.4%<\/b> (107485)<br>Complexity : <b>0<\/b><br>0 : <b>88%<\/b> (94610)<br>1 : <b>12%<\/b> (12875)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> < 32.962<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>5.3%<\/b> (166490)<br>Complexity : <b>0.008<\/b><br>0 : <b>43.1%<\/b> (71820)<br>1 : <b>56.9%<\/b> (94670)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 32.962<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.7%<\/b> (22252)<br>Complexity : <b>0<\/b><br>0 : <b>73%<\/b> (16250)<br>1 : <b>27%<\/b> (6002)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 32.962<br><b> incl <\/b> >= 118.517<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>4.6%<\/b> (144238)<br>Complexity : <b>0<\/b><br>0 : <b>38.5%<\/b> (55570)<br>1 : <b>61.5%<\/b> (88668)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> < 0<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 32.962<br><b> incl <\/b> < 118.517<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>38.4%<\/b> (1209959)<br>Complexity : <b>0<\/b><br>0 : <b>4.5%<\/b> (53963)<br>1 : <b>95.5%<\/b> (1155996)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> >= 0<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>6.7%<\/b> (212617)<br>Complexity : <b>0<\/b><br>0 : <b>15.3%<\/b> (32603)<br>1 : <b>84.7%<\/b> (180014)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>1.5%<\/b> (47336)<br>Complexity : <b>0<\/b><br>0 : <b>27.6%<\/b> (13085)<br>1 : <b>72.4%<\/b> (34251)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> >= 0.005<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0%<\/b> (1234)<br>Complexity : <b>0<\/b><br>0 : <b>65%<\/b> (802)<br>1 : <b>35%<\/b> (432)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> >= 0.005<br><b> macc_y <\/b> >= 0.639<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>1.5%<\/b> (46102)<br>Complexity : <b>0<\/b><br>0 : <b>26.6%<\/b> (12283)<br>1 : <b>73.4%<\/b> (33819)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> >= 0.005<br><b> macc_y <\/b> < 0.639<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>5.2%<\/b> (165281)<br>Complexity : <b>0<\/b><br>0 : <b>11.8%<\/b> (19518)<br>1 : <b>88.2%<\/b> (145763)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0 <= <b>clock_proxy_cos<\/b> < 0.272<br><b> sdmax <\/b> < 0.005<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>31.7%<\/b> (997342)<br>Complexity : <b>0<\/b><br>0 : <b>2.1%<\/b> (21360)<br>1 : <b>97.9%<\/b> (975982)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_cos <\/b> >= 0.272<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>"],"fixed":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],"colorClust":["#7D91B6","#7D91B6","#7D91B6","#7D91B6","#7D91B6","#B9828C","#7D91B6","#B9828C","#B9828C","#B9828C","#B9828C","#7D91B6","#B9828C","#B9828C","#B9828C"],"labelClust":["0","0","0","0","0","1","0","1","1","1","1","0","1","1","1"],"Leaf":[0,0,1,0,1,0,1,1,0,0,0,1,1,1,1],"font.size":[16,16,16,16,16,16,16,16,16,16,16,16,16,16,16],"scaling.min":[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],"scaling.max":[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]},"edges":{"id":["edge1","edge2","edge3","edge4","edge5","edge6","edge7","edge8","edge9","edge10","edge11","edge12","edge13","edge14"],"from":[1,2,2,5,5,11,11,1,3,6,12,12,6,3],"to":[2,4,5,10,11,22,23,3,6,12,24,25,13,7],"label":["< 0",">= 0.003","< 0.003","< 32.962",">= 32.962",">= 118.517","< 118.517",">= 0","< 0.272",">= 0.005",">= 0.639","< 0.639","< 0.005",">= 0.272"],"value":[1940632,1666657,273975,107485,166490,22252,144238,1209959,212617,47336,1234,46102,165281,997342],"title":["<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\"><0<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\">>=0.003<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\"><0.003<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\"><32.962<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\">>=32.962<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\">>=118.517<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\"><118.517<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\">>=0<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\"><0.272<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\">>=0.005<\/div>","<div style=\"text-align:center;\"><b>macc_y<\/b><\/div><div style=\"text-align:center;\">>=0.639<\/div>","<div style=\"text-align:center;\"><b>macc_y<\/b><\/div><div style=\"text-align:center;\"><0.639<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\"><0.005<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_cos<\/b><\/div><div style=\"text-align:center;\">>=0.272<\/div>"],"color":["#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7"],"font.size":[14,14,14,14,14,14,14,14,14,14,14,14,14,14],"font.align":["horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal"],"smooth.enabled":[true,true,true,true,true,true,true,true,true,true,true,true,true,true],"smooth.type":["cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier"],"smooth.roundness":[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","font":{"color":"#EEE8D5","size":20,"strokeWidth":1}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"direction":"UD"}},"interaction":{"selectConnectedEdges":false,"tooltipDelay":500,"dragNodes":false,"dragView":false,"zoomView":false,"zoomSpeed":1},"edges":{"scaling":{"label":{"enabled":false}},"font":{"color":"#EEE8D5","size":20,"strokeWidth":1}}},"groups":null,"width":"100%","height":"550px","idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-size:12px;text-align:center;"},"footer":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-size:12px;text-align:center;"},"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":true,"hoverNearest":false,"degree":{"from":50000,"to":0},"algorithm":"hierarchical","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":true,"resetHighlight":true,"clusterOptions":{"fixed":true,"physics":false},"keepCoord":true,"labelSuffix":"(cluster)"},"OnceEvents":{"stabilized":"function() { \n        this.setOptions({layout:{hierarchical:false}, physics:{solver:'barnesHut', enabled:true, stabilization : false}, nodes : {physics : false, fixed : true}});\n    }"},"tree":{"updateShape":true,"shapeVar":"dot","shapeY":"square","colorVar":{"variable":["clock_proxy_cos","incl","macc_y","sdmax","temp"],"color":["#CC5500","#8B0000","#FFD700","#228B22","#654321"]},"colorY":{"colorY":{"modality":["0","1"],"color":["#7D91B6","#B9828C"]},"vardecidedClust":["0","0","0","0","0","1","0","1","1","1","1","0","1","1","1"]}},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":["OnceEvents.stabilized"],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+<section id="sleep-classification-flow" class="slide level2 smaller column scrollable" data-transition="zoom">
+<h2>Sleep classification flow</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div id="htmlwidget-84b762a635707da696de" style="width:100%;height:550px;" class="visNetwork html-widget "></div>
+<script type="application/json" data-for="htmlwidget-84b762a635707da696de">{"x":{"nodes":{"id":[1,2,4,5,10,11,22,23,46,47,3,6,12,24,25,50,51,13,26,27,54,55,7],"label":["clock_proxy_linear","sdmax","0","temp","0","incl","0","sdacc_x","0","1","sdmax","clock_proxy_linear","age","0","temp","0","1","age","0","incl","0","1","1"],"level":[1,2,6,3,6,4,6,5,6,6,2,3,4,6,5,6,6,4,6,5,6,6,6],"color":["#8B0000","#654321","#7D91B6","#8B0000","#7D91B6","#FFD700","#7D91B6","#228B22","#7D91B6","#B9828C","#654321","#8B0000","#CC5500","#7D91B6","#8B0000","#7D91B6","#B9828C","#CC5500","#7D91B6","#FFD700","#7D91B6","#B9828C","#B9828C"],"value":[3150591,1993663,1692945,300718,128918,171800,21878,149922,32234,117688,1156928,89970,13314,7062,6252,5696,556,76656,11337,65319,1092,64227,1066958],"shape":["dot","dot","square","dot","square","dot","square","dot","square","square","dot","dot","dot","square","dot","square","square","dot","square","dot","square","square","square"],"title":["<div style=\"text-align:center;\">N : <b>100%<\/b> (3150591)<br>Complexity : <b>0.736<\/b><br>0 : <b>64.8%<\/b> (2040815)<br>1 : <b>35.2%<\/b> (1109776)<\/div>","<div style=\"text-align:center;\">N : <b>63.3%<\/b> (1993663)<br>Complexity : <b>0.003<\/b><br>0 : <b>93.8%<\/b> (1870523)<br>1 : <b>6.2%<\/b> (123140)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>53.7%<\/b> (1692945)<br>Complexity : <b>0<\/b><br>0 : <b>98.6%<\/b> (1669947)<br>1 : <b>1.4%<\/b> (22998)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> >= 0.003<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>9.5%<\/b> (300718)<br>Complexity : <b>0.003<\/b><br>0 : <b>66.7%<\/b> (200576)<br>1 : <b>33.3%<\/b> (100142)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>4.1%<\/b> (128918)<br>Complexity : <b>0<\/b><br>0 : <b>88.4%<\/b> (114005)<br>1 : <b>11.6%<\/b> (14913)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> < 33.255<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>5.5%<\/b> (171800)<br>Complexity : <b>0.003<\/b><br>0 : <b>50.4%<\/b> (86571)<br>1 : <b>49.6%<\/b> (85229)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 33.255<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.7%<\/b> (21878)<br>Complexity : <b>0<\/b><br>0 : <b>74.9%<\/b> (16396)<br>1 : <b>25.1%<\/b> (5482)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 33.255<br><b> incl <\/b> >= 118.395<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>4.8%<\/b> (149922)<br>Complexity : <b>0.003<\/b><br>0 : <b>46.8%<\/b> (70175)<br>1 : <b>53.2%<\/b> (79747)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 33.255<br><b> incl <\/b> < 118.395<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>1%<\/b> (32234)<br>Complexity : <b>0<\/b><br>0 : <b>60.9%<\/b> (19616)<br>1 : <b>39.1%<\/b> (12618)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 33.255<br><b> incl <\/b> < 118.395<br><b> sdacc_x <\/b> >= 0.002<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>3.7%<\/b> (117688)<br>Complexity : <b>0<\/b><br>0 : <b>43%<\/b> (50559)<br>1 : <b>57%<\/b> (67129)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> < 0.044<br><b> sdmax <\/b> < 0.003<br><b> temp <\/b> >= 33.255<br><b> incl <\/b> < 118.395<br><b> sdacc_x <\/b> < 0.002<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>36.7%<\/b> (1156928)<br>Complexity : <b>0.003<\/b><br>0 : <b>14.7%<\/b> (170292)<br>1 : <b>85.3%<\/b> (986636)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.044<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>2.9%<\/b> (89970)<br>Complexity : <b>0.003<\/b><br>0 : <b>46.1%<\/b> (41494)<br>1 : <b>53.9%<\/b> (48476)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.044<br><b> sdmax <\/b> >= 0.006<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.4%<\/b> (13314)<br>Complexity : <b>0<\/b><br>0 : <b>78.1%<\/b> (10395)<br>1 : <b>21.9%<\/b> (2919)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0.044 <= <b>clock_proxy_linear<\/b> < 0.128<br><b> sdmax <\/b> >= 0.006<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.2%<\/b> (7062)<br>Complexity : <b>0<\/b><br>0 : <b>85.4%<\/b> (6034)<br>1 : <b>14.6%<\/b> (1028)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0.044 <= <b>clock_proxy_linear<\/b> < 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> >= 9.5<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.2%<\/b> (6252)<br>Complexity : <b>0<\/b><br>0 : <b>69.8%<\/b> (4361)<br>1 : <b>30.2%<\/b> (1891)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0.044 <= <b>clock_proxy_linear<\/b> < 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> < 9.5<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.2%<\/b> (5696)<br>Complexity : <b>0<\/b><br>0 : <b>72.3%<\/b> (4116)<br>1 : <b>27.7%<\/b> (1580)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0.044 <= <b>clock_proxy_linear<\/b> < 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> < 9.5<br><b> temp <\/b> >= 32.083<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0%<\/b> (556)<br>Complexity : <b>0<\/b><br>0 : <b>44.1%<\/b> (245)<br>1 : <b>55.9%<\/b> (311)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b>  <\/b> 0.044 <= <b>clock_proxy_linear<\/b> < 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> < 9.5<br><b> temp <\/b> < 32.083<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>2.4%<\/b> (76656)<br>Complexity : <b>0.002<\/b><br>0 : <b>40.6%<\/b> (31099)<br>1 : <b>59.4%<\/b> (45557)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.128<br><b> sdmax <\/b> >= 0.006<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0.4%<\/b> (11337)<br>Complexity : <b>0<\/b><br>0 : <b>61.9%<\/b> (7020)<br>1 : <b>38.1%<\/b> (4317)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> < 6.5<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>2.1%<\/b> (65319)<br>Complexity : <b>0.001<\/b><br>0 : <b>36.9%<\/b> (24079)<br>1 : <b>63.1%<\/b> (41240)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> >= 6.5<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>0%<\/b> (1092)<br>Complexity : <b>0<\/b><br>0 : <b>77.7%<\/b> (848)<br>1 : <b>22.3%<\/b> (244)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> >= 6.5<br><b> incl <\/b> < 31.843<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>2%<\/b> (64227)<br>Complexity : <b>0<\/b><br>0 : <b>36.2%<\/b> (23231)<br>1 : <b>63.8%<\/b> (40996)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.128<br><b> sdmax <\/b> >= 0.006<br><b> age <\/b> >= 6.5<br><b> incl <\/b> >= 31.843<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>","<div style=\"text-align:center;\">N : <b>33.9%<\/b> (1066958)<br>Complexity : <b>0<\/b><br>0 : <b>12.1%<\/b> (128798)<br>1 : <b>87.9%<\/b> (938160)<hr class = \"rPartvisNetwork\">\n<div class =\"showOnMe2\"><div style=\"text-align:center;\"><U style=\"color:blue;\"  onmouseover=\"this.style.cursor='pointer';\" onmouseout=\"this.style.cursor='default';\">Rules<\/U><\/div>\n<div class=\"showMeRpartTTp2\" style=\"display:none;\">\n<b> clock_proxy_linear <\/b> >= 0.044<br><b> sdmax <\/b> < 0.006<\/script><script type=\"text/javascript\">$(document).ready(function(){\n$(\".showOnMe2\").click(function(){\n$(\".showMeRpartTTp2\").toggle();\n$.sparkline_display_visible();\n});\n  });<\/script><\/div><\/div>\n\n<\/div>"],"fixed":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],"colorClust":["#7D91B6","#7D91B6","#7D91B6","#7D91B6","#7D91B6","#7D91B6","#7D91B6","#B9828C","#7D91B6","#B9828C","#B9828C","#B9828C","#7D91B6","#7D91B6","#7D91B6","#7D91B6","#B9828C","#B9828C","#7D91B6","#B9828C","#7D91B6","#B9828C","#B9828C"],"labelClust":["0","0","0","0","0","0","0","1","0","1","1","1","0","0","0","0","1","1","0","1","0","1","1"],"Leaf":[0,0,1,0,1,0,1,0,1,1,0,0,0,1,0,1,1,0,1,0,1,1,1],"font.size":[16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16],"scaling.min":[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],"scaling.max":[30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]},"edges":{"id":["edge1","edge2","edge3","edge4","edge5","edge6","edge7","edge8","edge9","edge10","edge11","edge12","edge13","edge14","edge15","edge16","edge17","edge18","edge19","edge20","edge21","edge22"],"from":[1,2,2,5,5,11,11,23,23,1,3,6,12,12,25,25,6,13,13,27,27,3],"to":[2,4,5,10,11,22,23,46,47,3,6,12,24,25,50,51,13,26,27,54,55,7],"label":["< 0.044",">= 0.003","< 0.003","< 33.255",">= 33.255",">= 118.395","< 118.395",">= 0.002","< 0.002",">= 0.044",">= 0.006","< 0.128",">= 9.5","< 9.5",">= 32.083","< 32.083",">= 0.128","< 6.5",">= 6.5","< 31.843",">= 31.843","< 0.006"],"value":[1993663,1692945,300718,128918,171800,21878,149922,32234,117688,1156928,89970,13314,7062,6252,5696,556,76656,11337,65319,1092,64227,1066958],"title":["<div style=\"text-align:center;\"><b>clock_proxy_linear<\/b><\/div><div style=\"text-align:center;\"><0.044<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\">>=0.003<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\"><0.003<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\"><33.255<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\">>=33.255<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\">>=118.395<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\"><118.395<\/div>","<div style=\"text-align:center;\"><b>sdacc_x<\/b><\/div><div style=\"text-align:center;\">>=0.002<\/div>","<div style=\"text-align:center;\"><b>sdacc_x<\/b><\/div><div style=\"text-align:center;\"><0.002<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_linear<\/b><\/div><div style=\"text-align:center;\">>=0.044<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\">>=0.006<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_linear<\/b><\/div><div style=\"text-align:center;\"><0.128<\/div>","<div style=\"text-align:center;\"><b>age<\/b><\/div><div style=\"text-align:center;\">>=9.5<\/div>","<div style=\"text-align:center;\"><b>age<\/b><\/div><div style=\"text-align:center;\"><9.5<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\">>=32.083<\/div>","<div style=\"text-align:center;\"><b>temp<\/b><\/div><div style=\"text-align:center;\"><32.083<\/div>","<div style=\"text-align:center;\"><b>clock_proxy_linear<\/b><\/div><div style=\"text-align:center;\">>=0.128<\/div>","<div style=\"text-align:center;\"><b>age<\/b><\/div><div style=\"text-align:center;\"><6.5<\/div>","<div style=\"text-align:center;\"><b>age<\/b><\/div><div style=\"text-align:center;\">>=6.5<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\"><31.843<\/div>","<div style=\"text-align:center;\"><b>incl<\/b><\/div><div style=\"text-align:center;\">>=31.843<\/div>","<div style=\"text-align:center;\"><b>sdmax<\/b><\/div><div style=\"text-align:center;\"><0.006<\/div>"],"color":["#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7","#8181F7"],"font.size":[14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14],"font.align":["horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal","horizontal"],"smooth.enabled":[true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true],"smooth.type":["cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier","cubicBezier"],"smooth.roundness":[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","font":{"color":"#EEE8D5","strokeWidth":1}},"manipulation":{"enabled":false},"layout":{"hierarchical":{"enabled":true,"direction":"UD"}},"interaction":{"selectConnectedEdges":false,"tooltipDelay":500,"dragNodes":false,"dragView":false,"zoomView":false,"zoomSpeed":1},"edges":{"scaling":{"label":{"enabled":false}},"font":{"color":"#EEE8D5","strokeWidth":1}}},"groups":null,"width":"100%","height":"550px","idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-size:12px;text-align:center;"},"footer":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-size:12px;text-align:center;"},"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":true,"hoverNearest":false,"degree":{"from":50000,"to":0},"algorithm":"hierarchical","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":true,"resetHighlight":true,"clusterOptions":{"fixed":true,"physics":false},"keepCoord":true,"labelSuffix":"(cluster)"},"OnceEvents":{"stabilized":"function() { \n        this.setOptions({layout:{hierarchical:false}, physics:{solver:'barnesHut', enabled:true, stabilization : false}, nodes : {physics : false, fixed : true}});\n    }"},"tree":{"updateShape":true,"shapeVar":"dot","shapeY":"square","colorVar":{"variable":["age","clock_proxy_linear","incl","sdacc_x","sdmax","temp"],"color":["#CC5500","#8B0000","#FFD700","#228B22","#654321","#8B0000"]},"colorY":{"colorY":{"modality":["0","1"],"color":["#7D91B6","#B9828C"]},"vardecidedClust":["0","0","0","0","0","0","0","1","0","1","1","1","0","0","0","0","1","1","0","1","0","1","1"]}},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":["OnceEvents.stabilized"],"jsHooks":[]}</script>
+</div>
+</div>
+<p><img src="images/SDU_WHITE_RGB-png.png" class="slide-logo"></p>
+<div class="footer footer-default">
+<p>https://github.com/esbenlykke/sleep_study</p>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-forger_simpler_1999" class="csl-entry" role="doc-biblioentry">
+Forger, D. B., M. E. Jewett, and R. E. Kronauer. 1999. <span>“A Simpler Model of the Human Circadian Pacemaker.”</span> <em>Journal of Biological Rhythms</em> 14 (6): 532–37. <a href="https://doi.org/10.1177/074873099129000867">https://doi.org/10.1177/074873099129000867</a>.
+</div>
+<div id="ref-skotte_detection_2014" class="csl-entry" role="doc-biblioentry">
+Skotte, Jørgen, Mette Korshøj, Jesper Kristiansen, Christiana Hanisch, and Andreas Holtermann. 2014. <span>“Detection of <span>Physical</span> <span>Activity</span> <span>Types</span> <span>Using</span> <span>Triaxial</span> <span>Accelerometers</span>.”</span> <em>Journal of Physical Activity and Health</em> 11 (1): 76–84. <a href="https://doi.org/10.1123/jpah.2011-0347">https://doi.org/10.1123/jpah.2011-0347</a>.
+</div>
+<div id="ref-walch_sleep_2019" class="csl-entry" role="doc-biblioentry">
+Walch, Olivia, Yitong Huang, Daniel Forger, and Cathy Goldstein. 2019. <span>“Sleep Stage Prediction with Raw Acceleration and Photoplethysmography Heart Rate Data Derived from a Consumer Wearable Device.”</span> <em>Sleep</em> 42 (12): zsz180. <a href="https://doi.org/10.1093/sleep/zsz180">https://doi.org/10.1093/sleep/zsz180</a>.
+</div>
+</div>
+</section>
+
     </div>
   </div>
 

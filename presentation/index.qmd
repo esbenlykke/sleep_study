@@ -5,7 +5,6 @@ author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
 format:
   revealjs: 
-    scrollable: true
     smaller: true
     theme: moon
     slide-number: true
@@ -18,9 +17,18 @@ format:
 editor_options: 
   chunk_output_type: console
 smooth-scroll: true
+bibliography: references.bib
 ---
 
 ## Background {.scrollable transition="convex"}
+
+```{r}
+#| echo: false
+library(gt)
+library(arrow)
+library(visNetwork)
+library(tidymodels)
+```
 
 Lists can optionally be displayed incrementally:
 
@@ -38,19 +46,89 @@ Insert pauses to make other types of content display incrementally.
 Learn more: [Incremental Lists](https://quarto.org/docs/presentations/revealjs/#incremental-lists)
 :::
 
-## Methods {.scrollable transition="zoom"}
+## Methods {transition="convex"}
 
-::: {.fragment .fade-in-then-semi-out}
-Hello there
+Overview
+Network plot of data preparation steps
+
+. . . 
+
+network plot
+
+## Features {transition="fade" .smaller}
+
+:::: {.columns}
+
+::: {.column width="30%"}
+::: {.fragment}
+**Basic Features**
+
+-   Weekday 
+-   Time of Day
+-   Placement
+-   Temperature
+:::
 :::
 
-:::{.fragment .fade-in-then-semi-out}
-hi there
+::: {.column width="30%"}
+::: {.fragment}
+**ACC derived features**^[@skotte_detection_2014]
+
+-   Mean ACC X 
+-   Mean ACC Y
+-   Mean ACC Z
+-   Standard Deviation X
+-   Standard Deviation Y
+-   Standard Deviation Z
+-   Max Standard Deviation
+-   Inclination
+:::
 :::
 
+::: {.column width="40%"}
+::: {.fragment}
+**Sensor-Independent Features**^[@walch_sleep_2019, @forger_simpler_1999]
+
+-   Clock Proxy Linear
+-   Clock Proxy Cosinus
+:::
+:::
+
+::::
+
+:::aside
+:::
 ---
 
-## {.smaller .scrollable transition="convex" .column}
+## Human Circadian Clock {.smaller transition="convex"}
+
+@forger_simpler_1999: a so-called cubic van der Pol equation
+
+::: {.fragment}
+$$\frac{dx_c}{dt}=\frac{\pi}{12}\begin{cases}\mu(x_c-\frac{4x^3}{3})-x\begin{bmatrix}(\frac{24}{0.99669\tau_x})^2+kB\end{bmatrix}\end{cases}$$
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+This thing is dependent on ambient light and body temperature!
+:::
+
+::: {.fragment .fade-in-then-semi-out}
+@walch_sleep_2019 incorporated this feature using step counts from the Apple Watch
+:::
+
+::: {.fragment}
+But as demonstrated by @walch_sleep_2019, a simple cosine function does the tricks just as well :)
+:::
+
+## Circadian Proxy Features {.smaller transition="convex"}
+
+```{r}
+source(here::here("presentation/code/plot_sensor-independent.R"))
+
+plot_proxy
+```
+
+## {.smaller transition="convex" .column}
 
 ```{r}
 source("~/sleep_study/presentation/code/tables_performance.R")
@@ -60,7 +138,7 @@ tab_1
 
 Performance of the models to predict each class <span style="color:gold">**seperately**</span>, i.e., "sleep" and "in-bed". 
 
-## {.smaller .scrollable transition="convex" .column}
+## {.smaller transition="convex" .column}
 
 ```{r}
 tab_2
@@ -70,7 +148,7 @@ Performance of the models to predict each <span style="color:gold">**combined**<
 
 ---
 
-## Bland-Altman Plots {.smaller transition="convex"}
+## Bland-Altman Plots {.smaller transition="convex" .slide}
 
 ::: {.panel-tabset}
 
@@ -78,7 +156,7 @@ Performance of the models to predict each <span style="color:gold">**combined**<
 
 ```{r}
 #| echo: false
-source("~/sleep_study/presentation/code/ba_plots.R")
+source(here::here("presentation/code/ba_plots.R"))
 plots$decision_tree[[1]]
 
 plots$decision_tree[[2]]
@@ -137,28 +215,68 @@ plots$neural_net[[5]]
 
 ---
 
-### Tree Plots {.smaller .scrollable transition="zoom" .column}
+## In-bed classification flow {.smaller transition="zoom" .column}
 
 ```{r}
-#| echo: false
-library(arrow)
-library(visNetwork)
-library(tidymodels)
-
 in_bed_tree <-
   read_rds("~/sleep_study/data/models/fitted_models/in_bed_simple_CART_fit.rds")
 
 in_bed_tree |>
   extract_fit_engine() |>
   visTree(
-    height = "800px",
+    height = "550px",
     nodesPopSize = TRUE,
     minNodeSize = 10,
     maxNodeSize = 30,
     fallenLeaves = TRUE,
     legend = FALSE,
     digits = 3,
-    direction = "LR"
+    direction = "UD",
+    colorVar = c(
+      "#CC5500", "#8B0000", "#FFD700",
+      "#228B22", "#654321", "#8B0000", "#FFDB58"
+    ),
+    export = FALSE
+  ) |>
+  visNodes(font = list(
+    color = "#EEE8D5",
+    size = 20,
+    strokeWidth = 1
+  )) |>
+  visEdges(font = list(
+    color = "#EEE8D5",
+    size = 20,
+    strokeWidth = 1
+  )) |> 
+  visInteraction(dragNodes = FALSE, 
+                 dragView = FALSE, 
+                 zoomView = FALSE)
+```
+
+---
+
+## Sleep classification flow {.smaller transition="zoom" .column}
+
+```{r}
+sleep_tree <-
+  read_rds("~/sleep_study/data/models/fitted_models/sleep_simple_CART_fit.rds")
+
+sleep_tree |>
+  extract_fit_engine() |>
+  visTree(
+    height = "550px",
+    nodesPopSize = TRUE,
+    minNodeSize = 10,
+    maxNodeSize = 30,
+    fallenLeaves = TRUE,
+    legend = FALSE,
+    digits = 3,
+    direction = "UD",
+    colorVar = c(
+      "#CC5500", "#8B0000", "#FFD700",
+      "#228B22", "#654321", "#8B0000", "#FFDB58"
+    ),
+    export = FALSE
   ) |>
   visNodes(font = list(
     color = "#EEE8D5",
@@ -168,5 +286,8 @@ in_bed_tree |>
     color = "#EEE8D5",
     strokeWidth = 1
   )) |> 
-  visLegend(addEdges = list(font = list(color = "#EEE8D5")))
+  visInteraction(dragNodes = FALSE, 
+                 dragView = FALSE, 
+                 zoomView = FALSE)
 ```
+

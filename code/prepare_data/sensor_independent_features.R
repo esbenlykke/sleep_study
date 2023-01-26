@@ -8,6 +8,8 @@ cat("Creating sensor-independent features. This won't take long...")
 
 data <-
   read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
+# data <-
+#   read_parquet("data/processed/data_for_modelling/fup_thigh.parquet")
 
 
 # Subject-level in-bed time -----------------------------------------------
@@ -109,7 +111,7 @@ clock_proxy |>
   select(
     id, datetime, unix_time, day, noon_day, age, placement,
     clock_proxy_cos, clock_proxy_linear, incl, theta, temp:time_day
-  ) |>
+  ) |> count(noon_day, id)
   write_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet")
 
 
@@ -123,7 +125,7 @@ clock_proxy |>
   select(
     id, datetime, unix_time, day, noon_day, age, placement,
     clock_proxy_cos, clock_proxy_linear, incl, theta, temp:time_day
-  ) |>
-  filter(id == 757104) |> 
+  ) |> 
+  filter(id == 1587606) |> 
   ggplot(aes(datetime, clock_proxy_cos)) +
-  geom_step()
+  geom_step() 
