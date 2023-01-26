@@ -4,16 +4,15 @@ subtitle: "(working title)"
 author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
 format:
-  revealjs: 
+  revealjs:
     smaller: true
     theme: moon
     slide-number: true
-    chalkboard: 
-      buttons: false
     preview-links: auto
     logo: images/SDU_WHITE_RGB-png.png
     footer: https://github.com/esbenlykke/sleep_study
     css: my_styles.css
+embed-resources: true
 editor_options: 
   chunk_output_type: console
 smooth-scroll: true
