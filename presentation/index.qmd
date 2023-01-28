@@ -54,23 +54,37 @@ Network plot of data preparation steps
 
 network plot
 
+## Exclusion Criteria {transition="fade"}
+
+```{r}
+#| fig-align: center
+source(here::here("presentation/code/flowchart_eligible_nights.R"))
+
+flow
+```
+
+::: aside
+1. @hirshkowitz_national_2015
+:::
+
+
 ## Features {transition="fade" .smaller}
 
 :::: {.columns}
 
 ::: {.column width="30%"}
-::: {.fragment}
+
 **Basic Features**
 
 -   Weekday 
 -   Time of Day
 -   Placement
 -   Temperature
-:::
+
 :::
 
 ::: {.column width="30%"}
-::: {.fragment}
+
 **ACC derived features**^[@skotte_detection_2014]
 
 -   Mean ACC X 
@@ -81,22 +95,20 @@ network plot
 -   Standard Deviation Z
 -   Max Standard Deviation
 -   Inclination
-:::
+
 :::
 
 ::: {.column width="40%"}
-::: {.fragment}
+
 **Sensor-Independent Features**^[@walch_sleep_2019, @forger_simpler_1999]
 
 -   Clock Proxy Linear
 -   Clock Proxy Cosinus
-:::
+
 :::
 
 ::::
 
-:::aside
-:::
 ---
 
 ## Human Circadian Clock {.smaller transition="convex"}
@@ -124,7 +136,15 @@ But as demonstrated by @walch_sleep_2019, a simple cosine function does the tric
 ```{r}
 source(here::here("presentation/code/plot_sensor-independent.R"))
 
-plot_proxy
+plot_proxy_cos
+```
+
+## Circadian Proxy Features {.smaller transition="convex"}
+
+```{r}
+source(here::here("presentation/code/plot_sensor-independent.R"))
+
+plot_proxy_lin
 ```
 
 ## {.smaller transition="convex" .column}

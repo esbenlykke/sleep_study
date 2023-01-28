@@ -5,7 +5,7 @@ library(lubridate)
 library(hms)
 library(arrow)
 
-# path <- "data/processed/screens_baseline.parquet"
+path <- "data/processed/screens_baseline.parquet"
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 

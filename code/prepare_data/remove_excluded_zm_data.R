@@ -50,11 +50,11 @@ valid_zm_days <-
   filter(score %in% c(2, 3, 5)) |>
   distinct(id, noon_day)
 
-# the case_when() replaces up to 20 consecutive NAs with in-bed times (blips of NAs
+# the case_when() replaces up to 20 consecutive NAs with in-bed time (blips of NAs
 # is random noise produced by clock synchronization errors, I believe)
 temp <-
   data |>
-  semi_join(valid_zm_days, by = c("id", "noon_day")) |> 
+  semi_join(valid_zm_days, by = c("id", "noon_day")) |>
   left_join(zm_int, by = c("id", "datetime", "noon_day")) |>
   mutate(
     score = if_else(score == -5, NA_real_, score),
@@ -102,21 +102,11 @@ bad_in_bed_periods <-
     max_cumsum != 0 & (max_cumsum < (7 * 60 * 60) / epoch_length | max_cumsum > (12 * 60 * 60) / epoch_length)
   )
 
-# ID's with no in_bed time. Not necessary cf. "only_in_bed_days"
-# no_in_bed <-
-# temp |>
-# ungroup() |>
-# anti_join(bad_in_bed_periods, by = c("id", "noon_day")) |>
-# count(id, in_bed) |>
-# pivot_wider(id, names_from = in_bed, values_from = n, names_prefix = "in_bed_") |>
-# filter(is.na(in_bed_1)) |>
-# pull(id)
-
 # filter only for noon_days containing in-bed
 only_in_bed_days <-
   temp |>
   ungroup() |>
-  anti_join(bad_in_bed_periods, by = c("id", "noon_day")) |>
+  anti_join(bad_in_bed_periods, by = c("id", "noon_day")) |> 
   count(id, noon_day, group) |>
   filter(n > 1)
 
@@ -126,5 +116,5 @@ temp |>
   anti_join(bad_in_bed_periods, by = c("id", "noon_day")) |>
   semi_join(only_in_bed_days, by = c("id", "noon_day")) |>
   select(-c(score, group, in_bed_cumsum)) |>
-  arrange(id) |> 
+  arrange(id) |>
   write_parquet("data/processed/fup_thigh_no_bad_zm.parquet")

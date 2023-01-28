@@ -75,10 +75,12 @@ all_plots <-
           yintercept = upper,
           lty = 2, color = "#f88379", linewidth = .5, alpha = .8
         ) +
-        geom_point(shape = 21, size = 3, 
-                   fill = "#4D8C57", 
-                   color = "#EEE8D5",
-                   alpha = .7) +
+        geom_point(
+          shape = 21, size = 3,
+          fill = "#4D8C57",
+          color = "#EEE8D5",
+          alpha = .7
+        ) +
         labs(
           title = title,
           x = x_axis,
@@ -95,7 +97,7 @@ all_plots <-
           panel.background = element_rect(color = "#002B36", fill = "#002B36")
         )
     }
-    
+
     spt <-
       ba_plot(
         diffs, avg_spt_hrs, diff_spt_hrs, summaries$diff_spt_hrs_mean,
@@ -104,9 +106,11 @@ all_plots <-
         x_axis = "Average of Two Measurements",
         y_axis = "Difference Between Methods"
       ) +
-      scale_y_continuous(breaks = seq(-10, 10, 2),
-                         limits = c(-6, 6))
-    
+      scale_y_continuous(
+        breaks = seq(-10, 10, 2),
+        limits = c(-6, 6)
+      )
+
     tst <-
       ba_plot(
         diffs, avg_tst_hrs, diff_tst_hrs, summaries$diff_tst_hrs_mean,
@@ -115,18 +119,20 @@ all_plots <-
         x_axis = "Average of Two Measurements",
         y_axis = "Difference Between Methods"
       ) +
-      scale_y_continuous(breaks = seq(-10, 10, 2),
-                         limits = c(-7, 7))
-    
+      scale_y_continuous(
+        breaks = seq(-10, 10, 2),
+        limits = c(-7, 7)
+      )
+
     se_percent <-
       ba_plot(diffs, avg_se_percent, diff_se_percent, summaries$diff_se_percent_mean,
-              summaries$diff_se_percent_lower, summaries$diff_se_percent_upper,
-              "Sleep Efficiency (%)",
-              x_axis = "Average of Two Measurements",
-              y_axis = "Difference Between Methods"
+        summaries$diff_se_percent_lower, summaries$diff_se_percent_upper,
+        "Sleep Efficiency (%)",
+        x_axis = "Average of Two Measurements",
+        y_axis = "Difference Between Methods"
       ) +
       scale_y_continuous(breaks = seq(-30, 30, 10))
-    
+
     lps <-
       ba_plot(
         diffs, avg_lps_min, diff_lps_min, summaries$diff_lps_min_mean,
@@ -135,25 +141,24 @@ all_plots <-
         x_axis = "Average of Two Measurements",
         y_axis = "Difference Between Methods"
       ) +
-      scale_y_continuous(limits = c(-40, 40)) +
+      scale_y_continuous(limits = c(-100, 100)) +
       scale_x_continuous(limits = c(0, 100))
-    
+
     waso <-
       ba_plot(
         diffs, avg_waso_min, diff_waso_min, summaries$diff_waso_min_mean,
         summaries$diff_waso_min_lower, summaries$diff_waso_min_upper,
-        "Wake After Sleep Onset (min)", 
+        "Wake After Sleep Onset (min)",
         x_axis = "Average of Two Measurements",
         y_axis = "Difference Between Methods"
       ) +
-      scale_y_continuous(breaks = seq(-200, 200, 50),
-                         limits = c(-150, 150))
-    
-    
+      scale_y_continuous(
+        breaks = seq(-200, 200, 50),
+        limits = c(-150, 150)
+      )
+
+
     all <- list(spt, tst, se_percent, lps, waso)
-    #   wrap_plots(ncol = 1) +
-    #   plot_annotation(theme = theme(plot.background = element_rect(fill = "#002B36", color = "#002B36"),
-    #         panel.background = element_rect(color = "#002B36", fill = "#002B36")))
   }
 
 plots <- map2(all_diffs, all_summaries, all_plots)
