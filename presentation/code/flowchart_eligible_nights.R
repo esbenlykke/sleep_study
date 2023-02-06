@@ -116,7 +116,7 @@ flow <-
     fill = "grey15", linewidth = 0.25
   ) +
   annotate("text",
-    x = 30, y = 5, label = "391 nights\nfor training",
+    x = 30, y = 5, label = "391 nights, 80 subjects\nfor training",
     size = 4, color = "#EEE8D5"
   ) +
   geom_rect(
@@ -125,7 +125,7 @@ flow <-
   ) +
   annotate("text",
     x = 65, y = 5,
-    label = "388 nights\nfor testing",
+    label = "388 nights, 77 subjects\nfor testing",
     size = 4, color = "#EEE8D5"
   ) +
   # final arrows

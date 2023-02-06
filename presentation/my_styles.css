@@ -5,18 +5,19 @@
 }
 
 .author {
-  font-size: 60px;
+  font-size: 40px;
 }
 
 .date {
   font-size: 20px;
 }
 
-.column {
-text-align: center;
+.column-left {
+text-align: left;
 }
 
 .slide {
     height: 750px;
     overflow-y: auto !important;
 }
+

@@ -1,5 +1,5 @@
 ---
-title: "Machine Learned Models for Estimation of Sleep Quality in Free-Living Accelerometer Data"
+title: "Sleep Quality Estimation using Machine Learning and Thigh-Mounted Accelerometer Data in Free Living Conditions"
 subtitle: "(working title)"
 author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
@@ -27,32 +27,44 @@ library(gt)
 library(arrow)
 library(visNetwork)
 library(tidymodels)
+library(tidymodels)
 ```
 
-Lists can optionally be displayed incrementally:
+- Sleep plays a vital role in health, thus, improving the assessment of sleep–wake outside of a laboratory environment is critical
+- The gold standard (PSG) is costly and inconvenient.
+- Methods for estimating sleep/wake based on accelerometry exist, primarily from wrist-worn devices
+- Cole-Kripke and Sadeh algorithms are commonly used
+- determine in-bed time is difficult, usually set by sleep log and/or human scorers
+- detect wakefulness is difficult, worse performance in populations with sleep disorders
+- typically a two level analysis: epoch based and summarized across night(s)
+- Zmachine-derived sleep stats
+- 
 
-::: incremental
--   First item
--   Second item
--   Third item
-:::
+Purpose...
 
-. . .
+## But Esben, what about them sleep stages!?
 
-Insert pauses to make other types of content display incrementally.
-
-::: footer
-Learn more: [Incremental Lists](https://quarto.org/docs/presentations/revealjs/#incremental-lists)
-:::
+* I did free-living PSG recordings of sleep but...
+  - Super fragile -> shitty data
+  - Combersome and time consuming
+  - free-living?
+  - would surface skin temperature + acc be enough? Most likely needs HR
+  
+It was likely a dead end from the get-go :(
 
 ## Methods {transition="convex"}
 
-Overview
-Network plot of data preparation steps
+data preparation, big time-consumer is handling raw acc data
 
-. . . 
+only thigh data used. HSBC and other is only thigh data...
 
-network plot
+could be interesting to build models on thigh and hip ocmbined. 
+
+all zm recording is considered as in-bed (sensor problem?)
+
+no sleep stages, only sleep/awake
+
+sensor problems during sleep, up to 20 consecutive epochs (200 sec) are treated as sleep
 
 ## Exclusion Criteria {transition="fade"}
 
@@ -72,38 +84,38 @@ flow
 
 :::: {.columns}
 
-::: {.column width="30%"}
+::: {.fragment .column width="30%"}
 
 **Basic Features**
 
--   Weekday 
--   Time of Day
--   Placement
--   Temperature
+- Weekday 
+- Time of Day
+- Placement
+- Temperature
 
 :::
 
-::: {.column width="30%"}
+::: {.fragment .column width="30%"}
 
 **ACC derived features**^[@skotte_detection_2014]
 
--   Mean ACC X 
--   Mean ACC Y
--   Mean ACC Z
--   Standard Deviation X
--   Standard Deviation Y
--   Standard Deviation Z
--   Max Standard Deviation
--   Inclination
+- Mean ACC X 
+- Mean ACC Y
+- Mean ACC Z
+- Standard Deviation X
+- Standard Deviation Y
+- Standard Deviation Z
+- Max Standard Deviation
+- Inclination
 
 :::
 
-::: {.column width="40%"}
+::: {.fragment .column width="40%"}
 
 **Sensor-Independent Features**^[@walch_sleep_2019, @forger_simpler_1999]
 
--   Clock Proxy Linear
--   Clock Proxy Cosinus
+- Clock Proxy Linear
+- Clock Proxy Cosinus
 
 :::
 
@@ -147,25 +159,69 @@ source(here::here("presentation/code/plot_sensor-independent.R"))
 plot_proxy_lin
 ```
 
-## {.smaller transition="convex" .column}
+## building Models {.smaller transition="convex"}
 
 ```{r}
-source("~/sleep_study/presentation/code/tables_performance.R")
+source(here::here("presentation/code/plot_hyperparameter_tuning.R"))
+
+hyper_plot
+```
+
+## Results {transition="fade"}
+
+:::: {.columns}
+
+::: {.fragment .column width="50%"}
+
+* Performance Metrics
+  - F1 Score
+  - Accuracy
+  - Sensitivity
+  - Specificity
+  - ROC curves
+  
+:::
+
+::: {.fragment .column width="50%"}
+
+* Agreement With Zmachine Sleep Stats
+  - Sleep Period Time
+  - Total Sleep Time
+  - Sleep Efficiency
+  - Latency Until Persistent Sleep
+  - Wake After Sleep Onset
+  
+:::
+
+::::
+
+## ROC Curves {.smaller transition="fade" .column-left}
+
+
+```{r}
+source(here::here("presentation/code/plot_roc_curves.R"))
+
+roc_plots
+```
+
+
+## {.smaller transition="fade" .column-left}
+
+```{r}
+source(here::here("presentation/code/tables_performance.R"))
 
 tab_1
 ```
 
 Performance of the models to predict each class <span style="color:gold">**seperately**</span>, i.e., "sleep" and "in-bed". 
 
-## {.smaller transition="convex" .column}
+## {.smaller transition="fade" .column}
 
 ```{r}
 tab_2
 ```
 
 Performance of the models to predict each <span style="color:gold">**combined**</span> class, i.e., "sleep" + "in-bed". 
-
----
 
 ## Bland-Altman Plots {.smaller transition="convex" .slide}
 
@@ -238,7 +294,7 @@ plots$neural_net[[5]]
 
 ```{r}
 in_bed_tree <-
-  read_rds("~/sleep_study/data/models/fitted_models/in_bed_simple_CART_fit.rds")
+  read_rds(here::here("data/models/fitted_models/in_bed_simple_CART_fit.rds"))
 
 in_bed_tree |>
   extract_fit_engine() |>
@@ -266,10 +322,12 @@ in_bed_tree |>
     color = "#EEE8D5",
     size = 20,
     strokeWidth = 1
-  )) |> 
-  visInteraction(dragNodes = FALSE, 
-                 dragView = FALSE, 
-                 zoomView = FALSE)
+  )) |>
+  visInteraction(
+    dragNodes = FALSE,
+    dragView = FALSE,
+    zoomView = FALSE
+  )
 ```
 
 ---
@@ -278,7 +336,7 @@ in_bed_tree |>
 
 ```{r}
 sleep_tree <-
-  read_rds("~/sleep_study/data/models/fitted_models/sleep_simple_CART_fit.rds")
+  read_rds(here::here("data/models/fitted_models/sleep_simple_CART_fit.rds"))
 
 sleep_tree |>
   extract_fit_engine() |>
@@ -304,9 +362,17 @@ sleep_tree |>
   visEdges(font = list(
     color = "#EEE8D5",
     strokeWidth = 1
-  )) |> 
-  visInteraction(dragNodes = FALSE, 
-                 dragView = FALSE, 
-                 zoomView = FALSE)
+  )) |>
+  visInteraction(
+    dragNodes = FALSE,
+    dragView = FALSE,
+    zoomView = FALSE
+  )
 ```
 
+## Discussion {.smaller transition="zoom"}
+
+- heteroscedasticity
+- Cheung 2018 table 4: actigraphy provides a sufficiently narrow range of possible mean differences (CI 95%) clinical significant thresholds
+
+## References {transition="convex"}

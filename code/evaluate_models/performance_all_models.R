@@ -18,21 +18,19 @@ in_bed_fits <- map(in_bed_fits_files, read_rds) |>
 sleep_fits <- map(sleep_fits_files, read_rds) |>
   set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
 
-test <- read_parquet("data/processed/testing_data.parquet") |>
-  group_by(id) |>
-  slice_sample(n = 100)
+test <- read_parquet("data/processed/testing_data.parquet") 
 
 # Metrics and plots -------------------------------------------------------
 
 
 my_metrics <-
-  metric_set(f_meas, accuracy, sensitivity, specificity)
+  metric_set(f_meas, accuracy, sensitivity, precision, specificity)
 
 get_metrics <-
   function(fit, truth, estimate) {
     fit |>
       augment(test) |>
-      my_metrics(truth = {{ truth }}, estimate = {{ estimate }})
+      my_metrics(truth = {{ truth }}, estimate = {{ estimate }}, event_level = "second")
   }
 
 in_bed_metrics <-
@@ -74,7 +72,7 @@ get_scores <-
         zm_in_bed_awake = as_factor(if_else(in_bed == 1 & sleep == 0, 1, 0)),
         zm_in_bed_sleep = as_factor(if_else(in_bed == 1 & sleep == 1, 1, 0))
       ) |>
-      my_metrics(truth = {{ truth }}, estimate = {{ estimate }})
+      my_metrics(truth = {{ truth }}, estimate = {{ estimate }}, event_level = "second")
   }
 
 
@@ -85,7 +83,7 @@ map2_dfr(in_bed_fits, sleep_fits,
   select(-.estimator) |>
   pivot_wider(names_from = model, values_from = .estimate) |>
   mutate(
-    event = "In-Bed Awake"
+    event = "In-Bed Awake Prediction"
   ) |>
   bind_rows(
     map2_dfr(in_bed_fits, sleep_fits,
@@ -95,7 +93,7 @@ map2_dfr(in_bed_fits, sleep_fits,
       select(-.estimator) |>
       pivot_wider(names_from = model, values_from = .estimate) |>
       mutate(
-        event = "In-Bed Sleep"
+        event = "In-Bed Sleep Prediction"
       )
   ) |> 
   write_csv("data/processed/combined_preds_performance_metrics.csv")
