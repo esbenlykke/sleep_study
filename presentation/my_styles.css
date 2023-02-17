@@ -12,12 +12,6 @@
   font-size: 20px;
 }
 
-.column-left {
-text-align: left;
-}
+.P {text-align: left }
 
-.slide {
-    height: 750px;
-    overflow-y: auto !important;
-}
-
+.H2 { text-align: center }

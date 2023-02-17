@@ -8,9 +8,10 @@ library(lubridate)
 
 test <-
   read_parquet("data/processed/testing_data.parquet") |>
-  filter(
-    id != 757104 & id != 1377205
-  ) # TODO fix the leap year February problem in ID = 757104
+  filter((id != 1377205) &
+           (id != 1377204 | !noon_day %in% c(9, 25)) &
+           (id != 1377204 | noon_day != 22))
+# TODO what causes these outliers?
 
 # Load models -------------------------------------------------------------
 
@@ -69,7 +70,7 @@ create_stats <-
         spt_hrs = ((max(row_number()[in_bed_72 == 60] + 30) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60 / 60,
         tst_hrs = (sum(in_bed_sleep) * 10) / 60 / 60,
         se_percent = 100 * (tst_hrs / spt_hrs),
-        lps_min = abs((((min(row_number()[sleep_72 == 60])) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60),
+        lps_min = (((min(row_number()[sleep_72 == 60])) - min(row_number()[in_bed_72 == 60] - 30)) * 10) / 60, 
         waso_min = ((sum(in_bed_no_sleep) - lps_min) * 10) / 60,
         .groups = "drop"
       ) |>

@@ -151,7 +151,7 @@ plot_proxy_lin <-
     geom = "text",
     x = as_datetime(static_end) + hours(1),
     y = .5,
-    label = hms::as_hms(static_start - seconds(10)),
+    label = hms::as_hms(static_end + seconds(10)),
     color = "#EEE8D5",
     angle = 90,
     size = 8

@@ -1,5 +1,5 @@
 ---
-title: "Sleep Quality Estimation using Machine Learning and Thigh-Mounted Accelerometer Data in Free Living Conditions"
+title: "Sleep Quality Estimation using Thigh-Mounted Accelerometer Data in Free Living Conditions"
 subtitle: "(working title)"
 author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
@@ -12,6 +12,7 @@ format:
     logo: images/SDU_WHITE_RGB-png.png
     footer: https://github.com/esbenlykke/sleep_study
     css: my_styles.css
+    scrollable: true
 embed-resources: true
 editor_options: 
   chunk_output_type: console
@@ -47,26 +48,20 @@ Purpose...
 * I did free-living PSG recordings of sleep but...
   - Super fragile -> shitty data
   - Combersome and time consuming
-  - free-living?
+  - free-living when wired up like a robot?
   - would surface skin temperature + acc be enough? Most likely needs HR
   
 It was likely a dead end from the get-go :(
 
 ## Methods {transition="convex"}
 
-data preparation, big time-consumer is handling raw acc data
+- data preparation, big time-consumer is handling raw acc data
+- only thigh data used. HSBC and other is only thigh data...
+- all zm recording is considered as in-bed (sensor problem?)
+- no sleep stages, only sleep/awake
+- sensor problems during sleep, up to 20 consecutive epochs (200 sec) are treated as sleep
 
-only thigh data used. HSBC and other is only thigh data...
-
-could be interesting to build models on thigh and hip ocmbined. 
-
-all zm recording is considered as in-bed (sensor problem?)
-
-no sleep stages, only sleep/awake
-
-sensor problems during sleep, up to 20 consecutive epochs (200 sec) are treated as sleep
-
-## Exclusion Criteria {transition="fade"}
+## Exclusion Criteria {transition="fade" .H2}
 
 ```{r}
 #| fig-align: center
@@ -140,7 +135,7 @@ This thing is dependent on ambient light and body temperature!
 :::
 
 ::: {.fragment}
-But as demonstrated by @walch_sleep_2019, a simple cosine function does the tricks just as well :)
+But as demonstrated by @walch_sleep_2019, a simple cosine function does the trick just as well :)
 :::
 
 ## Circadian Proxy Features {.smaller transition="convex"}
@@ -195,7 +190,7 @@ hyper_plot
 
 ::::
 
-## ROC Curves {.smaller transition="fade" .column-left}
+## ROC Curves {.smaller transition="fade"}
 
 
 ```{r}
@@ -205,25 +200,27 @@ roc_plots
 ```
 
 
-## {.smaller transition="fade" .column-left}
+## Lots of Metrics {.smaller transition="zoom" .H2}
 
+:::: {.columns}
+
+::: {.column}
 ```{r}
 source(here::here("presentation/code/tables_performance.R"))
 
-tab_1
+tab1
 ```
+:::
 
-Performance of the models to predict each class <span style="color:gold">**seperately**</span>, i.e., "sleep" and "in-bed". 
-
-## {.smaller transition="fade" .column}
-
+::: {.column}
 ```{r}
-tab_2
+tab2
 ```
+:::
 
-Performance of the models to predict each <span style="color:gold">**combined**</span> class, i.e., "sleep" + "in-bed". 
+::::
 
-## Bland-Altman Plots {.smaller transition="convex" .slide}
+## Bland-Altman Plots {.smaller transition="fade"}
 
 ::: {.panel-tabset}
 
@@ -231,7 +228,7 @@ Performance of the models to predict each <span style="color:gold">**combined**<
 
 ```{r}
 #| echo: false
-source(here::here("presentation/code/ba_plots.R"))
+source(here::here("presentation/code/plot_ba.R"))
 plots$decision_tree[[1]]
 
 plots$decision_tree[[2]]
@@ -288,9 +285,16 @@ plots$neural_net[[5]]
 
 :::
 
----
+## Bland-Altman Analysis {.smaller transition="fade" .H2}
 
-## In-bed classification flow {.smaller transition="zoom" .column}
+```{r}
+source(here::here("presentation/code/table_ba.R"))
+
+tab_ba
+```
+
+
+## In-bed classification flow {.smaller transition="zoom" .H2}
 
 ```{r}
 in_bed_tree <-
@@ -332,7 +336,7 @@ in_bed_tree |>
 
 ---
 
-## Sleep classification flow {.smaller transition="zoom" .column}
+## Sleep classification flow {.smaller transition="zoom" .H2}
 
 ```{r}
 sleep_tree <-
@@ -374,5 +378,6 @@ sleep_tree |>
 
 - heteroscedasticity
 - Cheung 2018 table 4: actigraphy provides a sufficiently narrow range of possible mean differences (CI 95%) clinical significant thresholds
+- could be interesting to build models on thigh and hip ocmbined. 
 
 ## References {transition="convex"}
