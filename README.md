@@ -1,5 +1,3 @@
-![](/banner.png)
-
 # Sleep Quality Estimation using Thigh-Mounted Accelerometer Data in Free Living Conditions (working title)
 
 Accurately measuring and assessing sleep quality is essential for identifying and addressing sleep-related issues. Recent advances in wearable technology and machine learning offer a promising alternative to traditional PSG-based methods. 
