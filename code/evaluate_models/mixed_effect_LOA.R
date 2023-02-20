@@ -1,10 +1,6 @@
 library(tidyverse)
 library(arrow)
-library(patchwork)
-library(showtext)
-
-
-# TODO consider calculating 95% CI for bias
+library(SimplyAgree)
 
 
 stats_files <-
@@ -13,14 +9,7 @@ stats_files <-
 all_stats <-
   map(stats_files, read_parquet) |>
   set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
-# |>
-#   map(
-#     ~ filter(.x, (id != 1742705 | noon_day != 24) &
-#         (id != 1044005 | noon_day != 16) &
-#         (id != 1750904 | noon_day != 21) &
-#         (id != 1718904 | noon_day != 8)
-#     )
-#   ) # TODO look into these lps_min outliers
+
 
 get_diff_stats <-
   function(tbl) {
@@ -48,32 +37,53 @@ all_diffs <-
   all_stats |>
   map(get_diff_stats)
 
-test <- all_diffs$logistic_regression
 
-plot_qqs <- funtion(df){
-df |> 
-  select(id, noon_day, contains("diff")) |> 
-  pivot_longer(-c(id:noon_day)) |> 
-  ggplot(aes(sample = value)) +
-  geom_qq(shape = 21, fill = "darkorange", alpha = .5) + 
-  geom_qq_line() +
-  facet_wrap(~ name, scales = "free") +
-  theme_light()
+# Differences are not normal. Use nonparametric approach for LOA.
+# But is this correct for repeated measures? I think not.
+
+get_agree <- function(df = all_diffs, pred, ref, delta, type) {
+  map(df, ~ agree_nest(
+    x = pred,
+    y = ref,
+    id = "id",
+    data = .,
+    delta = delta,
+    prop_bias = FALSE
+  )) |>
+    map_dfr("loa", .id = "model") |>
+    rownames_to_column(var = "ba_metric") |>
+    mutate(
+      ba_metric = str_remove(ba_metric, "...\\d"),
+      ba_metric = str_to_lower(str_replace(ba_metric, " ", "_")),
+      type = pred
+    )
 }
+# spt
+spt <- get_agree(all_diffs, "spt_hrs", "zm_spt_hrs", 2)
 
-# Differences are not normal. Use nonparametric approach for LOA. 
+# tst
+tst <- get_agree(all_diffs, "tst_hrs", "zm_tst_hrs", 2)
 
-# test |> 
-#   loa_lme(data = _,
-#           diff = "diff_spt_hrs",
-#           avg = "avg_spt_hrs",
-#           id = "id",
-#           replicates = 1000)
+# se_percent
+se_percent <- get_agree(all_diffs, "se_percent", "zm_se_percent", 20)
+
+# lps_min
+lps <- get_agree(all_diffs, "se_percent", "zm_se_percent", 20)
+
+# waso
+waso <- get_agree(all_diffs, "waso_min", "zm_waso_min", 10)
+
+ba_metrics <-
+  as_tibble(bind_rows(spt, tst, se_percent, lps, waso))
 
 
-agree_np(x = "spt_hrs", 
-         y = "zm_spt_hrs", 
-         id = "id", 
-         data = test, 
-         delta = 1, 
-         prop_bias = TRUE)
+# This method is nonparametric and accounts for repeated measures. Double check with Jan!
+
+# Mixed Effects Limits of Agreement
+# This function allows for the calculation of bootstrapped limits of agreement when there are multiple
+# observations per subject
+
+# lps_mixed <- 
+  loa_mixed(diff = "diff_lps_min", condition = "noon_day", id = "id", data = test,
+            delta = 20,
+            replicates = 100)

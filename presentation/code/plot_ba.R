@@ -65,22 +65,9 @@ all_summaries <-
   all_stats |>
   map(get_diff_stats) |>
   map(get_summary_stats)
+# TODO calculate nonparametric metrics for BA using 'SimplyAgree'
+# source("code/evaluate_models/mixed_effect_LOA.R")
 
-
-# Confidence intervals ----------------------------------------------------
-
-all_diffs$logistic_regression %>%
-  # We're interested in the number of hours worked per week
-  specify(response = diff_spt_hrs) %>%
-  # Generate bootstrap samples
-  generate(reps = 1000, type = "bootstrap") %>%
-  # Calculate mean of each bootstrap sample
-  calculate(stat = "mean") |> 
-  # Calculate the confidence interval around the point estimate
-  get_confidence_interval(
-    # At the 95% confidence level; percentile method
-    level = 0.95
-  )
 
 # BA plots for simple trees -----------------------------------------------
 
@@ -108,9 +95,9 @@ ba_plot <- function(diffs, avg, diff, mean_diff, lower, upper, title, x_axis = "
       alpha = .7
     ) +
     geom_smooth(se = FALSE, color = "#EEE8D5", method = "lm", 
-                linewidth = 1.5, lineend = "round") +
+                linewidth = 1.5, lineend = "round", fullrange = TRUE) +
     geom_smooth(se = FALSE, color = "#127A62", method = "lm", 
-                lineend = "round", lty = 2) +
+                lineend = "round", lty = 2, fullrange = TRUE) +
   labs(
     title = title,
     x = x_axis,
