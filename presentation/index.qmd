@@ -162,7 +162,7 @@ source(here::here("presentation/code/plot_hyperparameter_tuning.R"))
 hyper_plot
 ```
 
-## Results {transition="fade"}
+# Results {transition="fade"}
 
 :::: {.columns}
 

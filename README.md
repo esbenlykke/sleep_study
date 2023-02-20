@@ -5,3 +5,15 @@ Accurately measuring and assessing sleep quality is essential for identifying an
 This research project aims to develop machine learning models from accelerometer data using the Zmachine which is an EEG-based device as the gold-standard for detecting in-bed time and time asleep, estimating sleep quality metrics such as sleep efficiency and total sleep time.
 
 By developing accurate machine learning models to estimate sleep quality metrics, this research has the potential to improve our understanding of sleep patterns and inform interventions to improve sleep quality and overall health.
+
+## Install requirements
+
+Download and install [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge) and run the following command from terminal to create an environment with all necessary software: 
+
+```
+mamba env create -f envirenment.yml
+```
+
+## Usage
+
+This will be added at later stages of the project. 

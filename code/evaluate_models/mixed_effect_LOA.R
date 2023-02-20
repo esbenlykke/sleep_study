@@ -38,17 +38,20 @@ all_diffs <-
   map(get_diff_stats)
 
 
-# Differences are not normal. Use nonparametric approach for LOA.
-# But is this correct for repeated measures? I think not.
+# This method is nonparametric and accounts for repeated measures. Double check with Jan!
 
-get_agree <- function(df = all_diffs, pred, ref, delta, type) {
-  map(df, ~ agree_nest(
-    x = pred,
-    y = ref,
+# Mixed Effects Limits of Agreement
+# This function allows for the calculation of bootstrapped limits of agreement 
+# when there are multiple observations per subject
+
+get_agree <- function(df = all_diffs, diff, condition = "noon_day", delta) {
+  map(df, ~ loa_mixed(
+    diff = diff,
+    condition = condition,
     id = "id",
     data = .,
     delta = delta,
-    prop_bias = FALSE
+    replicates = 1000
   )) |>
     map_dfr("loa", .id = "model") |>
     rownames_to_column(var = "ba_metric") |>
@@ -68,7 +71,7 @@ tst <- get_agree(all_diffs, "tst_hrs", "zm_tst_hrs", 2)
 se_percent <- get_agree(all_diffs, "se_percent", "zm_se_percent", 20)
 
 # lps_min
-lps <- get_agree(all_diffs, "se_percent", "zm_se_percent", 20)
+lps <- get_agree(all_diffs, "lps_min", "zm_lps_min", 20)
 
 # waso
 waso <- get_agree(all_diffs, "waso_min", "zm_waso_min", 10)
@@ -76,14 +79,4 @@ waso <- get_agree(all_diffs, "waso_min", "zm_waso_min", 10)
 ba_metrics <-
   as_tibble(bind_rows(spt, tst, se_percent, lps, waso))
 
-
-# This method is nonparametric and accounts for repeated measures. Double check with Jan!
-
-# Mixed Effects Limits of Agreement
-# This function allows for the calculation of bootstrapped limits of agreement when there are multiple
-# observations per subject
-
-# lps_mixed <- 
-  loa_mixed(diff = "diff_lps_min", condition = "noon_day", id = "id", data = test,
-            delta = 20,
-            replicates = 100)
+beepr::beep(3)
