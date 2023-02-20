@@ -1,6 +1,7 @@
 library(tidyverse)
 library(arrow)
 library(SimplyAgree)
+library(furrr)
 
 
 stats_files <-
@@ -41,42 +42,50 @@ all_diffs <-
 # This method is nonparametric and accounts for repeated measures. Double check with Jan!
 
 # Mixed Effects Limits of Agreement
-# This function allows for the calculation of bootstrapped limits of agreement 
+# This function allows for the calculation of bootstrapped limits of agreement
 # when there are multiple observations per subject
 
 get_agree <- function(df = all_diffs, diff, condition = "noon_day", delta) {
-  map(df, ~ loa_mixed(
+  future_map(df, ~ loa_mixed(
     diff = diff,
     condition = condition,
     id = "id",
     data = .,
     delta = delta,
     replicates = 1000
-  )) |>
+  ), .options = furrr_options(seed = 123)) |>
     map_dfr("loa", .id = "model") |>
     rownames_to_column(var = "ba_metric") |>
     mutate(
       ba_metric = str_remove(ba_metric, "...\\d"),
       ba_metric = str_to_lower(str_replace(ba_metric, " ", "_")),
-      type = pred
-    )
+      type = diff,
+      type = str_remove(type, "diff_")
+    ) |>
+    as_tibble()
 }
+
+# Run in parallel
+
+plan(multisession, workers = 6)
+
 # spt
-spt <- get_agree(all_diffs, "spt_hrs", "zm_spt_hrs", 2)
+spt <- get_agree(all_diffs, "diff_spt_hrs", delta = 2)
 
 # tst
-tst <- get_agree(all_diffs, "tst_hrs", "zm_tst_hrs", 2)
-
+tst <- get_agree(all_diffs, "diff_tst_hrs", delta = 2)
 # se_percent
-se_percent <- get_agree(all_diffs, "se_percent", "zm_se_percent", 20)
+se_percent <- get_agree(all_diffs, "diff_se_percent", delta = 20)
 
 # lps_min
-lps <- get_agree(all_diffs, "lps_min", "zm_lps_min", 20)
+lps <- get_agree(all_diffs, "diff_lps_min", delta = 20)
 
 # waso
-waso <- get_agree(all_diffs, "waso_min", "zm_waso_min", 10)
+waso <- get_agree(all_diffs, "diff_waso_min", delta = 10)
 
 ba_metrics <-
-  as_tibble(bind_rows(spt, tst, se_percent, lps, waso))
+  bind_rows(spt, tst, se_percent, lps, waso) |> 
+  janitor::clean_names()
 
-beepr::beep(3)
+beepr::beep()
+
