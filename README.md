@@ -1,3 +1,5 @@
+![](banner.png)
+
 # Sleep Quality Estimation using Thigh-Mounted Accelerometer Data in Free Living Conditions (working title)
 
 DOI: []()
@@ -10,7 +12,7 @@ By developing accurate machine learning models to estimate sleep quality metrics
 
 ## Clone repo
 
-Download and nstall [git](https://git-scm.com/downloads) and clone this repo to a local computer.
+Use [git](https://git-scm.com/downloads) to clone this repo to a local computer with the following command in terminal.
 
 ```
 git clone https://github.com/esbenlykke/sleep_study
@@ -18,7 +20,7 @@ git clone https://github.com/esbenlykke/sleep_study
 
 ## Install requirements
 
-Download and install [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge) and run the following command from terminal to create an environment with all necessary software: 
+Use [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge) to create an environment with all necessary software by running the following command in terminal : 
 
 ```
 mamba env create -f envirenment.yml
