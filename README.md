@@ -1,5 +1,3 @@
-![](banner.png)
-
 # Sleep Quality Estimation using Thigh-Mounted Accelerometer Data in Free Living Conditions (working title)
 
 DOI: []()

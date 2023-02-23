@@ -1,5 +1,5 @@
 ---
-title: "Sleep Quality Estimation using Thigh-Mounted Accelerometer Data in Free Living Conditions"
+title: "Sleep Quality Estimation using Raw Data from Thigh-Mounted Accelerometers during Free Living Conditions"
 subtitle: "(working title)"
 author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
@@ -20,7 +20,7 @@ smooth-scroll: true
 bibliography: references.bib
 ---
 
-## Background {.scrollable transition="convex"}
+## Background {transition="convex"}
 
 ```{r}
 #| echo: false
@@ -43,7 +43,7 @@ library(tidymodels)
 
 Purpose...
 
-## But Esben, what about them sleep stages!?
+## But Esben, what about them sleep stages!? {transition="convex"}
 
 * I did free-living PSG recordings of sleep but...
   - Super fragile -> shitty data
@@ -61,7 +61,7 @@ It was likely a dead end from the get-go :(
 - no sleep stages, only sleep/awake
 - sensor problems during sleep, up to 20 consecutive epochs (200 sec) are treated as sleep
 
-## Exclusion Criteria {transition="fade" .H2}
+## Exclusion Criteria {transition="convex" .H2}
 
 ```{r}
 #| fig-align: center
@@ -75,7 +75,7 @@ flow
 :::
 
 
-## Features {transition="fade" .smaller}
+## Features {transition="convex" .H2}
 
 :::: {.columns}
 
@@ -118,7 +118,7 @@ flow
 
 ---
 
-## Human Circadian Clock {.smaller transition="convex"}
+## Human Circadian Clock {transition="convex"}
 
 @forger_simpler_1999: a so-called cubic van der Pol equation
 
@@ -138,7 +138,7 @@ This thing is dependent on ambient light and body temperature!
 But as demonstrated by @walch_sleep_2019, a simple cosine function does the trick just as well :)
 :::
 
-## Circadian Proxy Features {.smaller transition="convex"}
+## Circadian Proxy Features {transition="convex"}
 
 ```{r}
 source(here::here("presentation/code/plot_sensor-independent.R"))
@@ -146,7 +146,7 @@ source(here::here("presentation/code/plot_sensor-independent.R"))
 plot_proxy_cos
 ```
 
-## Circadian Proxy Features {.smaller transition="convex"}
+## Circadian Proxy Features {transition="convex"}
 
 ```{r}
 source(here::here("presentation/code/plot_sensor-independent.R"))
@@ -154,7 +154,7 @@ source(here::here("presentation/code/plot_sensor-independent.R"))
 plot_proxy_lin
 ```
 
-## building Models {.smaller transition="convex"}
+## building Models {transition="convex"}
 
 ```{r}
 source(here::here("presentation/code/plot_hyperparameter_tuning.R"))
@@ -162,11 +162,13 @@ source(here::here("presentation/code/plot_hyperparameter_tuning.R"))
 hyper_plot
 ```
 
-# Results {transition="fade"}
+## Results {transition="convex" .H2}
 
 :::: {.columns}
 
 ::: {.fragment .column width="50%"}
+
+### Epoch-Based
 
 * Performance Metrics
   - F1 Score
@@ -179,7 +181,9 @@ hyper_plot
 
 ::: {.fragment .column width="50%"}
 
-* Agreement With Zmachine Sleep Stats
+### Summarized across nights {.H3}
+
+* Agreement With Zmachine Sleep Stats 
   - Sleep Period Time
   - Total Sleep Time
   - Sleep Efficiency
@@ -190,7 +194,7 @@ hyper_plot
 
 ::::
 
-## ROC Curves {.smaller transition="fade"}
+## ROC Curves {transition="convex"}
 
 
 ```{r}
@@ -200,7 +204,7 @@ roc_plots
 ```
 
 
-## Lots of Metrics {.smaller transition="zoom" .H2}
+## Lots of Metrics {transition="convex" .H2}
 
 :::: {.columns}
 
@@ -220,7 +224,7 @@ tab2
 
 ::::
 
-## Bland-Altman Plots {.smaller transition="fade"}
+## Bland-Altman Plots {transition="convex"}
 
 ::: {.panel-tabset}
 
@@ -229,63 +233,64 @@ tab2
 ```{r}
 #| echo: false
 source(here::here("presentation/code/plot_ba.R"))
-plots$decision_tree[[1]]
 
-plots$decision_tree[[2]]
+dc_plots[[1]]
 
-plots$decision_tree[[3]]
+dc_plots[[2]]
 
-plots$decision_tree[[4]]
+dc_plots[[3]]
 
-plots$decision_tree[[5]]
+dc_plots[[4]]
+
+dc_plots[[5]]
 ```
 
 ### Logistic Regression
 
 ```{r}
-plots$logistic_regression[[1]]
+lr_plots[[1]]
 
-plots$logistic_regression[[2]]
+lr_plots[[2]]
 
-plots$logistic_regression[[3]]
+lr_plots[[3]]
 
-plots$logistic_regression[[4]]
+lr_plots[[4]]
 
-plots$logistic_regression[[5]]
+lr_plots[[5]]
 ```
-
-### XGBoost
-
-```{r}
-plots$xgboost[[1]]
-
-plots$xgboost[[2]]
-
-plots$xgboost[[3]]
-
-plots$xgboost[[4]]
-
-plots$xgboost[[5]]
-```
-
 
 ### Neural Net
 
 ```{r}
-plots$neural_net[[1]]
+nn_plots[[1]]
 
-plots$neural_net[[2]]
+nn_plots[[2]]
 
-plots$neural_net[[3]]
+nn_plots[[3]]
 
-plots$neural_net[[4]]
+nn_plots[[4]]
 
-plots$neural_net[[5]]
+nn_plots[[5]]
+```
+
+
+### XGBoost
+
+```{r}
+xg_plots[[1]]
+
+xg_plots[[2]]
+
+xg_plots[[3]]
+
+xg_plots[[4]]
+
+xg_plots[[5]]
 ```
 
 :::
 
-## Bland-Altman Analysis {.smaller transition="fade" .H2}
+## Bland-Altman Analysis {transition="convex" .H2}
 
 ```{r}
 source(here::here("presentation/code/table_ba.R"))
@@ -294,7 +299,7 @@ tab_ba
 ```
 
 
-## In-bed classification flow {.smaller transition="zoom" .H2}
+## In-bed classification flow {transition="convex" .H2}
 
 ```{r}
 in_bed_tree <-
@@ -336,7 +341,7 @@ in_bed_tree |>
 
 ---
 
-## Sleep classification flow {.smaller transition="zoom" .H2}
+## Sleep classification flow {transition="convex" .H2}
 
 ```{r}
 sleep_tree <-
@@ -374,10 +379,12 @@ sleep_tree |>
   )
 ```
 
-## Discussion {.smaller transition="zoom"}
+
+## Discussion {transition="convex"}
 
 - heteroscedasticity
 - Cheung 2018 table 4: actigraphy provides a sufficiently narrow range of possible mean differences (CI 95%) clinical significant thresholds
-- could be interesting to build models on thigh and hip ocmbined. 
+- could be interesting to build models on thigh and hip ocmbined.
+- multiclass vs multilabel classification
 
 ## References {transition="convex"}

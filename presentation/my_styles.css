@@ -12,6 +12,21 @@
   font-size: 20px;
 }
 
-.P {text-align: left }
+.H1 { 
+  text-align: center;
+  font-size: 50px;
+}
 
-.H2 { text-align: center }
+.H2 { 
+  text-align: center;
+  font-size: 50px;
+}
+
+.H3 {
+  text-align: left;
+}
+
+.ol.aside-footnotes {
+  padding-top: 3em;
+  font-size: 14pt;
+}

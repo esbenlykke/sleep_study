@@ -83,9 +83,8 @@ lps <- get_agree(all_diffs, "diff_lps_min", delta = 20)
 # waso
 waso <- get_agree(all_diffs, "diff_waso_min", delta = 10)
 
-ba_metrics <-
-  bind_rows(spt, tst, se_percent, lps, waso) |> 
-  janitor::clean_names()
+bind_rows(spt, tst, se_percent, lps, waso) |> 
+  janitor::clean_names() |> 
+  write_csv("data/processed/mixed_effect_ba.csv")
 
 beepr::beep()
-

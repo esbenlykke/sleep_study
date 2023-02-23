@@ -6,8 +6,8 @@ library(gtExtras)
 library(here)
 
 
-# TODO consider calculating 95% CI for bias
-
+ba_metrics <-
+  read_csv(here::here("data/processed/mixed_effect_ba.csv"))
 
 stats_files <-
   list.files(here("data/processed/stats_predictions"), full.names = TRUE)
@@ -63,11 +63,9 @@ all_diffs <-
   all_stats |>
   map(get_diff_stats)
 
-all_summaries <-
-  all_stats |>
-  map(get_diff_stats) |>
-  map(get_summary_stats) |>
-  bind_rows(.id = "model")
+
+ba_metrics |>
+  pivot_wider(names_from = c(model, ba_metric), values_from = c(estimate:upper_ci))
 
 
 # create table ------------------------------------------------------------
@@ -76,60 +74,53 @@ font_add_google("IBM Plex Serif", family = "ibm")
 showtext_auto()
 
 tab_ba <-
-all_summaries |>
-  pivot_longer(-model) |>
+ba_metrics |>
   mutate(
     ba_metric = case_when(
-      str_detect(name, "mean") ~ "Bias",
-      str_detect(name, "upper") ~ "LOA Upper",
-      str_detect(name, "lower") ~ "LOA Lower"
+      str_detect(ba_metric, "bias") ~ "Bias (95% CI)",
+      str_detect(ba_metric, "lower") ~ "Lower LOA (95% CI)",
+      str_detect(ba_metric, "upper") ~ "Upper LOA (95% CI)"
     ),
-    name = str_remove_all(name, "diff_|_upper|_lower|_mean"),
-    name = case_when(
-      name == "spt_hrs" ~ "Sleep Period Time",
-      name == "tst_hrs" ~ "Total Sleep Time",
-      name == "se_percent" ~ "Sleep Efficiency",
-      name == "lps_min" ~ "Latency Until Persistent Sleep",
-      name == "waso_min" ~ "Wake After Sleep Onset"
+    model = case_when(
+      str_detect(model, "logistic") ~ "Logistic Regression",
+      str_detect(model, "decision") ~ "Decision Tree",
+      str_detect(model, "neural") ~ "Neural Net",
+      TRUE ~ "XGboost"
     ),
-    name = fct_relevel(name, c("Sleep Period Time", "Total Sleep Time", 
-                               "Sleep Efficiency", "Latency Until Persistent Sleep",
-                               "Wake After Sleep Onset"))
+    type = case_when(
+      str_detect(type, "spt") ~ "Sleep Period Time (hrs)",
+      str_detect(type, "tst") ~ "Total Sleep Time (hrs)",
+      str_detect(type, "se_percent") ~ "Sleep Efficiency (%)",
+      str_detect(type, "lps") ~ "Latency Until Persistent Sleep (min)",
+      TRUE ~ "Wake After Sleep onset (min)"
+    ),
+    estimate = glue::glue("{round(estimate, 2)} ({round(lower_ci, 2)}; {round(upper_ci, 2)})")
   ) |>
-  group_by(name, model) |>
-  arrange(ba_metric, .by_group = TRUE) |>
-  group_by(model) |> 
-  arrange(name, .by_group = TRUE) |> 
-  pivot_wider(names_from = model) |>
-  ungroup() |>
+  select(-lower_ci:-upper_ci) |>
+  pivot_wider(names_from = ba_metric, values_from = estimate) |>
   # Create table
-  gt(rowname_col = "ba_metric", groupname_col = "name") |>
-  # tab_header(title = md("Bland-Altman Analysis")) |>
-  cols_align(align = "center", columns = decision_tree:xgboost) |>
-  cols_align(align = "right", columns = ba_metric) |>
+  gt(groupname_col = "type") |>
+  # tab_header(title = md("Bland-Altman Analysis"))
+  cols_align(align = "right", columns = model) |>
   cols_width(
-    decision_tree:xgboost ~ px(100),
-    ba_metric ~ px(100)
+    2:5 ~ px(200),
+    model ~ px(200)
   ) |>
-  cols_label(
-    logistic_regression = md("Logistic Regression"),
-    neural_net = "Neural Network",
-    decision_tree = md("Decision<br>Tree"),
-    xgboost = "XGboost"
-  ) |>
-  fmt_number(columns = decision_tree:xgboost) |>
-  # row_group_order(groups = c("sps_hrs", "Total Sleep Time", 
-  #                            "Sleep fficiency", "Latency Until Persistent Sleep",
-  #                            "Wake After Sleep Onset")) |> 
   tab_style(
     style = cell_text(size = px(12)),
     locations = cells_body(
-      columns = c(decision_tree:xgboost)
+      columns = 1:5
     )
-  ) |> 
+  ) |>
   tab_style(
     style = cell_fill("#2C4E57"),
-    locations = cells_body(rows = c(1, 3, 4, 6, 7, 9, 10, 12, 13, 15))
+    locations = cells_body(rows = seq(1, 19, 2))
+  ) |>
+  cols_label(model = "") |>
+  cols_align(columns = 1:5, align = "right") |> 
+  tab_footnote(
+    footnote = "Bootstrapped mixed effects limits of agreement with multiple
+    observations per subject (Parker et al. 2016)"
   ) |>
   tab_options(
     table.font.names = "ibm",
@@ -158,7 +149,6 @@ all_summaries |>
     # table_body.hlines.style = "none",
     table_body.vlines.style = "none",
     data_row.padding = px(1),
-    heading.align = "center"
+    heading.align = "center",
+    footnotes.font.size = 10
   )
-
-  

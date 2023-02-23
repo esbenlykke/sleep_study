@@ -4,8 +4,8 @@ library(patchwork)
 library(showtext)
 
 
-# TODO consider calculating 95% CI for bias
-
+ba_metrics <-
+  read_csv(here::here("data/processed/mixed_effect_ba.csv"))
 
 stats_files <-
   list.files("~/sleep_study/data/processed/stats_predictions", full.names = TRUE)
@@ -43,50 +43,77 @@ get_diff_stats <-
       ungroup()
   }
 
-
-get_summary_stats <-
-  function(tbl) {
-    tbl |>
-      # filter(se_percent > 0) |>
-      summarise(
-        across(contains("diff"), list(
-          upper = ~ mean(.x) + 1.96 * sd(.x),
-          lower = ~ mean(.x) - 1.96 * sd(.x),
-          mean = ~ mean(.x)
-        ))
-      )
-  }
-
-all_diffs <-
-  all_stats |>
-  map(get_diff_stats)
-
-all_summaries <-
+diff_avg <-
   all_stats |>
   map(get_diff_stats) |>
-  map(get_summary_stats)
-# TODO calculate nonparametric metrics for BA using 'SimplyAgree'
-# source("code/evaluate_models/mixed_effect_LOA.R")
+  map(~ .x |> select(id, contains(c("diff", "avg")))) |>
+  map(~ .x |> pivot_longer(contains("diff"), names_to = "diffs", values_to = "diff_values")) |>
+  map(~ .x |> pivot_longer(contains("avg"), names_to = "avgs", values_to = "avg_values")) |>
+  map(~ .x |> filter(
+    (str_detect(diffs, "spt") & str_detect(avgs, "spt")) |
+      (str_detect(diffs, "tst") & str_detect(avgs, "tst")) |
+      (str_detect(diffs, "se") & str_detect(avgs, "se")) |
+      (str_detect(diffs, "lps") & str_detect(avgs, "lps")) |
+      (str_detect(diffs, "waso") & str_detect(avgs, "waso"))
+  )) |>
+  map(~ .x |> group_split(diffs, avgs))
 
 
-# BA plots for simple trees -----------------------------------------------
+h_lines <-
+  ba_metrics |>
+  group_split(model, .keep = FALSE) |>
+  setNames(c("decision_tree", "logistic_regression", "neural_net", "xgboost")) |>
+  map(~ .x |>
+    select(ba_metric, estimate, type) |>
+    pivot_wider(names_from = ba_metric, values_from = estimate) |>
+    group_split(type))
+
+ci_lines <-
+  ba_metrics |>
+  group_split(model, .keep = FALSE) |>
+  setNames(c("decision_tree", "logistic_regression", "neural_net", "xgboost")) |>
+  map(~
+    .x |>
+      select(ba_metric, type, lower_ci:upper_ci) |>
+      pivot_wider(names_from = ba_metric, values_from = lower_ci:upper_ci) |>
+      group_split(type))
+
+
+# BA plots for all models and sleep quality metrics -----------------------
+
 
 
 font_add_google("Mukta", family = "mukta")
 font_add_google("IBM Plex Serif", family = "ibm")
 showtext_auto()
 
-ba_plot <- function(diffs, avg, diff, mean_diff, lower, upper, title, x_axis = "", y_axis = "") {
-  diffs |>
-    ggplot(aes({{ avg }}, {{ diff }})) +
-    geom_hline(yintercept = mean_diff, color = "lightblue", lty = 1) +
-    geom_hline(
-      yintercept = lower,
-      lty = 2, color = "#f88379", linewidth = .5, alpha = .8
+
+titles <-
+  c(
+    "Sleep Period Time (hrs)", "Total Sleep Time (hrs)",
+    "Sleep Efficiency (%)", "Latency Until Persisten Sleep (min)",
+    "Wake After Sleep Onset (min)"
+  )
+
+plot_ba <- function(...) {
+  ggplot(..1, aes(avg_values, diff_values)) +
+    annotate(
+      geom = "rect",
+      xmin = -Inf, xmax = Inf,
+      ymin = ..3$lower_ci_mean_bias, ymax = ..3$upper_ci_mean_bias,
+      fill = "lightblue", alpha = .2, lty = 2
     ) +
-    geom_hline(
-      yintercept = upper,
-      lty = 2, color = "#f88379", linewidth = .5, alpha = .8
+    annotate(
+      geom = "rect",
+      xmin = -Inf, xmax = Inf,
+      ymin = ..3$lower_ci_lower_loa, ymax = ..3$upper_ci_lower_loa,
+      fill = "#f88379", alpha = .2, lty = 2
+    ) +
+    annotate(
+      geom = "rect",
+      xmin = -Inf, xmax = Inf,
+      ymin = ..3$lower_ci_upper_loa, ymax = ..3$upper_ci_upper_loa,
+      fill = "#f88379", alpha = .2, lty = 2
     ) +
     geom_point(
       shape = 21, size = 3,
@@ -94,15 +121,43 @@ ba_plot <- function(diffs, avg, diff, mean_diff, lower, upper, title, x_axis = "
       color = "#EEE8D5",
       alpha = .7
     ) +
-    geom_smooth(se = FALSE, color = "#EEE8D5", method = "lm", 
-                linewidth = 1.5, lineend = "round", fullrange = TRUE) +
-    geom_smooth(se = FALSE, color = "#127A62", method = "lm", 
-                lineend = "round", lty = 2, fullrange = TRUE) +
-  labs(
-    title = title,
-    x = x_axis,
-    y = y_axis
-  ) +
+    geom_smooth(
+      se = FALSE, color = "#EEE8D5", method = "lm",
+      linewidth = 1, lineend = "round", fullrange = TRUE
+    ) +
+    geom_smooth(
+      se = FALSE, color = "#127A62", method = "lm",
+      lineend = "round", lty = 2, fullrange = TRUE,
+      linewidth = .6
+    ) +
+    geom_hline(yintercept = ..2$mean_bias, color = "lightblue") +
+    annotate(
+      geom = "label",
+      x = min(..1$avg_values),
+      y = ..2$mean_bias,
+      label = format(..2$mean_bias, digits = 2, size = 18),
+      color = "lightblue", fill = "#002B36"
+    ) +
+    geom_hline(yintercept = ..2$lower_loa, color = "#f88379") +
+    annotate(
+      geom = "label",
+      x = min(..1$avg_values),
+      y = ..2$lower_loa,
+      label = format(..2$lower_loa, digits = 2, size = 18),
+      color = "#f88379", fill = "#002B36"
+    ) +
+    geom_hline(yintercept = ..2$upper_loa, color = "#f88379") +
+    annotate(
+      geom = "label",
+      x = min(..1$avg_values),
+      y = ..2$upper_loa,
+      label = format(..2$upper_loa, digits = 2, size = 18),
+      color = "#f88379", fill = "#002B36"
+    ) +
+    labs(
+      x = "Average of Two Measurements",
+      y = "Difference Between Methods"
+    ) +
     theme(
       text = element_text(color = "#EEE8D5"),
       axis.title = element_text(family = "ibm", size = 20, color = "#EEE8D5"),
@@ -112,175 +167,39 @@ ba_plot <- function(diffs, avg, diff, mean_diff, lower, upper, title, x_axis = "
       panel.grid = element_line(color = "#293D42"),
       plot.background = element_rect(fill = "#002B36", color = "#EEE8D5"),
       panel.background = element_rect(color = "#002B36", fill = "#002B36")
-    )
+    ) 
 }
 
-all_plots <-
-  function(diffs, summaries) {
-    spt <-
-      ba_plot(
-        diffs, avg_spt_hrs, diff_spt_hrs, summaries$diff_spt_hrs_mean,
-        summaries$diff_spt_hrs_lower, summaries$diff_spt_hrs_upper,
-        "Sleep Period Time (hrs)",
-        x_axis = "Average of Two Measurements",
-        y_axis = "Difference Between Methods"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_spt_hrs),
-        y = summaries$diff_spt_hrs_mean,
-        label = format(summaries$diff_spt_hrs_mean, digits = 2, size = 18),
-        color = "lightblue", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_spt_hrs),
-        y = summaries$diff_spt_hrs_lower,
-        label = format(summaries$diff_spt_hrs_lower, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_spt_hrs),
-        y = summaries$diff_spt_hrs_upper,
-        label = format(summaries$diff_spt_hrs_upper, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      scale_y_continuous(
-        breaks = seq(-10, 10, 2),
-        limits = c(-6, 6)
-      )
 
-    tst <-
-      ba_plot(
-        diffs, avg_tst_hrs, diff_tst_hrs, summaries$diff_tst_hrs_mean,
-        summaries$diff_tst_hrs_lower, summaries$diff_tst_hrs_upper,
-        "Total Sleep Time (hrs)",
-        x_axis = "Average of Two Measurements",
-        y_axis = "Difference Between Methods"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_tst_hrs),
-        y = summaries$diff_tst_hrs_mean,
-        label = format(summaries$diff_tst_hrs_mean, digits = 2, size = 18),
-        color = "lightblue", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_tst_hrs),
-        y = summaries$diff_tst_hrs_lower,
-        label = format(summaries$diff_tst_hrs_lower, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_tst_hrs),
-        y = summaries$diff_tst_hrs_upper,
-        label = format(summaries$diff_tst_hrs_upper, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      scale_y_continuous(
-        breaks = seq(-10, 10, 2),
-        limits = c(-7, 7)
-      )
-
-    se_percent <-
-      ba_plot(diffs, avg_se_percent, diff_se_percent, summaries$diff_se_percent_mean,
-        summaries$diff_se_percent_lower, summaries$diff_se_percent_upper,
-        "Sleep Efficiency (%)",
-        x_axis = "Average of Two Measurements",
-        y_axis = "Difference Between Methods"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_se_percent),
-        y = summaries$diff_se_percent_mean,
-        label = format(summaries$diff_se_percent_mean, digits = 2, size = 18),
-        color = "lightblue", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_se_percent),
-        y = summaries$diff_se_percent_lower,
-        label = format(summaries$diff_se_percent_lower, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_se_percent),
-        y = summaries$diff_se_percent_upper,
-        label = format(summaries$diff_se_percent_upper, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      scale_y_continuous(breaks = seq(-30, 30, 10))
-
-    lps <-
-      ba_plot(
-        diffs, avg_lps_min, diff_lps_min, summaries$diff_lps_min_mean,
-        summaries$diff_lps_min_lower, summaries$diff_lps_min_upper,
-        "Latency until Persistent Sleep (min)",
-        x_axis = "Average of Two Measurements",
-        y_axis = "Difference Between Methods"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_lps_min),
-        y = summaries$diff_lps_min_mean,
-        label = format(summaries$diff_lps_min_mean, digits = 2, size = 18),
-        color = "lightblue", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_lps_min),
-        y = summaries$diff_lps_min_lower,
-        label = format(summaries$diff_lps_min_lower, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_lps_min),
-        y = summaries$diff_lps_min_upper,
-        label = format(summaries$diff_lps_min_upper, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      )
-
-    waso <-
-      ba_plot(
-        diffs, avg_waso_min, diff_waso_min, summaries$diff_waso_min_mean,
-        summaries$diff_waso_min_lower, summaries$diff_waso_min_upper,
-        "Wake After Sleep Onset (min)",
-        x_axis = "Average of Two Measurements",
-        y_axis = "Difference Between Methods"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_waso_min),
-        y = summaries$diff_waso_min_mean,
-        label = format(summaries$diff_waso_min_mean, digits = 2, size = 18),
-        color = "lightblue", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_waso_min),
-        y = summaries$diff_waso_min_lower,
-        label = format(summaries$diff_waso_min_lower, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      annotate(
-        geom = "label",
-        x = min(diffs$avg_waso_min),
-        y = summaries$diff_waso_min_upper,
-        label = format(summaries$diff_waso_min_upper, digits = 2, size = 18),
-        color = "#f88379", fill = "#002B36"
-      ) +
-      scale_y_continuous(
-        breaks = seq(-200, 200, 50),
-        limits = c(-150, 150)
-      )
+create_titles <- function(x) {
+  x %>%
+    setNames(c(
+      "lps", "se", "spt", "tst", "waso"
+    )) %>%
+    .[c(3, 4, 2, 1, 5)] |>
+    map2(titles, ~ .x + labs(title = .y))
+}
 
 
-    list(spt, tst, se_percent, lps, waso)
-  }
+# dc_plots <-
+dc_plots <-
+  pmap(
+    list(diff_avg$decision_tree, h_lines$decision_tree, ci_lines$decision_tree), plot_ba
+  ) |> 
+  create_titles()
 
-plots <- map2(all_diffs, all_summaries, all_plots)
+
+lr_plots <-
+  pmap(
+    list(diff_avg$logistic_regression, h_lines$logistic_regression, ci_lines$logistic_regression), plot_ba) |>
+  create_titles()
+
+nn_plots <-
+  pmap(
+    list(diff_avg$neural_net, h_lines$neural_net, ci_lines$neural_net), plot_ba) |>
+  create_titles()
+
+xg_plots <-
+  pmap(
+    list(diff_avg$xgboost, h_lines$xgboost, ci_lines$xgboost), plot_ba) |>
+  create_titles()
