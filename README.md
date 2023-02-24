@@ -1,4 +1,4 @@
-# Sleep Quality Estimation using Accelerometer Data from Thigh-Mounted Devices During in Free Living Conditions (working title)
+# Sleep Quality Estimation using Accelerometer Data from Thigh-Mounted Devices During Free Living Conditions (working title)
 
 DOI: []()
 
