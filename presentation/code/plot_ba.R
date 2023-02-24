@@ -88,13 +88,6 @@ font_add_google("IBM Plex Serif", family = "ibm")
 showtext_auto()
 
 
-titles <-
-  c(
-    "Sleep Period Time (hrs)", "Total Sleep Time (hrs)",
-    "Sleep Efficiency (%)", "Latency Until Persisten Sleep (min)",
-    "Wake After Sleep Onset (min)"
-  )
-
 plot_ba <- function(...) {
   ggplot(..1, aes(avg_values, diff_values)) +
     annotate(
@@ -170,6 +163,13 @@ plot_ba <- function(...) {
     ) 
 }
 
+titles <-
+  c(
+    "Sleep Period Time (hrs)", "Total Sleep Time (hrs)",
+    "Sleep Efficiency (%)", "Latency Until Persisten Sleep (min)",
+    "Wake After Sleep Onset (min)"
+  )
+
 
 create_titles <- function(x) {
   x %>%
@@ -186,8 +186,7 @@ dc_plots <-
   pmap(
     list(diff_avg$decision_tree, h_lines$decision_tree, ci_lines$decision_tree), plot_ba
   ) |> 
-  create_titles()
-
+  create_titles() 
 
 lr_plots <-
   pmap(

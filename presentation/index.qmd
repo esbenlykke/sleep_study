@@ -1,5 +1,5 @@
 ---
-title: "Sleep Quality Estimation using Raw Data from Thigh-Mounted Accelerometers during Free Living Conditions"
+title: "Sleep Quality Estimation using Accelerometer Data from Thigh-Mounted Devices During in Free Living Conditions"
 subtitle: "(working title)"
 author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
