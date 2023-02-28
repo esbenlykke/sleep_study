@@ -53,3 +53,4 @@ dependencies:
   # - morfist
   - tensorflow
   - quarto
+  - r-themis=1.*

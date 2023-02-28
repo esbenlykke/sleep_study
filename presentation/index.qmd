@@ -41,7 +41,7 @@ library(tidymodels)
 - Zmachine-derived sleep stats
 - 
 
-Purpose...
+Purpose... 
 
 ## But Esben, what about them sleep stages!? {transition="convex"}
 
@@ -55,11 +55,17 @@ It was likely a dead end from the get-go :(
 
 ## Methods {transition="convex"}
 
+::: {.fragment}
+
 - data preparation, big time-consumer is handling raw acc data
 - only thigh data used. HSBC and other is only thigh data...
 - all zm recording is considered as in-bed (sensor problem?)
 - no sleep stages, only sleep/awake
 - sensor problems during sleep, up to 20 consecutive epochs (200 sec) are treated as sleep
+- Combine binary classifiers to produce multilabel outcomes (i.e., binary Relevance)
+- Evaluated combined classifiers using weighted micro-averaging.
+
+:::
 
 ## Exclusion Criteria {transition="convex" .H2}
 
@@ -138,7 +144,7 @@ This thing is dependent on ambient light and body temperature!
 But as demonstrated by @walch_sleep_2019, a simple cosine function does the trick just as well :)
 :::
 
-## Circadian Proxy Features {transition="convex"}
+## Circadian Proxy Features {transition="fade"}
 
 ```{r}
 source(here::here("presentation/code/plot_sensor-independent.R"))
@@ -146,7 +152,7 @@ source(here::here("presentation/code/plot_sensor-independent.R"))
 plot_proxy_cos
 ```
 
-## Circadian Proxy Features {transition="convex"}
+## Circadian Proxy Features {transition="fade"}
 
 ```{r}
 source(here::here("presentation/code/plot_sensor-independent.R"))
@@ -161,6 +167,39 @@ source(here::here("presentation/code/plot_hyperparameter_tuning.R"))
 
 hyper_plot
 ```
+
+## Estimate Sleep Quality Metrics {transition="fade"}
+
+
+```{r}
+#| fig-asp: .4
+source(here::here("presentation/code/plot_pred_example.R"))
+
+plot_ex
+```
+
+## Estimate Sleep Quality Metrics {transition="fade"}
+
+```{r}
+#| fig-asp: .4
+source(here::here("presentation/code/plot_pred_example.R"))
+
+plot_lps
+```
+
+::: aside 
+This methedology is called binary relevance.
+:::
+
+## Estimate Sleep Quality Metrics {transition="fade"}
+
+```{r}
+#| fig-asp: .4
+source(here::here("presentation/code/plot_pred_example.R"))
+
+plot_tst
+```
+
 
 ## Results {transition="convex" .H2}
 
@@ -203,6 +242,11 @@ source(here::here("presentation/code/plot_roc_curves.R"))
 roc_plots
 ```
 
+## ROC Curves {transition="convex"}
+
+```{r}
+roc_combined_plots
+```
 
 ## Lots of Metrics {transition="convex" .H2}
 
@@ -386,5 +430,7 @@ sleep_tree |>
 - Cheung 2018 table 4: actigraphy provides a sufficiently narrow range of possible mean differences (CI 95%) clinical significant thresholds
 - could be interesting to build models on thigh and hip ocmbined.
 - multiclass vs multilabel classification
+- in-bed awake/sleep is highly imbalanced -> maybe train a new classifier accounting for imbalanced data (SMOTE)
+- model combined preds instead?
 
 ## References {transition="convex"}

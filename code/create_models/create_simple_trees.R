@@ -19,8 +19,9 @@ data <-
   read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
   bind_rows(read_parquet("data/processed/data_for_modelling/fup_thigh_sensor_independent_features.parquet")) |> 
   mutate(
-    in_bed = as_factor(in_bed),
-    sleep = as_factor(sleep)
+    in_bed_asleep = as_factor(if_else(in_bed == 1 & sleep == 1, 1, 0)),
+    in_bed_awake = as_factor(if_else(in_bed == 1 & sleep == 0, 1, 0)),
+    out_bed_awake = as_factor(if_else(in_bed == 0 & sleep == 0, 1, 0))
   )
 
 set.seed(123)

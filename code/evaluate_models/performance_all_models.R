@@ -20,7 +20,9 @@ sleep_fits <- map(sleep_fits_files, read_rds) |>
 
 test <- read_parquet("data/processed/testing_data.parquet") 
 
-# Metrics and plots -------------------------------------------------------
+
+# calculate metrics -------------------------------------------------------
+
 
 
 my_metrics <-
@@ -53,17 +55,17 @@ in_bed_metrics |>
 
 
 
-# Calculate performance only on in_bed ------------------------------------
+# combined metrics --------------------------------------------------------
 
 
 get_scores <-
   function(in_bed_fit, sleep_fit, truth, estimate) {
     in_bed_fit |>
-      augment(test) |>
+      augment(test, type = "prob") |>
       rename_with(~ paste0(.x, "_in_bed"), starts_with(".")) |>
       bind_cols(
         sleep_fit |>
-          predict(test)
+          predict(test, type = "prob")
       ) |>
       rename_with(~ paste0(.x, "_sleep"), ends_with(".pred_class")) |>
       transmute(

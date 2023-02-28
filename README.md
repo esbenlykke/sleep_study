@@ -26,6 +26,10 @@ Use [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge) to create 
 mamba env create -f envirenment.yml
 ```
 
+### Download models
+
+Download models from ???
+
 ### Usage
 
 This will be added at later stages of the project. 

@@ -5,7 +5,7 @@ suppressMessages(library(tidymodels))
 suppressMessages(library(arrow))
 
 train <-
-  read_parquet("data/processed/training_data.parquet")
+  read_parquet("data/processed/binary_relevance_training_data.parquet")
 
 # In-bed ------------------------------------------------------------------
 
