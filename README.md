@@ -8,7 +8,7 @@ This research project aims to develop machine learning models from accelerometer
 
 ## Use methods and models
 
-If you wish to employ the methods for data preprocessing and machine learning models developed in this project, please follow the steps below.
+A separate repo with instructions on how to preprocess and derive sleep quality metrics using the models developed in this study will be created soon...
 
 ### Clone repo
 

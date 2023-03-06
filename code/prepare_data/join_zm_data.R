@@ -6,7 +6,7 @@ library(lubridate)
 # Path to zm zmachine files
 
 files <-
-  list.files("data/raw/screens_zmachine", ".csv", full.names = TRUE)
+  list.files("/media/esbenlykke/My Passport/sleep_study/data/raw/screens_zmachine", ".csv", full.names = TRUE)
 
 read_csv(files, id = "id", col_types = "??iiiii") %>%
   janitor::clean_names() %>%

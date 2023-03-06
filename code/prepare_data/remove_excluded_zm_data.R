@@ -10,21 +10,21 @@ cat("Only including valid zm data. Lots of filter joins going on here...")
 epoch_length <- 10
 
 data <-
-  read_parquet("data/processed/screens_followup.parquet") |>
+  read_parquet("data/processed/all_thigh_data.parquet") |>
   rename(datetime = time) %>%
   mutate(
+    id = as.numeric(id),
     day = day(datetime),
     noon_day = day(datetime - hours(12)),
     unix_time = as.integer(datetime) %/% epoch_length * epoch_length,
     datetime = as_datetime(unix_time),
     .after = 1
-  ) |>
-  select(id, datetime, unix_time, day, noon_day, age:sd_max, -sensor_code)
+  ) 
 
 # filter join the days from the zm data
 noon_days <-
   data |>
-  distinct(id, noon_day) |>
+  distinct(id, noon_day) |> 
   arrange(id)
 
 zm_int <-
@@ -39,7 +39,7 @@ zm_int <-
     .after = 1
   ) |>
   select(id, datetime, unix_time, day, noon_day, score, -unix_time, -day) |>
-  semi_join(noon_days)
+  semi_join(noon_days, by = "id")
 
 # valid zm days are determined by as a minimum to be including sleep
 # (i.e., score %in% c(2, 3, 5))
@@ -117,4 +117,4 @@ temp |>
   semi_join(only_in_bed_days, by = c("id", "noon_day")) |>
   select(-c(score, group, in_bed_cumsum)) |>
   arrange(id) |>
-  write_parquet("data/processed/fup_thigh_no_bad_zm.parquet")
+  write_parquet("data/processed/all_thigh_no_bad_zm.parquet")

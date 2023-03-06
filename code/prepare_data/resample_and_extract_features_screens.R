@@ -22,7 +22,7 @@ cwa_files <-
   list.files(str_c(cwa_path, "/temp"), full.names = TRUE)
 
 temp_files <-
-  paste0("~/sleep_study/data/temp/", str_replace(
+  paste0("~/projects/sleep_study/data/temp/", str_replace(
     list.files(str_c(cwa_path, "/temp")), "cwa", "feather"
   ))
 

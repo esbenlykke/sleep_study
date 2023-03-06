@@ -39,18 +39,6 @@ nn_wf <-
   extract_workflow("in_bed_neural_network") |> 
   finalize_workflow(best_in_bed_nn_result) 
 
-# MARS model --------------------------------------------------------------
-
-
-# best_in_bed_MARS_result <-
-#   all_in_bed_wf %>%
-#   extract_workflow_set_result("in_bed_MARS") |> 
-#   select_best(metric = "f_meas") 
-# 
-# MARS_wf <- 
-#   all_in_bed_wf |> 
-#   extract_workflow("in_bed_MARS") |> 
-#   finalize_workflow(best_in_bed_MARS_result) 
 
 # XGboost -----------------------------------------------------------------
 

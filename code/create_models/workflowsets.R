@@ -1,9 +1,8 @@
 #!/usr/bin/env Rscript
-
-suppressMessages(library(tidyverse))
-# suppressMessages(library(finetune))
-suppressMessages(library(tidymodels))
-suppressMessages(library(arrow))
+#
+library(tidyverse)
+library(tidymodels)
+library(arrow)
 
 
 tidymodels_prefer()
@@ -15,8 +14,7 @@ cat("Packages loaded...\n")
 cat("Spending data budget...\n")
 set.seed(123)
 data <-
-  read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
-  bind_rows(read_parquet("data/processed/data_for_modelling/fup_thigh_sensor_independent_features.parquet")) |> 
+  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features.parquet") |>
   mutate(
     in_bed = as_factor(in_bed),
     sleep = as_factor(sleep)

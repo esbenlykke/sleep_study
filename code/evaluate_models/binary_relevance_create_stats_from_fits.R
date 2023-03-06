@@ -13,28 +13,28 @@ test <-
 # Load models -------------------------------------------------------------
 
 # in_bed_fits <-
-in_bed_asleep_fit_files <-
-  list.files("data/models/binary_relevance_fitted_models", full.names = TRUE) |>
+in_bed_asleep_fit_filenames <-
+  list.files("/media/esbenlykke/My Passport/fitted_models", full.names = TRUE) |>
   str_subset("in_bed_asleep") 
   
-in_bed_awake_fit_files <-
+in_bed_awake_fit_filenames <-
   list.files("data/binary_relevance_models/fitted_models", full.names = TRUE) |>
   str_subset("in_bed_awake") 
 
-out_bed_awake <- 
+out_bed_awake_fit_filenames <- 
   list.files("data/binary_relevance_models/fitted_models", full.names = TRUE) |>
   str_subset("out_bed_awake") 
 
 in_bed_asleep_fits <-
-  in_bed_asleep_fit_files |>
+  in_bed_asleep_fit_filenames |>
   map(read_rds)
 
 in_bed_awake_fits <-
-  in_bed_awake_fit_files |>
+  in_bed_awake_fit_filenames |>
   map(read_rds)
 
 out_bed_awake_fits <-
-  out_bed_awake_fit_files |>
+  out_bed_awake_fit_filenames |>
   map(read_rds)
 
 

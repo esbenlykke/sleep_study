@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 
 library(tidyverse)
-library(finetune)
 library(tidymodels)
 library(arrow)
 library(themis)
@@ -15,10 +14,8 @@ cat("Packages loaded...\n")
 # Spend data budget -------------------------------------------------------
 cat("Spending data budget...\n")
 
-set.seed(123)
 data <-
-  read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
-  bind_rows(read_parquet("data/processed/data_for_modelling/fup_thigh_sensor_independent_features.parquet")) |> 
+  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features.parquet") |>
   mutate(
     in_bed_asleep = as_factor(if_else(in_bed == 1 & sleep == 1, 1, 0)),
     in_bed_awake = as_factor(if_else(in_bed == 1 & sleep == 0, 1, 0)),
@@ -61,7 +58,7 @@ in_bed_awake_rec <-
 
 out_bed_awake_rec <-
   recipe(
-    in_bed_awake ~ age + incl + temp + macc_x + macc_y + macc_z +
+    out_bed_awake ~ age + incl + temp + macc_x + macc_y + macc_z +
       sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear,
     data = train
   ) |>
@@ -125,10 +122,10 @@ in_bed_asleep_CART_results <-
   )
 tictoc::toc()
 
-write_rds(in_bed_CART_results, "data/models/in_bed_asleep_simple_CART_results.rds")
+write_rds(in_bed_asleep_CART_results, "/media/esbenlykke/My Passport/grid_results/in_bed_asleep_simple_CART_results.rds")
 
 
-cat("Tune grid for in-bed awake models\n")
+# cat("Tune grid for in-bed awake models\n")
 
 # in-bed awake
 tictoc::tic()
@@ -142,9 +139,16 @@ in_bed_awake_CART_results <-
   )
 tictoc::toc()
 
-write_rds(sleep_CART_results, "data/models/in_bed_awake_simple_CART_results.rds")
+write_rds(in_bed_awake_CART_results, "/media/esbenlykke/My Passport/grid_results/in_bed_awake_simple_CART_results.rds")
+
+rm(in_bed_awake_CART_results)
+gc()
+
 
 # out-bed awake
+# 
+cat("Tune grid for out-bed awake models\n")
+
 tictoc::tic()
 out_bed_awake_CART_results <-
   out_bed_awake_wf |>
@@ -156,26 +160,33 @@ out_bed_awake_CART_results <-
   )
 tictoc::toc()
 
-write_rds(sleep_CART_results, "data/models/out_bed_awake_simple_CART_results.rds")
+write_rds(out_bed_awake_CART_results, "/media/esbenlykke/My Passport/grid_results/out_bed_awake_simple_CART_results.rds")
 
+rm(out_bed_awake_CART_results)
+gc()
 
 # Finalizing model --------------------------------------------------------
-# In bed asleep
+# In-bed asleep
+ctrl_fit <- control_parsnip(verbosity = 2L)
+
+in_bed_asleep_CART_results <- 
+  read_rds("/media/esbenlykke/My Passport/grid_results/in_bed_asleep_simple_CART_results.rds")
+ 
 best_in_bed_asleep_results <-
   in_bed_asleep_CART_results %>%
   select_best(metric = "f_meas")
-
-ctrl_fit <- control_parsnip(verbosity = 2L)
 
 in_bed_asleep_CART_fit <-
   in_bed_asleep_wf %>%
   finalize_workflow(best_in_bed_asleep_results) %>%
   fit(train)
 
-write_rds(in_bed_CART_fit, "data/models/binary_relevance_fitted_models/in_bed_asleep_simple_CART_fit.rds")
+write_rds(in_bed_asleep_CART_fit, "/media/esbenlykke/My Passport/fitted_models/in_bed_asleep_simple_CART_fit.rds")
 
+# in-bed awake
+in_bed_awake_CART_results <- 
+  read_rds("/media/esbenlykke/My Passport/grid_results/in_bed_awake_simple_CART_results.rds")
 
-# in bed awake
 best_in_bed_awake_results <-
   in_bed_awake_CART_results %>%
   select_best(metric = "f_meas")
@@ -185,9 +196,12 @@ in_bed_awake_CART_fit <-
   finalize_workflow(best_in_bed_awake_results) %>%
   fit(train)
 
-write_rds(sleep_CART_fit, "data/models/binary_relevance_fitted_models/in_bed_awake_simple_CART_fit.rds")
+write_rds(in_bed_awake_CART_fit, "/media/esbenlykke/My Passport/fitted_models/in_bed_awake_simple_CART_fit.rds")
 
 # out bed awake
+out_bed_awake_CART_results <- 
+  read_rds("/media/esbenlykke/My Passport/grid_results/out_bed_awake_simple_CART_results.rds")
+
 best_out_bed_awake_results <-
   out_bed_awake_CART_results %>%
   select_best(metric = "f_meas")
@@ -197,4 +211,4 @@ out_bed_awake_CART_fit <-
   finalize_workflow(best_out_bed_awake_results) %>%
   fit(train)
 
-write_rds(sleep_CART_fit, "data/models/binary_relevance_fitted_models/out_bed_awake_simple_CART_fit.rds")
+write_rds(out_bed_awake_CART_fit, "/media/esbenlykke/My Passport/fitted_models/out_bed_awake_simple_CART_fit.rds")

@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 
 library(tidyverse)
-library(finetune)
 library(tidymodels)
 library(arrow)
 
@@ -15,8 +14,7 @@ cat("Packages loaded...\n")
 cat("Spending data budget...\n")
 set.seed(123)
 data <-
-  read_parquet("data/processed/data_for_modelling/bsl_thigh_sensor_independent_features.parquet") |>
-  bind_rows(read_parquet("data/processed/data_for_modelling/fup_thigh_sensor_independent_features.parquet")) |> 
+  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features.parquet") |>
   mutate(
     in_bed_asleep = as_factor(if_else(in_bed == 1 & sleep == 1, 1, 0)),
     in_bed_awake = as_factor(if_else(in_bed == 1 & sleep == 0, 1, 0)),
@@ -217,10 +215,6 @@ doParallel::registerDoParallel(cores = 6)
 # Tuning models with regular grid search ----------------------------------
 # In bed
 
-cat("Tuning the following workflows:\n")
-all_in_bed_asleep_workflows
-
-tictoc::tic()
 grid_ctrl <-
   control_grid(
     verbose = TRUE,
@@ -231,6 +225,10 @@ grid_ctrl <-
     event_level = "second"
   )
 
+cat("Tuning the following workflows:\n")
+all_in_bed_asleep_workflows
+
+tictoc::tic()
 in_bed_asleep_grid_results <-
   all_in_bed_asleep_workflows |>
   workflow_map(
@@ -244,7 +242,7 @@ in_bed_asleep_grid_results <-
   )
 tictoc::toc()
 
-write_rds(in_bed_asleep_grid_results, "data/models/in_bed_asleep_workflowsets_results.rds")
+write_rds(in_bed_asleep_grid_results, "/media/esbenlykke/My Passport/grid_results/in_bed_asleep_workflowsets_results.rds")
 
 # Sleep
 
@@ -264,7 +262,7 @@ in_bed_awake_grid_results <-
   )
 tictoc::toc()
 
-write_rds(in_bed_awake_grid_results, "data/models/in_bed_awake_workflowsets_results.rds")
+write_rds(in_bed_awake_grid_results, "/media/esbenlykke/My Passport/grid_results/in_bed_awake_workflowsets_results.rds")
 
 cat("Tuning the following workflows:\n")
 all_out_bed_awake_workflows
@@ -282,5 +280,5 @@ out_bed_awake_grid_results <-
   )
 tictoc::toc()
 
-write_rds(out_bed_awake_grid_results, "data/models/out_bed_awake_workflowsets_results.rds")
+write_rds(out_bed_awake_grid_results, "/media/esbenlykke/My Passport/grid_results/out_bed_awake_workflowsets_results.rds")
 

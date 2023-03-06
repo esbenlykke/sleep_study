@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 
 suppressMessages(library(tidyverse))
-suppressMessages(library(finetune))
 suppressMessages(library(tidymodels))
 suppressMessages(library(arrow))
 

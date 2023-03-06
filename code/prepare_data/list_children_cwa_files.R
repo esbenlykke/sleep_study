@@ -7,10 +7,10 @@ library(tidyverse)
 
 
 info_baseline <-
-  readxl::read_excel("data/participant_info/screens_baseline_info.xlsx")
+  readxl::read_excel("/media/esbenlykke/My\ Passport/sleep_study/data/participant_info/screens_baseline_info.xlsx")
 
 info_followup <-
-  readxl::read_excel("data/participant_info/screens_followup_info.xlsx")
+  readxl::read_excel("/media/esbenlykke/My\ Passport/sleep_study/data/data/participant_info/screens_followup_info.xlsx")
 
 
 # screens filenames -------------------------------------------------------
