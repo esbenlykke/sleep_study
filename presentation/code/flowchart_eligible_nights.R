@@ -116,7 +116,7 @@ flow <-
   ) +
   annotate("text",
     x = 65, y = 34.5,
-    label = "253 nights not between\n7 hrs and 12 hrs excluded¹",
+    label = "253 nights between\n7 hrs and 12 hrs excluded¹",
     size = annotate_text_size, color = "#EEE8D5", lineheight = annotate_lineheight
   ) +
   # train and test boxes

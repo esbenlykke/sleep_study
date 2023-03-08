@@ -56,4 +56,5 @@ dependencies:
   - r-visnetwork
   - r-tictoc
   - r-R.utils
+  - r-butcher
   

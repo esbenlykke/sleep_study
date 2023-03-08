@@ -64,6 +64,7 @@ It was likely a dead end from the get-go :(
 - sensor problems during sleep, up to 20 consecutive epochs (200 sec) are treated as sleep
 - Combine binary classifiers to produce multilabel outcomes (i.e., binary Relevance)
 - Evaluated combined classifiers using weighted micro-averaging.
+- adjust threshold for in bed awake or give edge in tie breakers??
 
 :::
 
