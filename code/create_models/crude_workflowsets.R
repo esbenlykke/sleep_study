@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-#
+
 library(tidyverse)
 library(tidymodels)
 library(arrow)
@@ -9,6 +9,8 @@ tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
 cat("Packages loaded...\n")
+
+path <- "/media/esbenlykke/My Passport/crude/"
 
 # Spend data budget -------------------------------------------------------
 cat("Spending data budget...\n")
@@ -92,7 +94,7 @@ xgb_spec <-
   boost_tree(
     tree_depth = tune(), learn_rate = tune(),
     loss_reduction = tune(), min_n = tune(),
-    sample_size = tune(), trees = tune()
+    sample_size = tune(), trees = seq(100, 700, 200)
   ) |>
   set_engine("xgboost", verbose = TRUE) |>
   set_mode("classification")
@@ -175,33 +177,33 @@ doParallel::registerDoParallel(cores = 6)
 # Tuning models with regular grid search ----------------------------------
 # In bed
 
-cat("Tuning the following workflows:\n")
-all_in_bed_workflows
-
-tictoc::tic()
-grid_ctrl <-
-  control_grid(
-    verbose = TRUE,
-    allow_par = TRUE,
-    parallel_over = "everything",
-    save_pred = FALSE,
-    save_workflow = FALSE
-  )
-
-in_bed_grid_results <-
-  all_in_bed_workflows |>
-  workflow_map(
-    seed = 123,
-    "tune_grid",
-    resamples = folds,
-    grid = 5,
-    control = grid_ctrl,
-    metrics = metric_set(f_meas, roc_auc),
-    verbose = TRUE
-  )
-tictoc::toc()
-
-write_rds(in_bed_grid_results, "data/models/in_bed_workflowsets_results.rds")
+# cat("Tuning the following workflows:\n")
+# all_in_bed_workflows
+# 
+# tictoc::tic()
+# grid_ctrl <-
+#   control_grid(
+#     verbose = TRUE,
+#     allow_par = TRUE,
+#     parallel_over = "everything",
+#     save_pred = FALSE,
+#     save_workflow = FALSE
+#   )
+# 
+# in_bed_grid_results <-
+#   all_in_bed_workflows |>
+#   workflow_map(
+#     seed = 123,
+#     "tune_grid",
+#     resamples = folds,
+#     grid = 5,
+#     control = grid_ctrl,
+#     metrics = metric_set(f_meas, roc_auc),
+#     verbose = TRUE
+#   )
+# tictoc::toc()
+# 
+# write_rds(in_bed_grid_results, str_c(path, "/grid_results/in_bed_workflowsets_results.rds"))
 
 # Sleep
 
@@ -221,32 +223,4 @@ sleep_grid_results <-
   )
 tictoc::toc()
 
-write_rds(sleep_grid_results, "data/models/sleep_workflowsets_results.rds")
-
-# Tuning models with race method ------------------------------------------
-
-# tictoc::tic()
-# race_ctrl <-
-#   control_race(
-#     save_pred = TRUE,
-#     verbose = TRUE,
-#     allow_par = TRUE,
-#     parallel_over = "resamples",
-#     save_workflow = TRUE
-#   )
-#
-#
-# race_results <-
-#   all_workflows |>
-#   workflow_map(
-#     "tune_race_anova",
-#     seed = 123,
-#     resamples = folds,
-#     grid = 5,
-#     control = race_ctrl,
-#     metrics = metric_set(f_meas, roc_auc),
-#     verbose = TRUE
-#   )
-#
-# write_rds(race_results, "data/models/race_results.rds")
-# tictoc::toc()
+write_rds(sleep_grid_results, str_c(path, "/grid_results/sleep_workflowsets_results.rds"))

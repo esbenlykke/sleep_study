@@ -16,11 +16,14 @@ zm_stats <-
   select(id, day, month, spt_hrs, tst_hrs, se_percent, lps_min, waso_min) |>
   rename_with(.cols = -c(id, day, month), ~ paste0("zm_", .))
 
+filenames <- list.files("/media/esbenlykke/My Passport/binary_relevance_preds",
+           full.names = TRUE,
+           pattern = "no_ties"
+)
+
 dfs <-
-  map(list.files("/media/esbenlykke/My Passport/binary_relevance_preds",
-    full.names = TRUE,
-    pattern = "no_ties"
-  ), read_parquet)
+  map(filenames, read_parquet) %>% 
+  setNames(str_remove_all(filenames, "/media/esbenlykke/My Passport/binary_relevance_preds/"))
 
 # create stats ------------------------------------------------------------
 
