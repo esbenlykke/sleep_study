@@ -22,6 +22,16 @@ data <-
     sleep = as_factor(sleep)
   )
 
+### for testing purposes
+# ids <- data %>% distinct(id) %>% slice(1:10)
+# 
+# data <- data %>%
+#   filter(id %in% ids$id) %>%
+#   group_by(id, in_bed, sleep) %>%
+#   slice_sample(n = 100) %>%
+#   ungroup()
+###
+
 set.seed(123)
 spl <-
   data |>
@@ -53,7 +63,6 @@ in_bed_rec <-
 
 in_bed_norm_rec <-
   in_bed_rec |>
-  step_zv(all_predictors()) |>
   step_normalize(all_numeric_predictors())
 
 sleep_rec <-
@@ -175,43 +184,24 @@ doParallel::registerDoParallel(cores = 6)
 
 
 # Tuning models with regular grid search ----------------------------------
+
+grid_ctrl <-
+  control_grid(
+    verbose = TRUE,
+    allow_par = TRUE,
+    parallel_over = "everything",
+    save_pred = FALSE,
+    save_workflow = FALSE
+  )
+
 # In bed
 
-# cat("Tuning the following workflows:\n")
-# all_in_bed_workflows
-# 
-# tictoc::tic()
-# grid_ctrl <-
-#   control_grid(
-#     verbose = TRUE,
-#     allow_par = TRUE,
-#     parallel_over = "everything",
-#     save_pred = FALSE,
-#     save_workflow = FALSE
-#   )
-# 
-# in_bed_grid_results <-
-#   all_in_bed_workflows |>
-#   workflow_map(
-#     seed = 123,
-#     "tune_grid",
-#     resamples = folds,
-#     grid = 5,
-#     control = grid_ctrl,
-#     metrics = metric_set(f_meas, roc_auc),
-#     verbose = TRUE
-#   )
-# tictoc::toc()
-# 
-# write_rds(in_bed_grid_results, str_c(path, "/grid_results/in_bed_workflowsets_results.rds"))
-
-# Sleep
-
 cat("Tuning the following workflows:\n")
-all_sleep_workflows
+all_in_bed_workflows
 
-sleep_grid_results <-
-  all_sleep_workflows |>
+tictoc::tic()
+in_bed_grid_results <-
+  all_in_bed_workflows[3,] |>
   workflow_map(
     seed = 123,
     "tune_grid",
@@ -223,4 +213,24 @@ sleep_grid_results <-
   )
 tictoc::toc()
 
-write_rds(sleep_grid_results, str_c(path, "/grid_results/sleep_workflowsets_results.rds"))
+write_rds(in_bed_grid_results, str_c(path, "/grid_results/in_bed_workflowsets_results.rds"))
+
+# Sleep
+
+# cat("Tuning the following workflows:\n")
+# all_sleep_workflows
+# 
+# sleep_grid_results <-
+#   all_sleep_workflows |>
+#   workflow_map(
+#     seed = 123,
+#     "tune_grid",
+#     resamples = folds,
+#     grid = 5,
+#     control = grid_ctrl,
+#     metrics = metric_set(f_meas, roc_auc),
+#     verbose = TRUE
+#   )
+# tictoc::toc()
+# 
+# write_rds(sleep_grid_results, str_c(path, "grid_results/sleep_workflowsets_results.rds"))

@@ -13,7 +13,17 @@ cat("Reading in-bed workflowsets")
 path <- "/media/esbenlykke/My Passport/multiclass/"
 
 train <- 
-  read_parquet("data/data_for_modelling/crude_training_data.parquet")
+  read_parquet("data/data_for_modelling/multiclass_training_data.parquet")
+
+# for testing purposes
+# ids <- train %>% distinct(id) %>% slice(1:10)
+# 
+# train <- train %>%
+#   filter(id %in% ids$id) %>%
+#   group_by(id, multiclass) %>%
+#   slice_sample(n = 100) %>%
+#   ungroup()
+###
 
 # Finalizing models -------------------------------------------------------
 
@@ -38,11 +48,11 @@ grid_results %>%
 
 best_nnet <- 
   grid_results %>% 
-  extract_workflow_set_result("multiclass_rec_neural_network") |> 
+  extract_workflow_set_result("multiclass_rec_nnet") |> 
   select_best(metric = "f_meas") 
 
 grid_results %>% 
-  extract_workflow("multiclass_rec_neural_network") %>% 
+  extract_workflow("multiclass_rec_nnet") %>% 
   finalize_workflow(best_nnet) %>% 
   fit(train) %>% 
   write_rds(str_c(path, "fitted_models/multiclass_nnet_fit.rds"))

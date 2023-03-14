@@ -23,6 +23,16 @@ data <-
     sleep = as_factor(sleep)
   )
 
+# for testing purposes
+# ids <- data %>% distinct(id) %>% slice(1:10)
+# 
+# data <- data %>%
+#   filter(id %in% ids$id) %>%
+#   group_by(id, in_bed, sleep) %>%
+#   slice_sample(n = 100) %>%
+#   ungroup()
+###
+
 set.seed(123)
 spl <-
   data |>

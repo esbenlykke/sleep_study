@@ -2,7 +2,7 @@ library(tidyverse)
 library(tidymodels)
 
 data <- 
-  read_rds(here::here("presentation/data/sleep_workflowsets_results.rds"))
+  read_rds(here::here("presentation/data/wfset_example.rds"))
 
 hyper_plot <- 
   data |> 
@@ -12,17 +12,17 @@ hyper_plot <-
     select_best = FALSE     # <- one point per workflow
   ) +
   # geom_text(aes(y = mean - .003, label = wflow_id), angle = 90, hjust = 1) +
-  lims(y = c(.96, 1)) +
+  # lims(y = c(.96, 1)) +
   labs(
     title = "Hyperparameter Tuning",
-    subtitle = "10-fold cross validation using 10-level grid search",
+    subtitle = "5-fold cross validation using 10-level grid search",
     color = "Model Type",
     shape = NULL,
     y = "F1 Metric",
     caption = "This figure contains only data from 1 person and, hence, is only for illustrative purposes."
   ) +
   scale_color_brewer(palette = "Dark2",
-                     label = c("XGboost", "Logistic Regression", "MARS", "Neural Net", "Random Forest")) +
+                     label = c("XGboost", "Neural Net", "Multinomial Logistic Regression", "Support Vector Machine")) +
   theme(
     text = element_text(color = "#EEE8D5", family = "ibm"),
     axis.title = element_text(family = "ibm", size = 20, color = "#EEE8D5"),

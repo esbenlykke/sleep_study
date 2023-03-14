@@ -29,14 +29,16 @@ data <-
     ))
   )
 
-
+### for testing purposes
 # ids <- data %>% distinct(id) %>% slice(1:10)
 # 
 # data <- data %>%
 #   filter(id %in% ids$id) %>%
 #   group_by(id, multiclass) %>%
-#   slice_sample(n = 1000) %>%
+#   slice_sample(n = 100) %>%
 #   ungroup()
+###
+
 
 set.seed(123)
 spl <-
@@ -100,7 +102,7 @@ multiclass_wf <-
 
 # Tune grids --------------------------------------------------------------
 
-cat("Tune grid for in-bed models\n")
+cat("Tune grid for multiclass simple trees\n")
 
 tictoc::tic()
 grid_ctrl <-

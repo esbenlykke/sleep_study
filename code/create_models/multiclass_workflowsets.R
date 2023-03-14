@@ -28,13 +28,15 @@ data <-
     )
   )
 
+### for testing purposes
 # ids <- data %>% distinct(id) %>% slice(1:10)
-#   
-# data <- data %>% 
-#   filter(id %in% ids$id) %>% 
-#   group_by(id, multiclass) %>% 
-#   slice_sample(n = 1000) %>% 
+# 
+# data <- data %>%
+#   filter(id %in% ids$id) %>%
+#   group_by(id, multiclass) %>%
+#   slice_sample(n = 100) %>%
 #   ungroup()
+###
 
 set.seed(123)
 spl <-
@@ -105,7 +107,7 @@ multiclass_wf <-
     ),
     models = list(
       logistic_regression = glmnet_spec, # works in parallel
-      nnet_regression = nnet_spec, # works in parallel
+      nnet = nnet_spec, # works in parallel
       # svm_rbf = svm_spec,
       xgboost = xgb_spec
     ),
