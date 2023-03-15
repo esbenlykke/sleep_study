@@ -8,12 +8,12 @@ library(here)
 library(patchwork)
 
 in_bed_roc <-
-  read_parquet(here("data/processed/roc_data_in_bed.parquet")) |>
+  read_parquet(here("data/processed/crude_roc_data_in_bed.parquet")) |>
   group_by(model) |>
   slice_sample(n = 1000, replace = TRUE)
 
 sleep_roc <-
-  read_parquet(here("data/processed/roc_data_sleep.parquet")) |>
+  read_parquet(here("data/processed/crude_roc_data_sleep.parquet")) |>
   group_by(model) |>
   slice_sample(n = 1000, replace = TRUE)
 

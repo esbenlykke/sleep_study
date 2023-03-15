@@ -23,12 +23,12 @@ data <-
   )
 
 ### for testing purposes
-# ids <- data %>% distinct(id) %>% slice(1:10)
+# ids <- data %>% distinct(id) %>% slice(1:15)
 # 
 # data <- data %>%
 #   filter(id %in% ids$id) %>%
-#   group_by(id, in_bed, sleep) %>%
-#   slice_sample(n = 100) %>%
+#   group_by(id) %>%
+#   slice_sample(n = 1000) %>%
 #   ungroup()
 ###
 
@@ -103,7 +103,7 @@ xgb_spec <-
   boost_tree(
     tree_depth = tune(), learn_rate = tune(),
     loss_reduction = tune(), min_n = tune(),
-    sample_size = tune(), trees = seq(100, 700, 200)
+    sample_size = tune(), trees = tune()
   ) |>
   set_engine("xgboost", verbose = TRUE) |>
   set_mode("classification")
@@ -201,7 +201,7 @@ all_in_bed_workflows
 
 tictoc::tic()
 in_bed_grid_results <-
-  all_in_bed_workflows[3,] |>
+  all_in_bed_workflows |>
   workflow_map(
     seed = 123,
     "tune_grid",

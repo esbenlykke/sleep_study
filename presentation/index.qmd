@@ -236,7 +236,7 @@ plot_tst
 ::::
 
 ## ROC Curves {transition="convex"}
-
+### Two binary models (in-bed/asleep)
 
 ```{r}
 source(here::here("presentation/code/plot_roc_curves.R"))
@@ -245,9 +245,10 @@ roc_plots
 ```
 
 ## ROC Curves {transition="convex"}
+### Binary relevance
 
 ```{r}
-roc_combined_plots
+source(here::here)
 ```
 
 ## Lots of Metrics {transition="convex" .H2}
