@@ -267,21 +267,28 @@ plot_tst
 
 ::::
 
-<!-- ## ROC Curves {transition="convex"} -->
-<!-- ### Two binary models (in-bed/asleep) -->
+## ROC Curves {transition="convex"}
 
-<!-- ```{r} -->
-<!-- source(here::here("presentation/code/plot_roc_curves.R")) -->
+```{r}
+source(here::here("presentation/code/plot_roc_curves.R"))
 
-<!-- roc_plots -->
-<!-- ``` -->
+multi_roc_plot
+```
 
-<!-- ## ROC Curves {transition="convex"} -->
-<!-- ### Binary relevance -->
+## ROC Curves {transition="convex"}
 
-<!-- ```{r} -->
-<!-- source(here::here) -->
-<!-- ``` -->
+```{r}
+three_classifiers_roc_plot
+```
+
+
+## ROC Curves {transition="convex"}
+
+```{r}
+#| fig-width: 8
+#| fig-align: center
+two_classifiers_roc_plot
+```
 
 <!-- ## Lots of Metrics {transition="convex" .H2} -->
 
@@ -468,4 +475,4 @@ plot_tst
 <!-- - in-bed awake/sleep is highly imbalanced -> maybe train a new classifier accounting for imbalanced data (SMOTE) -->
 <!-- - model combined preds instead? -->
 
-<!-- ## References {transition="convex"} -->
+## References {transition="convex"}

@@ -95,18 +95,12 @@ fits <- map(filesnames, read_rds) |>
   set_names(c("decision_tree", "decision_tree_SMOTE", "logistic_regression", "neural_net", "xgboost"))
 
 test <- read_parquet("data/data_for_modelling/multiclass_testing_data.parquet") %>%
-  mutate(multiclass = as_factor(multiclass))
-
-get_roc3 <-
-  function(fit, truth, estimate) {
-    fit |>
-      augment(test) |>
-      roc_curve(truth = {{ truth }}, estimate = {{ estimate }}, event_level = "second")
-  }
+  mutate(multiclass = factor(multiclass, 
+                             levels = c("in_bed_asleep", "in_bed_awake", "out_bed_awake")))
 
 
 map_dfr(fits,
-  ~ get_roc3(.x, multiclass, c(.pred_in_bed_asleep, .pred_in_bed_awake, .pred_out_bed_awake)),
+  ~ get_roc(.x, multiclass, c(.pred_in_bed_asleep, .pred_in_bed_awake, .pred_out_bed_awake)),
   .id = "model"
 ) |>
   write_parquet("data/processed/multiclass_OvsALL_roc_data.parquet")
