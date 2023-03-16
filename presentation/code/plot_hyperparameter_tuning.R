@@ -19,7 +19,7 @@ hyper_plot <-
     color = "Model Type",
     shape = NULL,
     y = "F1 Metric",
-    caption = "This figure contains only data from 1 person and, hence, is only for illustrative purposes."
+    caption = "Note: this is based on simulated data and is not representative of the actual training data from the study"
   ) +
   scale_color_brewer(palette = "Dark2",
                      label = c("XGboost", "Neural Net", "Multinomial Logistic Regression", "Support Vector Machine")) +
