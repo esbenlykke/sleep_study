@@ -4,12 +4,8 @@ library(SimplyAgree)
 library(furrr)
 
 
-stats_files <-
-  list.files("~/sleep_study/data/processed/stats_predictions", full.names = TRUE)
-
-all_stats <-
-  map(stats_files, read_parquet) |>
-  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
+crude_stats <-
+  read_parquet("data/processed/crude_stats.parquet")
 
 
 get_diff_stats <-
@@ -34,9 +30,11 @@ get_diff_stats <-
   }
 
 
-all_diffs <-
-  all_stats |>
-  map(get_diff_stats)
+crude_all_diffs <-
+  get_diff_stats(crude_stats) %>%
+  group_split(model) %>%
+  set_names(c("decision_tree", "logistic_regression", "neural_network", "xgboost")) %>%
+  map(drop_na) 
 
 
 # This method is nonparametric and accounts for repeated measures. Double check with Jan!
@@ -45,16 +43,18 @@ all_diffs <-
 # This function allows for the calculation of bootstrapped limits of agreement
 # when there are multiple observations per subject
 
-get_agree <- function(df = all_diffs, diff, condition = "noon_day", delta) {
-  future_map(df, ~ loa_mixed(
-    diff = diff,
-    condition = condition,
-    id = "id",
-    data = .,
-    delta = delta,
-    replicates = 1000
-  ), .options = furrr_options(seed = 123)) |>
-    map_dfr("loa", .id = "model") |>
+
+get_agree <- function(df, diff, delta, x_axis) {
+  df %>%
+    loa_mixed(
+      diff = diff,
+      condition = "noon_day",
+      id = "id",
+      data = .,
+      delta = delta,
+      plot.xaxis = x_axis
+    ) |>
+    pluck("loa") %>%
     rownames_to_column(var = "ba_metric") |>
     mutate(
       ba_metric = str_remove(ba_metric, "...\\d"),
@@ -65,26 +65,91 @@ get_agree <- function(df = all_diffs, diff, condition = "noon_day", delta) {
     as_tibble()
 }
 
+
 # Run in parallel
 
 plan(multisession, workers = 6)
 
 # spt
-spt <- get_agree(all_diffs, "diff_spt_hrs", delta = 2)
+
+crude_spt <-
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_spt_hrs) > 6)) %>% 
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_spt_hrs",
+    delta = 2,
+    x_axis = "avg_spt_hrs"
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
 
 # tst
-tst <- get_agree(all_diffs, "diff_tst_hrs", delta = 2)
+crude_tst <- 
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_tst_hrs) > 5)) %>% 
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_tst_hrs",
+    delta = 2,
+    x_axis = "avg_tst_hrs"
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
 # se_percent
-se_percent <- get_agree(all_diffs, "diff_se_percent", delta = 20)
+crude_se_percent <-  
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_se_percent) > 30)) %>% 
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_se_percent",
+    delta = 2,
+    x_axis = "avg_se_percent"
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
 
 # lps_min
-lps <- get_agree(all_diffs, "diff_lps_min", delta = 20)
+crude_lps <- 
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_lps_min) > 100)) %>% 
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_lps_min",
+    delta = 2,
+    x_axis = "avg_lps_min"
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
 
 # waso
-waso <- get_agree(all_diffs, "diff_waso_min", delta = 10)
+crude_waso <- 
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_waso_min) > 100)) %>% 
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_waso_min",
+    delta = 2,
+    x_axis = "avg_waso_min"
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
 
-bind_rows(spt, tst, se_percent, lps, waso) |> 
-  janitor::clean_names() |> 
-  write_csv("data/processed/mixed_effect_ba.csv")
+
+bind_rows(crude_spt, crude_tst, crude_se_percent, crude_lps, crude_waso) |>
+  janitor::clean_names() |>
+  write_csv("data/processed/crude_mixed_effect_ba.csv")
 
 beepr::beep()

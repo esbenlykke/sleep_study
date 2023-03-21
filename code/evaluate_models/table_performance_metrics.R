@@ -5,8 +5,7 @@ library(gt)
 library(showtext)
 
 
-separate_metrics <- read_csv("data/processed/performance_metrics.csv")
-combined_metrics <- read_csv("data/processed/combined_preds_performance_metrics.csv")
+crude_metrics <- read_csv("data/processed/crude_performance_metrics.csv")
 
 # Create table ------------------------------------------------------------
 
@@ -50,7 +49,7 @@ tab_fun <- function(metric_data) {
     data_color(columns = decision_tree, colors = "lightblue", alpha = .6)
 }
 
-tab_fun(separate_metrics)
+tab_fun(crude_metrics)
 
 gtsave(tab_performance, "visuals/table_separate_preds_performance_metrics.html")
 

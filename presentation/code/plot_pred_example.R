@@ -6,7 +6,7 @@ font_add_google("Mukta", family = "mukta")
 font_add_google("IBM Plex Serif", family = "ibm")
 showtext_auto()
 
-my_theme <- 
+my_theme <-
   theme(
     text = element_text(color = "#EEE8D5"),
     axis.title = element_text(family = "ibm", size = 20, color = "#EEE8D5"),
@@ -27,41 +27,197 @@ my_theme <-
 
 multiclass_ex <-
   tibble(
-  datetime = seq(
-    as_datetime("2020-01-15 12:00:00"),
-    as_datetime("2020-01-16 12:00:00"), seconds(10)
-  ),
-  in_bed_awake = if_else(
-    (datetime > as_datetime("2020-01-15 21:00:00") &
-      datetime < as_datetime("2020-01-15 21:30:00")) |
-      (datetime > as_datetime("2020-01-16 06:00:00") &
-        datetime < as_datetime("2020-01-16 06:50:00")), 1, 0
-  ),
-  in_bed_asleep = if_else(
-    datetime > as_datetime("2020-01-15 21:30:00") &
-      datetime < as_datetime("2020-01-16 06:00:00"), 1, 0
-  ),
-  out_bed_awake = if_else(
-    datetime > as_datetime("2020-01-15 12:00:00") &
-      datetime < as_datetime("2020-01-15 21:00:00") |
-      datetime > as_datetime("2020-01-16 06:50:00") &
-        datetime < as_datetime("2020-01-16 12:00:00"), 1, 0
-  )
-) %>% 
-  # pivot_longer(-datetime) %>% 
-    ggplot() +
+    datetime = seq(
+      as_datetime("2020-01-15 12:00:00"),
+      as_datetime("2020-01-16 12:00:00"), seconds(10)
+    ),
+    multiclass = factor(
+      case_when(
+        datetime >= as_datetime("2020-01-15 12:00:00") &
+          datetime < as_datetime("2020-01-15 21:00:00") |
+          datetime > as_datetime("2020-01-16 06:50:00") &
+            datetime <= as_datetime("2020-01-16 12:00:00") ~ "Out-Bed Awake",
+        (datetime >= as_datetime("2020-01-15 21:00:00") &
+          datetime <= as_datetime("2020-01-15 21:30:00")) |
+          (datetime >= as_datetime("2020-01-16 06:00:00") &
+            datetime <= as_datetime("2020-01-16 06:50:00")) ~ "In-Bed Awake",
+        (datetime > as_datetime("2020-01-15 21:30:00") &
+          datetime < as_datetime("2020-01-16 06:00:00")) ~ "In-Bed Asleep"
+      ),
+      levels = c("Out-Bed Awake", "In-Bed Awake", "In-Bed Asleep")
+    )
+  ) %>%
+  ggplot(aes(datetime, fct_rev(multiclass))) +
+  geom_step(group = 1, color = "#EEE8D5", size = 1.2) +
+  geom_step(group = 1, color = "darkorange") +
+  scale_x_datetime(
+    breaks = c(
+      as_datetime("2020-01-15 21:00:00"),
+      as_datetime("2020-01-16 00:00:00"),
+      as_datetime("2020-01-16 07:00:00")
+    ),
+    labels = c("Evening", "Midnight", "Morning"),
+    limits = c(as_datetime("2020-01-15 16:00:00"), as_datetime("2020-01-16 09:00:00"))
+  ) +
+  labs(
+    title = "Example from Single-Night Predictions",
+    subtitle = "Multiclass approach",
+    x = NULL,
+    y = NULL,
+    color = NULL,
+    caption = "Note: simulated data"
+  ) +
+  my_theme
+
+multiclass_lps <-
+  tibble(
+    datetime = seq(
+      as_datetime("2020-01-15 12:00:00"),
+      as_datetime("2020-01-16 12:00:00"), seconds(10)
+    ),
+    multiclass = factor(
+      case_when(
+        datetime >= as_datetime("2020-01-15 12:00:00") &
+          datetime < as_datetime("2020-01-15 21:00:00") |
+          datetime > as_datetime("2020-01-16 06:50:00") &
+            datetime <= as_datetime("2020-01-16 12:00:00") ~ "Out-Bed Awake",
+        (datetime >= as_datetime("2020-01-15 21:00:00") &
+          datetime <= as_datetime("2020-01-15 21:30:00")) |
+          (datetime >= as_datetime("2020-01-16 06:00:00") &
+            datetime <= as_datetime("2020-01-16 06:50:00")) ~ "In-Bed Awake",
+        (datetime > as_datetime("2020-01-15 21:30:00") &
+          datetime < as_datetime("2020-01-16 06:00:00")) ~ "In-Bed Asleep"
+      ),
+      levels = c("Out-Bed Awake", "In-Bed Awake", "In-Bed Asleep")
+    )
+  ) %>%
+  ggplot(aes(datetime, multiclass)) +
+  annotate(
+    geom = "rect",
+    xmin = as_datetime("2020-01-15 21:00:00"),
+    xmax = as_datetime("2020-01-15 21:30:00"),
+    ymin = -Inf, ymax = Inf, fill = "lightblue", alpha = .5
+  ) +
+  annotate(
+    geom = "text", label = "Latency Until Persistent Sleep",
+    x = as_datetime("2020-01-15 21:00:00") + minutes(150),
+    y = "In-Bed Awake",
+    color = "#EEE8D5", size = 6
+  ) +
+  geom_step(group = 1, color = "#EEE8D5", size = 1.2) +
+  geom_step(group = 1, color = "darkorange") +
+  scale_x_datetime(
+    breaks = c(
+      as_datetime("2020-01-15 21:00:00"),
+      as_datetime("2020-01-16 00:00:00"),
+      as_datetime("2020-01-16 07:00:00")
+    ),
+    labels = c("Evening", "Midnight", "Morning"),
+    limits = c(as_datetime("2020-01-15 16:00:00"), as_datetime("2020-01-16 09:00:00"))
+  ) +
+  labs(
+    title = "Example from Single-Night Predictions",
+    subtitle = "Multiclass approach",
+    x = NULL,
+    y = NULL,
+    color = NULL,
+    caption = "Note: simulated data"
+  ) +
+  my_theme
+
+multiclass_tst <-
+  tibble(
+    datetime = seq(
+      as_datetime("2020-01-15 12:00:00"),
+      as_datetime("2020-01-16 12:00:00"), seconds(10)
+    ),
+    multiclass = factor(
+      case_when(
+        datetime >= as_datetime("2020-01-15 12:00:00") &
+          datetime < as_datetime("2020-01-15 21:00:00") |
+          datetime > as_datetime("2020-01-16 06:50:00") &
+            datetime <= as_datetime("2020-01-16 12:00:00") ~ "Out-Bed Awake",
+        (datetime >= as_datetime("2020-01-15 21:00:00") &
+          datetime <= as_datetime("2020-01-15 21:30:00")) |
+          (datetime >= as_datetime("2020-01-16 06:00:00") &
+            datetime <= as_datetime("2020-01-16 06:50:00")) ~ "In-Bed Awake",
+        (datetime > as_datetime("2020-01-15 21:30:00") &
+          datetime < as_datetime("2020-01-16 06:00:00")) ~ "In-Bed Asleep"
+      ),
+      levels = c("Out-Bed Awake", "In-Bed Awake", "In-Bed Asleep")
+    )
+  ) %>%
+  ggplot(aes(datetime, multiclass)) +
+  annotate(
+    geom = "rect",
+    xmin = as_datetime("2020-01-15 21:30:00"),
+    xmax = as_datetime("2020-01-16 06:00:00"),
+    ymin = -Inf, ymax = Inf, fill = "lightblue", alpha = .5
+  ) +
+  annotate(
+    geom = "text", x = as_datetime("2020-01-16 02:00:00") - minutes(30),
+    y = "In-Bed Awake",
+    label = "Total Sleep Time",
+    color = "#EEE8D5", size = 6
+  ) +
+  geom_step(group = 1, color = "#EEE8D5", size = 1.2) +
+  geom_step(group = 1, color = "darkorange") +
+  scale_x_datetime(
+    breaks = c(
+      as_datetime("2020-01-15 21:00:00"),
+      as_datetime("2020-01-16 00:00:00"),
+      as_datetime("2020-01-16 07:00:00")
+    ),
+    labels = c("Evening", "Midnight", "Morning"),
+    limits = c(as_datetime("2020-01-15 16:00:00"), as_datetime("2020-01-16 09:00:00"))
+  ) +
+  labs(
+    title = "Example from Single-Night Predictions",
+    subtitle = "Multiclass approach",
+    x = NULL,
+    y = NULL,
+    color = NULL,
+    caption = "Note: simulated data"
+  ) +
+  my_theme
+
+br_ex <-
+  tibble(
+    datetime = seq(
+      as_datetime("2020-01-15 12:00:00"),
+      as_datetime("2020-01-16 12:00:00"), seconds(10)
+    ),
+    in_bed_awake = if_else(
+      (datetime > as_datetime("2020-01-15 21:00:00") &
+        datetime < as_datetime("2020-01-15 21:30:00")) |
+        (datetime > as_datetime("2020-01-16 06:00:00") &
+          datetime < as_datetime("2020-01-16 06:50:00")), 1, 0
+    ),
+    in_bed_asleep = if_else(
+      datetime > as_datetime("2020-01-15 21:30:00") &
+        datetime < as_datetime("2020-01-16 06:00:00"), 1, 0
+    ),
+    out_bed_awake = if_else(
+      datetime > as_datetime("2020-01-15 12:00:00") &
+        datetime < as_datetime("2020-01-15 21:00:00") |
+        datetime > as_datetime("2020-01-16 06:50:00") &
+          datetime < as_datetime("2020-01-16 12:00:00"), 1, 0
+    )
+  ) %>%
+  # pivot_longer(-datetime) %>%
+  ggplot() +
   # ggplot(aes(datetime, value, color = name)) +
   # geom_step() +
   # facet_wrap(~ name, ncol = 1) +
   geom_step(aes(datetime, in_bed_awake,
-                color = "1")
-  ) +
+    color = "1"
+  )) +
   geom_step(aes(datetime, in_bed_asleep + 1.1,
-                color = "2"), alpha = .7
-  ) +
+    color = "2"
+  ), alpha = .7) +
   geom_step(aes(datetime, out_bed_awake - 1.1,
-                color = "3"), alpha = .7
-  ) +
+    color = "3"
+  ), alpha = .7) +
   scale_y_continuous(
     breaks = c(0, 1),
     labels = c("No", "Yes")
@@ -82,7 +238,7 @@ multiclass_ex <-
   ) +
   labs(
     title = "Example from Single-Night Predictions",
-    subtitle = "Multiclass and binary relevance approach",
+    subtitle = "Binary relevance approach",
     x = NULL,
     y = NULL,
     color = NULL,
@@ -90,30 +246,30 @@ multiclass_ex <-
   ) +
   my_theme
 
-multiclass_lps <- 
-tibble(
-  datetime = seq(
-    as_datetime("2020-01-15 12:00:00"),
-    as_datetime("2020-01-16 12:00:00"), seconds(10)
-  ),
-  in_bed_awake = if_else(
-    (datetime > as_datetime("2020-01-15 21:00:00") &
-       datetime < as_datetime("2020-01-15 21:30:00")) |
-      (datetime > as_datetime("2020-01-16 06:00:00") &
-         datetime < as_datetime("2020-01-16 06:50:00")), 1, 0
-  ),
-  in_bed_asleep = if_else(
-    datetime > as_datetime("2020-01-15 21:30:00") &
-      datetime < as_datetime("2020-01-16 06:00:00"), 1, 0
-  ),
-  out_bed_awake = if_else(
-    datetime > as_datetime("2020-01-15 12:00:00") &
-      datetime < as_datetime("2020-01-15 21:00:00") |
-      datetime > as_datetime("2020-01-16 06:50:00") &
-      datetime < as_datetime("2020-01-16 12:00:00"), 1, 0
-  )
-) %>% 
-  # pivot_longer(-datetime) %>% 
+br_lps <-
+  tibble(
+    datetime = seq(
+      as_datetime("2020-01-15 12:00:00"),
+      as_datetime("2020-01-16 12:00:00"), seconds(10)
+    ),
+    in_bed_awake = if_else(
+      (datetime > as_datetime("2020-01-15 21:00:00") &
+        datetime < as_datetime("2020-01-15 21:30:00")) |
+        (datetime > as_datetime("2020-01-16 06:00:00") &
+          datetime < as_datetime("2020-01-16 06:50:00")), 1, 0
+    ),
+    in_bed_asleep = if_else(
+      datetime > as_datetime("2020-01-15 21:30:00") &
+        datetime < as_datetime("2020-01-16 06:00:00"), 1, 0
+    ),
+    out_bed_awake = if_else(
+      datetime > as_datetime("2020-01-15 12:00:00") &
+        datetime < as_datetime("2020-01-15 21:00:00") |
+        datetime > as_datetime("2020-01-16 06:50:00") &
+          datetime < as_datetime("2020-01-16 12:00:00"), 1, 0
+    )
+  ) %>%
+  # pivot_longer(-datetime) %>%
   ggplot() +
   annotate(
     geom = "rect",
@@ -131,14 +287,14 @@ tibble(
   # geom_step() +
   # facet_wrap(~ name, ncol = 1) +
   geom_step(aes(datetime, in_bed_awake,
-                color = "1")
-  ) +
+    color = "1"
+  )) +
   geom_step(aes(datetime, in_bed_asleep + 1.1,
-                color = "2"), alpha = .7
-  ) +
+    color = "2"
+  ), alpha = .7) +
   geom_step(aes(datetime, out_bed_awake - 1.1,
-                color = "3"), alpha = .7
-  ) +
+    color = "3"
+  ), alpha = .7) +
   scale_y_continuous(
     breaks = c(0, 1),
     labels = c("No", "Yes")
@@ -159,7 +315,7 @@ tibble(
   ) +
   labs(
     title = "Example from Single-Night Predictions",
-    subtitle = "Multiclass and binary relevance approach",
+    subtitle = "Binary relevance approach",
     x = NULL,
     y = NULL,
     color = NULL,
@@ -167,7 +323,7 @@ tibble(
   ) +
   my_theme
 
-multiclass_tst <- 
+br_tst <-
   tibble(
     datetime = seq(
       as_datetime("2020-01-15 12:00:00"),
@@ -175,9 +331,9 @@ multiclass_tst <-
     ),
     in_bed_awake = if_else(
       (datetime > as_datetime("2020-01-15 21:00:00") &
-         datetime < as_datetime("2020-01-15 21:30:00")) |
+        datetime < as_datetime("2020-01-15 21:30:00")) |
         (datetime > as_datetime("2020-01-16 06:00:00") &
-           datetime < as_datetime("2020-01-16 06:50:00")), 1, 0
+          datetime < as_datetime("2020-01-16 06:50:00")), 1, 0
     ),
     in_bed_asleep = if_else(
       datetime > as_datetime("2020-01-15 21:30:00") &
@@ -187,15 +343,15 @@ multiclass_tst <-
       datetime > as_datetime("2020-01-15 12:00:00") &
         datetime < as_datetime("2020-01-15 21:00:00") |
         datetime > as_datetime("2020-01-16 06:50:00") &
-        datetime < as_datetime("2020-01-16 12:00:00"), 1, 0
+          datetime < as_datetime("2020-01-16 12:00:00"), 1, 0
     )
-  ) %>% 
-  # pivot_longer(-datetime) %>% 
+  ) %>%
+  # pivot_longer(-datetime) %>%
   ggplot() +
   annotate(
     geom = "rect",
     xmin = as_datetime("2020-01-15 21:30:00"),
-    xmax = as_datetime("2020-01-16 06:50:00"),
+    xmax = as_datetime("2020-01-16 06:00:00"),
     ymin = -Inf, ymax = Inf, fill = "lightblue", alpha = .5
   ) +
   annotate(
@@ -207,14 +363,14 @@ multiclass_tst <-
   # geom_step() +
   # facet_wrap(~ name, ncol = 1) +
   geom_step(aes(datetime, in_bed_awake,
-                color = "1")
-  ) +
+    color = "1"
+  )) +
   geom_step(aes(datetime, in_bed_asleep + 1.1,
-                color = "2"), alpha = .7
-  ) +
+    color = "2"
+  ), alpha = .7) +
   geom_step(aes(datetime, out_bed_awake - 1.1,
-                color = "3"), alpha = .7
-  ) +
+    color = "3"
+  ), alpha = .7) +
   scale_y_continuous(
     breaks = c(0, 1),
     labels = c("No", "Yes")
@@ -235,7 +391,7 @@ multiclass_tst <-
   ) +
   labs(
     title = "Example from Single-Night Predictions",
-    subtitle = "Multiclass and binary relevance approach",
+    subtitle = "Binary relevance approach",
     x = NULL,
     y = NULL,
     color = NULL,

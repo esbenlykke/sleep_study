@@ -4,15 +4,13 @@ library(patchwork)
 library(showtext)
 
 
-ba_metrics <-
-  read_csv(here::here("data/processed/mixed_effect_ba.csv"))
+crude_me_ba <-
+  read_csv(here::here("data/processed/crude_mixed_effect_ba.csv"))
 
-stats_files <-
-  list.files("~/sleep_study/data/processed/stats_predictions", full.names = TRUE)
+crude_stats <- 
+  read_parquet("data/processed/crude_stats.parquet") 
 
-all_stats <-
-  map(stats_files, read_parquet) |>
-  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
+
 # |>
 #   map(
 #     ~ filter(.x, (id != 1742705 | noon_day != 24) &
@@ -43,9 +41,14 @@ get_diff_stats <-
       ungroup()
   }
 
+crude_all_diffs <-
+  get_diff_stats(crude_stats) %>%
+  group_split(model) %>%
+  set_names(c("decision_tree", "logistic_regression", "neural_network", "xgboost")) %>%
+  map(drop_na) 
+
 diff_avg <-
-  all_stats |>
-  map(get_diff_stats) |>
+  crude_all_diffs %>% 
   map(~ .x |> select(id, contains(c("diff", "avg")))) |>
   map(~ .x |> pivot_longer(contains("diff"), names_to = "diffs", values_to = "diff_values")) |>
   map(~ .x |> pivot_longer(contains("avg"), names_to = "avgs", values_to = "avg_values")) |>
@@ -60,7 +63,7 @@ diff_avg <-
 
 
 h_lines <-
-  ba_metrics |>
+  crude_me_ba |>
   group_split(model, .keep = FALSE) |>
   setNames(c("decision_tree", "logistic_regression", "neural_net", "xgboost")) |>
   map(~ .x |>
@@ -69,7 +72,7 @@ h_lines <-
     group_split(type))
 
 ci_lines <-
-  ba_metrics |>
+  crude_me_ba |>
   group_split(model, .keep = FALSE) |>
   setNames(c("decision_tree", "logistic_regression", "neural_net", "xgboost")) |>
   map(~
@@ -180,6 +183,8 @@ create_titles <- function(x) {
     map2(titles, ~ .x + labs(title = .y))
 }
 
+diff_avg %>% 
+map(~ filter(.x, !abs(diff_values) > 6))
 
 # dc_plots <-
 dc_plots <-

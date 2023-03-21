@@ -5,7 +5,7 @@ author: "Esben Lykke, PhD student"
 date: "`r format(Sys.Date(), '%d %B, %Y')`"
 format:
   revealjs:
-    smaller: true
+    smaller: false
     theme: moon
     slide-number: true
     preview-links: auto
@@ -20,16 +20,13 @@ smooth-scroll: true
 bibliography: references.bib
 ---
 
-## Background {transition="convex"}
-
-```{r}
-#| echo: false
-library(gt)
-library(arrow)
-library(visNetwork)
-library(tidymodels)
-library(tidymodels)
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
+
+# Background {transition="fade"}
+
+## Background {transition="convex"}
 
 - Sleep plays a vital role in health, thus, improving the assessment of sleep–wake outside of a laboratory environment is critical
 - The gold standard (PSG) is costly and inconvenient.
@@ -39,9 +36,7 @@ library(tidymodels)
 - detect wakefulness is difficult, worse performance in populations with sleep disorders
 - typically a two level analysis: epoch based and summarized across night(s)
 - Zmachine-derived sleep stats
-- 
-
-Purpose... 
+- Purpose... 
 
 ## But Esben, what about them sleep stages!? {transition="convex"}
 
@@ -53,9 +48,9 @@ Purpose...
   
 It was likely a dead end from the get-go :(
 
-## Methods {transition="convex"}
+# Methods {transition="fade"}
 
-::: {.fragment}
+## Methods {transition="convex"}
 
 - data preparation, big time-consumer is handling raw acc data
 - only thigh data used. HSBC and other is only thigh data...
@@ -67,8 +62,6 @@ It was likely a dead end from the get-go :(
 - adjust threshold for in bed awake or give edge in tie breakers??
 - zm sleep stats inclusion criteria
 - three approaches: tw- binary (risk of ghost classes), binary relevance (choosing the right tie breaker), and multiclass
-
-:::
 
 ## Exclusion Criteria {transition="convex" .H2}
 
@@ -204,6 +197,7 @@ multiclass_ex
 
 ```{r}
 #| fig-asp: .4
+
 multiclass_lps
 ```
 
@@ -211,7 +205,29 @@ multiclass_lps
 
 ```{r}
 #| fig-asp: .4
+
 multiclass_tst
+```
+## Estimate Sleep Quality Metrics {transition="fade"}
+
+```{r}
+#| fig-asp: .4
+
+br_ex
+```
+
+## Estimate Sleep Quality Metrics {transition="fade"}
+
+```{r}
+#| fig-asp: .4
+br_lps
+```
+
+## Estimate Sleep Quality Metrics {transition="fade"}
+
+```{r}
+#| fig-asp: .4
+br_tst
 ```
 
 ## Estimate Sleep Quality Metrics {transition="fade"}
@@ -235,11 +251,12 @@ plot_lps
 plot_tst
 ```
 
-## Results {transition="convex" .H2}
+# Results {transition="fade"}
+
+## {.H2 transition="convex"}
 
 :::: {.columns}
-
-::: {.fragment .column width="50%"}
+::: {.column width="50%"}
 
 ### Epoch-Based
 
@@ -252,7 +269,7 @@ plot_tst
   
 :::
 
-::: {.fragment .column width="50%"}
+::: {.column width="50%"}
 
 ### Summarized across nights {.H3}
 
@@ -264,10 +281,12 @@ plot_tst
   - Wake After Sleep Onset
   
 :::
-
 ::::
 
-## ROC Curves {transition="convex"}
+
+## Many ROC Curves {transition="convex"}
+
+## {transition="convex"}
 
 ```{r}
 source(here::here("presentation/code/plot_roc_curves.R"))
@@ -275,14 +294,14 @@ source(here::here("presentation/code/plot_roc_curves.R"))
 multi_roc_plot
 ```
 
-## ROC Curves {transition="convex"}
+## {transition="convex"}
 
 ```{r}
 three_classifiers_roc_plot
 ```
 
 
-## ROC Curves {transition="convex"}
+## {transition="convex"}
 
 ```{r}
 #| fig-width: 8
@@ -290,25 +309,30 @@ three_classifiers_roc_plot
 two_classifiers_roc_plot
 ```
 
-<!-- ## Lots of Metrics {transition="convex" .H2} -->
+## Lots of Metrics {transition="convex"}
 
-<!-- :::: {.columns} -->
+## {transition="convex"}
+::: {layout="[[-1], [1], [-1]]"}
+```{r}
+source(here::here("presentation/code/tables_performance.R"))
 
-<!-- ::: {.column} -->
-<!-- ```{r} -->
-<!-- source(here::here("presentation/code/tables_performance.R")) -->
+tab_multi_metrics
+```
+:::
 
-<!-- tab1 -->
-<!-- ``` -->
-<!-- ::: -->
+## {transition="convex" .H2}
 
-<!-- ::: {.column} -->
-<!-- ```{r} -->
-<!-- tab2 -->
-<!-- ``` -->
-<!-- ::: -->
+::: {layout="[[-1], [1], [-1]]"}
+```{r}
+tab_crude_metrics
+```
+:::
 
-<!-- :::: -->
+## {transition="convex" .H2}
+
+```{r}
+tab_br_metrics
+```
 
 <!-- ## Bland-Altman Plots {transition="convex"} -->
 
