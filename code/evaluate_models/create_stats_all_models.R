@@ -30,8 +30,10 @@ zm_stats <-
   select(id, day, month, spt_hrs, tst_hrs, se_percent, lps_min, waso_min) |>
   rename_with(.cols = -c(id, day, month), ~ paste0("zm_", .))
 
+
 # create stats ------------------------------------------------------------
 
+### Crude
 create_crude_stats <- function(tbl) {
   tbl %>%
     mutate(across(c(pred_in_bed, pred_sleep), as.integer) - 1) |>
@@ -54,9 +56,53 @@ create_crude_stats <- function(tbl) {
     inner_join(zm_stats, by = c("id", "noon_day" = "day", "month"))
 }
 
-preds_crude %>% 
-  group_by(model) %>% 
-  group_modify(~ create_crude_stats(.x), .keep = TRUE) %>% 
+preds_crude %>%
+  group_by(model) %>%
+  group_modify(~ create_crude_stats(.x), .keep = TRUE) %>%
   write_parquet("data/processed/crude_stats.parquet")
 
 ### binary relevance
+
+### Multiclass
+create_multi_stats <- function(tbl){
+  tbl %>%
+  mutate(
+    month = month(datetime - hours(12)),
+    in_bed_asleep_72 = slide_sum(.pred_class == "in_bed_asleep", before = 36, after = 36),
+    in_bed_awake_72 = slide_sum(.pred_class == "in_bed_awake", before = 36, after = 36),
+    out_bed_awake_72 = slide_sum(.pred_class == "out_bed_awake", before = 36, after = 36),
+    in_bed = if_else(in_bed_asleep_72 >= 60 | in_bed_awake_72 >= 60, 1, 0)
+  ) %>%
+  group_by(id, noon_day, month) %>% 
+  summarise(
+    spt_hrs = ((max(row_number()[in_bed == 1] + 30) - min(row_number()[in_bed == 1] - 30)) * 10) / 60 / 60,
+    tst_hrs = (sum(in_bed_asleep_72 >= 60) * 10) / 60 / 60,
+    se_percent = 100 * (tst_hrs / spt_hrs),
+    lps_min = (((min(row_number()[in_bed_asleep_72 == 60] + 30)) - min(row_number()[in_bed_awake_72 == 60] - 30)) * 10) / 60,
+    waso_min = ((sum(.pred_class == "in_bed_awake") - lps_min) * 10) / 60,
+    .groups = "drop"
+  ) %>% 
+  inner_join(zm_stats, by = c("id", "noon_day" = "day", "month"))}
+
+preds_multi %>% 
+  group_by(model) %>% 
+  group_modify(~ create_multi_stats(.x), .keep = TRUE) %>% 
+  ungroup() %>% 
+  write_parquet("data/processed/multiclass_stats.parquet")
+  
+  
+  
+# TESTING
+# multi_small <- 
+#   preds_multi %>% 
+#   filter(id == 8504 & noon_day == 9)
+# 
+# multi_small %>%
+#     group_by(model) %>%
+#     group_modify(~ create_multi_stats(.x), .keep = TRUE) %>%
+#     ungroup()
+#   
+#   multi_small %>% 
+#     filter(model == "logistic_regression") %>% 
+#     ggplot(aes(datetime, .pred_class)) +
+#     geom_step(group = 1)

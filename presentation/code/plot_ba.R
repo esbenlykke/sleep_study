@@ -8,7 +8,7 @@ crude_me_ba <-
   read_csv(here::here("data/processed/crude_mixed_effect_ba.csv"))
 
 crude_stats <- 
-  read_parquet("data/processed/crude_stats.parquet") 
+  read_parquet(here::here("data/processed/crude_stats.parquet") )
 
 
 # |>
@@ -183,8 +183,8 @@ create_titles <- function(x) {
     map2(titles, ~ .x + labs(title = .y))
 }
 
-diff_avg %>% 
-map(~ filter(.x, !abs(diff_values) > 6))
+# diff_avg %>% 
+# map(~ filter(.x, !abs(diff_values) > 6))
 
 # dc_plots <-
 dc_plots <-

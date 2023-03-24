@@ -6,66 +6,11 @@ library(gtExtras)
 library(here)
 
 
-ba_metrics <-
-  read_csv(here::here("data/processed/mixed_effect_ba.csv"))
+ba_metrics_crude <-
+  read_csv(here::here("data/processed/crude_mixed_effect_ba.csv"))
 
-stats_files <-
-  list.files(here("data/processed/stats_predictions"), full.names = TRUE)
-
-all_stats <-
-  map(stats_files, read_parquet) |>
-  set_names(c("logistic_regression", "neural_net", "decision_tree", "xgboost"))
-# |>
-#   map(
-#     ~ filter(.x, (id != 1742705 | noon_day != 24) &
-#         (id != 1044005 | noon_day != 16) &
-#         (id != 1750904 | noon_day != 21) &
-#         (id != 1718904 | noon_day != 8)
-#     )
-#   ) # TODO look into these lps_min outliers
-
-get_diff_stats <-
-  function(tbl) {
-    tbl |>
-      mutate(
-        diff_spt_hrs = spt_hrs - zm_spt_hrs,
-        diff_tst_hrs = tst_hrs - zm_tst_hrs,
-        diff_se_percent = se_percent - zm_se_percent,
-        diff_lps_min = lps_min - zm_lps_min,
-        diff_waso_min = waso_min - zm_waso_min
-      ) |>
-      rowwise() |>
-      mutate(
-        avg_spt_hrs = mean(c(spt_hrs, zm_spt_hrs)),
-        avg_tst_hrs = mean(c(tst_hrs, zm_tst_hrs)),
-        avg_se_percent = mean(c(se_percent, zm_se_percent)),
-        avg_lps_min = mean(c(lps_min, zm_lps_min)),
-        avg_waso_min = mean(c(waso_min, zm_waso_min))
-      ) |>
-      ungroup()
-  }
-
-
-get_summary_stats <-
-  function(tbl) {
-    tbl |>
-      # filter(se_percent > 0) |>
-      summarise(
-        across(contains("diff"), list(
-          upper = ~ mean(.x) + 1.96 * sd(.x),
-          lower = ~ mean(.x) - 1.96 * sd(.x),
-          mean = ~ mean(.x)
-        ))
-      )
-  }
-
-all_diffs <-
-  all_stats |>
-  map(get_diff_stats)
-
-
-ba_metrics |>
-  pivot_wider(names_from = c(model, ba_metric), values_from = c(estimate:upper_ci))
+ba_metrics_multi <- 
+  read_csv(here::here("data/processed/multiclass_mixed_effect_ba.csv"))
 
 
 # create table ------------------------------------------------------------
@@ -73,8 +18,8 @@ ba_metrics |>
 font_add_google("IBM Plex Serif", family = "ibm")
 showtext_auto()
 
-tab_ba <-
-ba_metrics |>
+create_ba_table <- function(tbl){
+    tbl |>
   mutate(
     ba_metric = case_when(
       str_detect(ba_metric, "bias") ~ "Bias (95% CI)",
@@ -117,7 +62,7 @@ ba_metrics |>
     locations = cells_body(rows = seq(1, 19, 2))
   ) |>
   cols_label(model = "") |>
-  cols_align(columns = 1:5, align = "right") |> 
+  cols_align(columns = 1:5, align = "right") |>
   tab_footnote(
     footnote = "Bootstrapped mixed effects limits of agreement with multiple
     observations per subject (Parker et al. 2016)"
@@ -152,3 +97,7 @@ ba_metrics |>
     heading.align = "center",
     footnotes.font.size = 10
   )
+}
+
+tab_ba_crude <-
+  create_ba_table(ba_metrics_crude)
