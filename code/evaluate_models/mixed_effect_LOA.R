@@ -81,83 +81,83 @@ get_agree <- function(df, diff, delta, x_axis) {
 
 doParallel::registerDoParallel(cores = 6)
 
-# # spt
-# crude_spt <-
-#   crude_all_diffs %>%
-#   map(~ filter(.x, !abs(diff_spt_hrs) > 6 & spt_hrs >= 0)) %>% 
-#   future_map_dfr(~ get_agree(
-#     df = .x,
-#     diff = "diff_spt_hrs",
-#     delta = 2,
-#   ),
-#   .progress = TRUE,
-#   .id = "model",
-#   .options = furrr_options(seed = 123)
-#   )
-# 
-# 
-# # tst
-# crude_tst <- 
-#   crude_all_diffs %>%
-#   map(~ filter(.x, !abs(diff_tst_hrs) > 5 & tst_hrs >= 0)) %>% 
-#   future_map_dfr(~ get_agree(
-#     df = .x,
-#     diff = "diff_tst_hrs",
-#     delta = 2,
-#   ),
-#   .progress = TRUE,
-#   .id = "model",
-#   .options = furrr_options(seed = 123)
-#   )
-# 
-# # se_percent
-# crude_se_percent <-  
-#   crude_all_diffs %>%
-#   map(~ filter(.x, !abs(diff_se_percent) > 30 & se_percent >= 0)) %>% 
-#   future_map_dfr(~ get_agree(
-#     df = .x,
-#     diff = "diff_se_percent",
-#     delta = 2,
-#   ),
-#   .progress = TRUE,
-#   .id = "model",
-#   .options = furrr_options(seed = 123)
-#   )
-# 
-# # lps_min
-# crude_lps <- 
-#   crude_all_diffs %>%
-#   map(~ filter(.x, !abs(diff_lps_min) > 100 & lps_min >= 0)) %>% 
-#   future_map_dfr(~ get_agree(
-#     df = .x,
-#     diff = "diff_lps_min",
-#     delta = 2,
-#   ),
-#   .progress = TRUE,
-#   .id = "model",
-#   .options = furrr_options(seed = 123)
-#   )
-# 
-# # waso
-# crude_waso <- 
-#   crude_all_diffs %>%
-#   map(~ filter(.x, !abs(diff_waso_min) > 100 & waso_min >= 0)) %>% 
-#   future_map_dfr(~ get_agree(
-#     df = .x,
-#     diff = "diff_waso_min",
-#     delta = 2,
-#   ),
-#   .progress = TRUE,
-#   .id = "model",
-#   .options = furrr_options(seed = 123)
-#   )
-# 
-# 
-# bind_rows(crude_spt, crude_tst, crude_se_percent, crude_lps, crude_waso) |>
-#   janitor::clean_names() |>
-#   write_csv("data/processed/crude_mixed_effect_ba.csv")
-# 
-# beepr::beep()
+# spt
+crude_spt <-
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_spt_hrs) > 6 & spt_hrs >= 0)) %>%
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_spt_hrs",
+    delta = 2,
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
+
+# tst
+crude_tst <-
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_tst_hrs) > 5 & tst_hrs >= 0)) %>%
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_tst_hrs",
+    delta = 2,
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
+# se_percent
+crude_se_percent <-
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_se_percent) > 30 & se_percent >= 0)) %>%
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_se_percent",
+    delta = 2,
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
+# lps_min
+crude_lps <-
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_lps_min) > 100 & lps_min >= 0)) %>%
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_lps_min",
+    delta = 2,
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
+# waso
+crude_waso <-
+  crude_all_diffs %>%
+  map(~ filter(.x, !abs(diff_waso_min) > 100 & waso_min >= 0)) %>%
+  future_map_dfr(~ get_agree(
+    df = .x,
+    diff = "diff_waso_min",
+    delta = 2,
+  ),
+  .progress = TRUE,
+  .id = "model",
+  .options = furrr_options(seed = 123)
+  )
+
+
+bind_rows(crude_spt, crude_tst, crude_se_percent, crude_lps, crude_waso) |>
+  janitor::clean_names() |>
+  write_csv("data/processed/crude_mixed_effect_ba.csv")
+
+beepr::beep()
 
 
 ### Multiclass

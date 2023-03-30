@@ -1,58 +1,84 @@
 library(tidyverse)
 library(arrow)
 library(lme4)
-library(car)
+
 
 crude_stats <-
-  read_parquet("data/processed/crude_stats.parquet") %>%
-  mutate(
-    id = as_factor(id)
-  ) %>%
-  split(.$model) %>%
-  map(drop_na)
+  crude_stats <-
+  read_rds("data/processed/crude_stats_and_diffs.rds")
 
-crude_dc_data <-
-  crude_stats[[1]] %>% 
-  ungroup()
-
-library(lme4)
-library(car)
+dc_spt <-
+  crude_stats$decision_tree %>%
+  filter(abs(diff_spt_hrs) < 5) %>%
+  select(id, noon_day, spt_hrs, zm_spt_hrs) %>%
+  mutate(spt_min = spt_hrs * 60) %>%
+  group_by(id) %>%
+  mutate(noon_day = 1:n())
 
 
-sleep_data <- 
-  crude_dc_data %>% 
-  select(id, spt_hrs)
+# crude_stats %>% 
+#   map(get_diff_stats) %>% 
+#   write_rds("data/processed/crude_stats_and_diffs.rds")
 
-# Fit a linear mixed effects model to estimate the within-subject standard deviation for each subject
-sleep_model <- lmer(spt_hrs ~ (1 | id), data = sleep_data)
+# Fit a linear mixed model and calculate the MDC using the estimated within-subject SD:
 
-# Extract sd from model
-sd <- sigma(sleep_model)
+get_mdc_icc <-
+  function(tbl) {
+    lmm <- lmer(spt_hrs ~ noon_day + (1 | id), data = tbl)
+    var_components <- VarCorr(lmm)
+    sd_between <- var_components$id[1] # Random intercept variance for subjects
+    residual_variance <- sigma(lmm)^2 # Residual variance (square of residual standard deviation)
+    icc <- sd_between / (sd_between + residual_variance)
+    confidence_level <- 0.95
+    z_score <- qnorm(confidence_level + (1 - confidence_level) / 2)
+    sd_within <- sigma(lmm)
+    
+    mdc <- z_score * sqrt(2) * sd_within * sqrt(1 - icc)
+    return(mdc)
+  }
 
-# Perform Levene's test
-levene_test <- leveneTest(resid(sleep_model) ~ sleep_data$id) %>% broom::tidy()
+get_mdc_sem <-
+  function(tbl) {
+    lmm <- lmer(spt_hrs ~ noon_day + (1 | id), data = tbl)
+    sd_within <- sigma(lmm)
+    n <- length(unique(tbl$id))
+    # # n <- 75
+    sem <- sd_within / sqrt(n)
+    mdc <- sem * 1.96 * sqrt(2)
+    return(mdc)
+  }
 
-# Levenes test is non sign. No need to use ICC
+# Calculate MDC and CI95% by bootstrapping.
 
-# Calculate SEM
-n <- length(unique(sleep_data$id)) # number of groups
-k <- length(sleep_data$spt_hrs) / n # sample size per group
-SEM <- sd / sqrt(n * k)
+# Create bootstraps
+set.seed(123)
+boots <-
+  rsample::bootstraps(dc_spt, times = 100)
 
-# MDC
-MDC <- 1.96 * SEM * sqrt(2)
-MDC * 60
+# Calculate MDC for each bootstrapped data set
+res_icc <-
+  map_dbl(boots$splits, get_mdc_icc)
 
-# 95%CI
-# Calculate degrees of freedom
-df <- n - 1
+res_sem <-
+  map_dbl(boots$splits, get_mdc_sem)
 
-# Calculate critical value for alpha = 0.05
-t_critical <- qt(1 - 0.05/2, df)
+mdc_mean_icc <- mean(res_icc)
+mdc_mean_sem <- mean(res_sem)
 
-# Calculate confidence interval
-CI <- c(MDC - t_critical * SEM * sqrt(2) * 60, MDC + t_critical * SEM * sqrt(2) * 60)
 
-# Print MDC and CI
-cat("MDC:", round(MDC, 2), "\n")
-cat("CI:", round(CI[1], 2), "-", round(CI[2], 2))
+# Calculate bootstrap confidence intervals
+mdc_ci_icc <- quantile(res_icc, c(0.025, 0.975))
+mdc_ci_sem <- quantile(res_sem, c(0.025, 0.975))
+
+
+glue::glue("MDC-ICC (CI95%)
+           {round(mdc_mean_icc, 1)} hours ({round(mdc_ci_icc[[1]], 1)} - {round(mdc_ci_icc[[2]], 1)})")
+glue::glue("MDC-SEM (CI95%)
+           {round(mdc_mean_sem, 1)} minutes ({round(mdc_ci_sem[[1]], 1)} - {round(mdc_ci_sem[[2]], 1)})")
+
+
+
+lmm <- lmer(spt_min ~ noon_day + (1 | id), data = dc_spt)
+icc <- performance::icc(lmm)[[1]]
+# MDES = (Z_β + Z_α/2) * σ / √(n * (k * (1 - ICC) + ICC))
+(.84 + 1.96) * sd(dc_spt$spt_min) /sqrt(75) * (4.5 * (1 - icc) + icc)

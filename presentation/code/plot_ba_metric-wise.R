@@ -47,7 +47,8 @@ crude_all_diffs <-
   map(~ group_split(.x, model)) %>%
   set_names(c("lps", "se", "spt", "tst", "waso"))
 
-
+# write diff data to file
+# write_rds(crude_all_diffs, "data/processed/crude_stats_diff_all_models.rds")
 
 h_lines <-
   crude_me_ba %>%
