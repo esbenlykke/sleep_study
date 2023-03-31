@@ -417,6 +417,13 @@ source(here::here("presentation/code/table_ba.R"))
 tab_ba_crude
 ```
 
+## Descriptives of Sleep Quality Statistics Across Methods {transition="convex" .H2 .smaller}
+
+```{r}
+source(here::here("code/evaluate_models/table_descriptives_of_sleep_stats.R"))
+
+tab_descriptives
+```
 
 ## In-bed classification flow {transition="convex" .H2}
 
@@ -491,6 +498,7 @@ read_rds(here::here("/media/esbenlykke/My Passport/crude/fitted_models/axed_mode
     zoomView = FALSE
   )
 ```
+
 
 # Discussion {transition="convex"}
 

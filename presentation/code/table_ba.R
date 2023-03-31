@@ -9,8 +9,8 @@ library(here)
 ba_metrics_crude <-
   read_csv(here::here("data/processed/crude_mixed_effect_ba.csv"))
 
-ba_metrics_multi <- 
-  read_csv(here::here("data/processed/multiclass_mixed_effect_ba.csv"))
+# ba_metrics_multi <- 
+#   read_csv(here::here("data/processed/multiclass_mixed_effect_ba.csv"))
 
 
 # create table ------------------------------------------------------------
