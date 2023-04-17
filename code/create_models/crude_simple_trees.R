@@ -1,8 +1,10 @@
 #!/usr/bin/env Rscript
 
 library(tidyverse)
-library(tidymodels)
 library(arrow)
+library(furrr)
+library(butcher)
+library(tidymodels)
 
 
 tidymodels_prefer()
@@ -15,54 +17,20 @@ path <- "/media/esbenlykke/My Passport/crude/"
 # Spend data budget -------------------------------------------------------
 cat("Spending data budget...\n")
 
-set.seed(123)
-data <-
-  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features.parquet") %>% 
-  mutate(
-    in_bed = as_factor(in_bed),
-    sleep = as_factor(sleep)
-  )
-
-# for testing purposes
-# ids <- data %>% distinct(id) %>% slice(1:10)
-# 
-# data <- data %>%
-#   filter(id %in% ids$id) %>%
-#   group_by(id, in_bed, sleep) %>%
-#   slice_sample(n = 100) %>%
-#   ungroup()
-###
-
-set.seed(123)
-spl <-
-  data |>
-  group_initial_split(group = id, prop = .5)
-
-train <- training(spl)
-test <- testing(spl)
-
-# write test data to file for use in later stages
-# write_parquet(train, "data/data_for_modelling/crude_training_data.parquet")
+train <- read_parquet("data/data_for_modelling/crude_training_data.parquet")
+test <- read_parquet("data/data_for_modelling/crude_testing_data.parquet")
 
 folds <-
   group_vfold_cv(train, group = id, v = 5, balance = "groups")
 
 
-# Create preprocessors ----------------------------------------------------
-
+# Create preprocessor -----------------------------------------------------
 
 in_bed_rec <-
   recipe(
     in_bed ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear,
-    data = train
-  ) |>
-  step_zv(all_predictors())
-
-sleep_rec <-
-  recipe(
-    sleep ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear,
+      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
+      x_sd_long + y_sd_long + z_sd_long,
     data = train
   ) |>
   step_zv(all_predictors())
@@ -93,11 +61,8 @@ doParallel::registerDoParallel(cores = 6)
 in_bed_wf <-
   workflow(in_bed_rec, cart_spec)
 
-sleep_wf <-
-  workflow(sleep_rec, cart_spec)
 
-
-# Tune grids --------------------------------------------------------------
+# Tune grid ---------------------------------------------------------------
 
 cat("Tune grid for in-bed models\n")
 # In bed
@@ -125,25 +90,10 @@ tictoc::toc()
 write_rds(in_bed_CART_results, str_c(path, "grid_results/in_bed_simple_tree_results.rds"))
 
 
-cat("Tune grid for sleep models\n")
 
-# Sleep
-tictoc::tic()
-sleep_CART_results <-
-  sleep_wf |>
-  tune_grid(
-    resamples = folds,
-    grid = tree_grid,
-    control = grid_ctrl,
-    metrics = metric_set(f_meas, roc_auc)
-  )
-tictoc::toc()
-
-write_rds(sleep_CART_results, str_c(path, "grid_results/sleep_simple_tree_results.rds"))
+# Finalize in bed model ---------------------------------------------------
 
 
-# Finalizing model --------------------------------------------------------
-# In bed
 best_in_bed_results <-
   in_bed_CART_results %>%
   select_best(metric = "f_meas")
@@ -158,15 +108,13 @@ in_bed_CART_fit <-
 write_rds(in_bed_CART_fit, str_c(path, "fitted_models/in_bed_simple_tree_fit.rds"))
 
 
-# Sleep
-best_sleep_results <-
-  sleep_CART_results %>%
-  select_best(metric = "f_meas")
+axe_a_lot <- function(model_list) {
+  model_list |>
+    axe_env() |>
+    axe_data() |>
+    axe_fitted() %>%
+    axe_call()
+}
 
-sleep_CART_fit <-
-  sleep_wf %>%
-  finalize_workflow(best_sleep_results) %>%
-  fit(train)
-
-write_rds(sleep_CART_fit, str_c(path, "fitted_models/sleep_simple_tree_fit.rds"))
-
+axe_a_lot(in_bed_CART_fit) %>% 
+  write_rds(str_c(path, "fitted_models/axed_models/in_bed_simple_tree_fit_AXED.rds"))
