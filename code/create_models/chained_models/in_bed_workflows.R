@@ -7,8 +7,8 @@ library(arrow)
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
-train <- read_parquet("data/data_for_modelling/crude_training_data.parquet")
-test <- read_parquet("data/data_for_modelling/crude_testing_data.parquet")
+train <- read_parquet("data/data_for_modelling/crude_training_data.parquet") %>% 
+  filter(id %in% c(8504, 8505, 37304, 132804, 182604))
 
 # write out train data for later fitting of optimized workflows
 # write_parquet(train, "data/processed/training_data.parquet")
@@ -68,7 +68,7 @@ xgb_spec <-
   boost_tree(
     tree_depth = tune(), learn_rate = tune(),
     loss_reduction = tune(), min_n = tune(),
-    sample_size = tune(), trees = tune()
+    sample_size = tune(), trees = seq(200, 1000, 200)
   ) |>
   set_engine("xgboost", verbose = TRUE) |>
   set_mode("classification")
@@ -79,7 +79,7 @@ xgb_spec <-
 nnet_param <-
   nnet_spec |>
   extract_parameter_set_dials() |>
-  update(hidden_units = hidden_units(c(1, 27)))
+  update(hidden_units = hidden_units(c(5, 27)))
 
 rpart_param <-
   CART_spec %>%
@@ -118,7 +118,7 @@ no_preproc_in_bed_wf <-
     cross = FALSE
   )
 
-all_in_bed_workflows <- 
+all_in_bed_workflows <-
   bind_rows(normalized_in_bed_wf, no_preproc_in_bed_wf)
 
 
@@ -158,16 +158,18 @@ in_bed_grid_results <-
   )
 tictoc::toc()
 
-write_rds(in_bed_grid_results, 
-          "/media/esbenlykke/My Passport/crude/grid_results/in_bed_workflowsets_results_10_sec.rds")
+write_rds(
+  in_bed_grid_results,
+  "/media/esbenlykke/My Passport/crude/grid_results/in_bed_workflowsets_results_10_sec.rds"
+)
 
 
 ### 30 second epohs ###
 
-train_30_sec <- 
+train_30_sec <-
   read_parquet("data/data_for_modelling/crude_training_30_sec_data.parquet")
 
-folds_30_sec <- 
+folds_30_sec <-
   group_mc_cv(train_30_sec, group = id, times = 5, prop = .5)
 
 in_bed_rec_30_sec <-
@@ -180,7 +182,7 @@ in_bed_rec_30_sec <-
   step_zv(all_predictors())
 
 in_bed_norm_rec_30_sec <-
-  in_bed_rec |>
+  in_bed_rec_30_sec |>
   step_normalize(all_numeric_predictors())
 
 normalized_in_bed_30_sec_wf <-
@@ -210,7 +212,7 @@ no_preproc_in_bed_30_sec_wf <-
     cross = FALSE
   )
 
-all_in_bed_workflows_30_sec <- 
+all_in_bed_workflows_30_sec <-
   bind_rows(normalized_in_bed_30_sec_wf, no_preproc_in_bed_30_sec_wf)
 
 
@@ -233,5 +235,7 @@ in_bed_grid_results_30_sec <-
   )
 tictoc::toc()
 
-write_rds(in_bed_grid_results, 
-          "/media/esbenlykke/My Passport/crude/grid_results/in_bed_workflowsets_results_30_sec.rds")
+write_rds(
+  in_bed_grid_results_30_sec,
+  "/media/esbenlykke/My Passport/crude/grid_results/in_bed_workflowsets_results_30_sec.rds"
+)

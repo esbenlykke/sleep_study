@@ -4,7 +4,7 @@ library(arrow)
 library(slider)
 
 
-extract_in_bed_data <- function(fit) {
+extract_in_bed_data <- function(fit, test) {
   fit %>%
     augment(test) %>%
     mutate(
@@ -19,35 +19,23 @@ extract_in_bed_data <- function(fit) {
     ungroup()
 }
 
-### 10 second epochs ###
 
-test <-
-  read_parquet("data/data_for_modelling/crude_testing_data.parquet") %>%
-  filter(id == 8504)
+data_10 <-
+  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features_10_sec_epochs.parquet") 
 
-in_bed_CART_fit <-
-  read_rds("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/decision_tree_in_bed_AXED.rds")
+data_30 <-
+  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features_30_sec_epochs.parquet") 
 
-in_bed_fits <-
-  list.files("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/", full.names = TRUE) %>%
-  str_subset("in_bed")
+in_bed_CART_fit_10 <-
+  read_rds("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/in_bed_simple_tree_fit_10_AXED.rds")
 
-in_bed_fits %>%
-  map(read_rds) %>%
-  map(extract_in_bed_data) %>%
-  write_rds("data/data_for_modelling/in_bed_data_10_sec.rds")
+in_bed_CART_fit_30 <-
+  read_rds("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/in_bed_simple_tree_fit_30_AXED.rds")
 
+### 10 sec data ###
+extract_in_bed_data(in_bed_CART_fit_10, data_10) %>% 
+  write_parquet("data/data_for_modelling/only_in_bed_data_10.parquet")
 
-### 30 second epochs ###
-
-# test <-
-#   read_parquet("data/data_for_modelling/crude_testing_30_sec_data.parquet")
-# 
-# in_bed_fits <-
-#   list.files("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/", full.names = TRUE) %>%
-#   str_subset("in_bed")
-# 
-# in_bed_fits %>%
-#   map(read_rds) %>%
-#   map(extract_in_bed_data) %>%
-#   write_rds("data/data_for_modelling/in_bed_data_10_sec.rds")
+### 30 sec data ###
+extract_in_bed_data(in_bed_CART_fit_30, data_30) %>% 
+  write_parquet("data/data_for_modelling/only_in_bed_data_30.parquet")
