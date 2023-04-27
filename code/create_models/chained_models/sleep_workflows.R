@@ -11,11 +11,11 @@ options(tidymodels.dark = TRUE)
 # Also consider a SMOTE variant for waso
 
 data_10 <-
-  read_parquet("data/data_for_modelling/only_in_bed_data_10.parquet") %>%
+  read_parquet("data/data_for_modelling/chained_classifiers/only_in_bed_data_10.parquet") %>%
   mutate(across(contains("sleep"), as_factor)) 
 
 data_30 <-
-  read_parquet("data/data_for_modelling/only_in_bed_data_30.parquet") %>%
+  read_parquet("data/data_for_modelling/chained_classifiers/only_in_bed_data_30.parquet") %>%
   mutate(across(contains("sleep"), as_factor)) 
 
 set.seed(123)
@@ -336,11 +336,11 @@ tune_wf_and_write_30 <- function(wfs, fname) {
 }
 
 fnames_10 <- 
-  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/", names(all_wfs_10), ".rds")
+  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep", names(all_wfs_10), ".rds")
 
 
 fnames_30 <- 
-  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/", names(all_wfs_30), ".rds")
+  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep", names(all_wfs_30), ".rds")
 
 
 walk2(all_wfs_10, fnames_10, tune_wf_and_write_10)

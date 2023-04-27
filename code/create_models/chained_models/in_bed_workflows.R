@@ -7,8 +7,9 @@ library(arrow)
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
-train <- read_parquet("data/data_for_modelling/crude_training_data.parquet") %>% 
-  filter(id %in% c(8504, 8505, 37304, 132804, 182604))
+train <- 
+  read_parquet("data/data_for_modelling/chained_classifiers/training_10_sec_data.parquet") %>% 
+  filter(id %in% c(3404, 8505, 54704, 55704, 132804))
 
 # write out train data for later fitting of optimized workflows
 # write_parquet(train, "data/processed/training_data.parquet")
@@ -26,8 +27,8 @@ cat("Creating preprocessing recipes...\n")
 in_bed_rec <-
   recipe(
     in_bed ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
+      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + 
+      clock_proxy_linear + x_sd_long + y_sd_long + z_sd_long,
     data = train
   ) |>
   step_zv(all_predictors())
@@ -160,14 +161,15 @@ tictoc::toc()
 
 write_rds(
   in_bed_grid_results,
-  "/media/esbenlykke/My Passport/crude/grid_results/in_bed_workflowsets_results_10_sec.rds"
+  "/media/esbenlykke/My Passport/chained_models/grid_results/in_bed/in_bed_workflowsets_results_10_sec.rds"
 )
 
 
 ### 30 second epohs ###
 
 train_30_sec <-
-  read_parquet("data/data_for_modelling/crude_training_30_sec_data.parquet")
+  read_parquet("data/data_for_modelling/chained_classifiers/training_30_sec_data.parquet") %>% 
+  filter(id %in% c(8504, 8505, 37304, 132804, 182604))
 
 folds_30_sec <-
   group_mc_cv(train_30_sec, group = id, times = 5, prop = .5)
@@ -237,5 +239,5 @@ tictoc::toc()
 
 write_rds(
   in_bed_grid_results_30_sec,
-  "/media/esbenlykke/My Passport/crude/grid_results/in_bed_workflowsets_results_30_sec.rds"
+  "/media/esbenlykke/My Passport/chained_models/grid_results/in_bed/in_bed_workflowsets_results_30_sec.rds"
 )
