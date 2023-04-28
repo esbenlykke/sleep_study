@@ -52,11 +52,17 @@ finalize_and_fit_best_wf <- function(grid_results_fnames, training_data) {
 }
 
 # List all grid result files in the specified directory
-grid_results_fnames <- 
-  list.files("/media/esbenlykke/My Passport/chained_models/grid_results/", full.names = TRUE) %>% 
-  str_subset(".rds")
+grid_results_fnames_30 <- 
+  list.files("/media/esbenlykke/My Passport/chained_models/grid_results", full.names = TRUE) %>% 
+  str_subset("30.rds")
 
 # Apply the finalize_and_fit_best_wf function to each grid result file and the training data
-walk(grid_results_fnames, ~ finalize_and_fit_best_wf(.x, train_30), 
+walk(grid_results_fnames_30, ~ finalize_and_fit_best_wf(.x, train_30), 
      .progress = TRUE)
 
+grid_results_fnames_10 <- 
+  list.files("/media/esbenlykke/My Passport/chained_models/grid_results", full.names = TRUE) %>% 
+  str_subset("10.rds")
+
+walk(grid_results_fnames_10, ~ finalize_and_fit_best_wf(.x, train_10), 
+     .progress = TRUE)

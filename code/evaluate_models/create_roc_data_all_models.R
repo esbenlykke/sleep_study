@@ -16,31 +16,33 @@ get_roc <-
 # CRUDE -------------------------------------------------------------------
 
 
-in_bed_fits_files <- list.files("/media/esbenlykke/My Passport/crude/fitted_models/axed_models",
-  full.names = TRUE
-) %>%
-  str_subset("in_bed")
+fits_10_paths <- 
+  list.files("/media/esbenlykke/My Passport/chained_models/fitted_workflows",
+  full.names = TRUE, recursive = TRUE
+) %>% 
+  str_subset("10_sec")
+
+fits_30_paths <- 
+  list.files("/media/esbenlykke/My Passport/chained_models/fitted_workflows",
+             full.names = TRUE, recursive = TRUE
+  ) %>% 
+  str_subset("30_sec")
 
 
-sleep_fits_files <- list.files("/media/esbenlykke/My Passport/crude/fitted_models/axed_models",
-  full.names = TRUE
-) %>%
-  str_subset("sleep")
-
-in_bed_fits <- map(in_bed_fits_files, read_rds) |>
+fits_10 <- map(fits_10_paths, read_rds) |>
   set_names(c("decision_tree", "logistic_regression", "neural_net", "xgboost"))
 
-sleep_fits <- map(sleep_fits_files, read_rds) |>
-  set_names(c("decision_tree", "logistic_regression", "neural_net", "xgboost"))
+fits_30 <- map(fits_30_paths, read_rds) 
 
-test <- read_parquet("data/data_for_modelling/crude_testing_data.parquet")
+test <- read_parquet("data/data_for_modelling/chained_classifiers/testing_30_sec_data.parquet") %>% 
+  mutate(across(contains("sleep"), as_factor))
 
 
-map_dfr(in_bed_fits, ~ get_roc(.x, in_bed, .pred_1), .id = "model") |>
+map_dfr(fits_10, ~ get_roc(.x, in_bed, .pred_1), .id = "model") |>
   write_parquet("data/processed/crude_roc_data_in_bed.parquet")
 
-map_dfr(sleep_fits, ~ get_roc(.x, in_bed, .pred_1), .id = "model") |>
-  write_parquet("data/processed/crude_roc_data_sleep.parquet")
+map_dfr(fits_30, ~ get_roc(.x, in_bed, .pred_1), .id = "model") |>
+  write_parquet("data/processed/")
 
 
 # Binary relevance --------------------------------------------------------
@@ -95,8 +97,9 @@ fits <- map(filesnames, read_rds) |>
   set_names(c("decision_tree", "decision_tree_SMOTE", "logistic_regression", "neural_net", "xgboost"))
 
 test <- read_parquet("data/data_for_modelling/multiclass_testing_data.parquet") %>%
-  mutate(multiclass = factor(multiclass, 
-                             levels = c("in_bed_asleep", "in_bed_awake", "out_bed_awake")))
+  mutate(multiclass = factor(multiclass,
+    levels = c("in_bed_asleep", "in_bed_awake", "out_bed_awake")
+  ))
 
 
 map_dfr(fits,

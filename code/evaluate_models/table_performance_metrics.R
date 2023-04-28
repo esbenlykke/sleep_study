@@ -1,11 +1,11 @@
-#!/usr/bin/env RscriptsuppressMessages(library(tidyverse))
+#!/usr/bin/env Rscript
 
 library(tidyverse)
 library(gt)
 library(showtext)
 
 
-crude_metrics <- read_csv("data/processed/crude_performance_metrics.csv")
+crude_metrics <- read_csv(here::here("data/processed/crude_performance_metrics.csv"))
 
 # Create table ------------------------------------------------------------
 

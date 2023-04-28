@@ -9,7 +9,7 @@ format:
     theme: moon
     slide-number: true
     preview-links: auto
-    logo: images/SDU_WHITE_RGB-png.png
+    logo: visuals/SDU_WHITE_RGB-png.png
     footer: https://github.com/esbenlykke/sleep_study
     css: my_styles.css
     scrollable: true
@@ -180,14 +180,6 @@ plot_proxy_lin
   - cons: complex training, low speed, feature redundancy
 :::
 
-## building Models {transition="convex"}
-
-```{r}
-source(here::here("presentation/code/plot_hyperparameter_tuning.R"))
-
-hyper_plot
-```
-
 ## Estimate Sleep Quality Metrics {transition="fade"}
 
 ```{r}
@@ -255,6 +247,10 @@ plot_lps
 plot_tst
 ```
 
+## Sequential Classifiers
+
+![](visuals/chained_models_data_flow.png)
+
 # Results {transition="fade"}
 
 ## {.H2 transition="convex" .smaller}
@@ -288,31 +284,27 @@ plot_tst
 :::
 ::::
 
+## In-bed models {transition="convex"}
 
-## Many ROC Curves {transition="convex" .H2}
+![](visuals/plot_hyper_10.png)
 
-## {transition="convex"}
+## In-bed performance of decision tree model {transition="convex"}
 
+:::: {.columns}
+
+::: {.column width="60%"}
+![](visuals/plot_in_bed_roc.png)
+:::
+
+::: {.column width="40%"}
 ```{r}
-source(here::here("presentation/code/plot_roc_curves.R"))
+source(here::here("presentation/code/tables_performance.R"))
 
-multi_roc_plot
+tab_in_bed
 ```
+:::
 
-## {transition="convex"}
-
-```{r}
-three_classifiers_roc_plot
-```
-
-
-## {transition="convex"}
-
-```{r}
-#| fig-width: 8
-#| fig-align: center
-two_classifiers_roc_plot
-```
+::::
 
 ## Lots of Metrics {transition="convex" .H2}
 
@@ -343,172 +335,172 @@ tab_br_metrics
 
 ::: {.panel-tabset}
 
-### Sleep Period Time {.smaller}
+<!-- ### Sleep Period Time {.smaller} -->
 
-```{r}
-#| echo: false
-source(here::here("presentation/code/plot_ba_metric-wise.R"))
+<!-- ```{r} -->
+<!-- #| echo: false -->
+<!-- source(here::here("presentation/code/plot_ba_metric-wise.R")) -->
 
-spt_plots[[1]]
+<!-- spt_plots[[1]] -->
 
-spt_plots[[2]]
+<!-- spt_plots[[2]] -->
 
-spt_plots[[3]]
+<!-- spt_plots[[3]] -->
 
-spt_plots[[4]]
-```
+<!-- spt_plots[[4]] -->
+<!-- ``` -->
 
-### Total Sleep Time {.smaller}
+<!-- ### Total Sleep Time {.smaller} -->
 
-```{r}
-tst_plots[[1]]
+<!-- ```{r} -->
+<!-- tst_plots[[1]] -->
 
-tst_plots[[2]]
+<!-- tst_plots[[2]] -->
 
-tst_plots[[3]]
+<!-- tst_plots[[3]] -->
 
-tst_plots[[4]]
-```
+<!-- tst_plots[[4]] -->
+<!-- ``` -->
 
-### Sleep Effeciency {.smaller}
+<!-- ### Sleep Effeciency {.smaller} -->
 
-```{r}
-se_plots[[1]]
+<!-- ```{r} -->
+<!-- se_plots[[1]] -->
 
-se_plots[[2]]
+<!-- se_plots[[2]] -->
 
-se_plots[[3]]
+<!-- se_plots[[3]] -->
 
-se_plots[[4]]
-```
-
-
-### Latency Until Persistant Sleep {.smaller}
-
-```{r}
-lps_plots[[1]]
-
-lps_plots[[2]]
-
-lps_plots[[3]]
-
-lps_plots[[4]]
-```
-
-### Wake After Sleep Onset {.smaller}
-
-```{r}
-waso_plots[[1]]
-
-waso_plots[[2]]
-
-waso_plots[[3]]
-
-waso_plots[[4]]
-```
-
-:::
-
-## Bland-Altman Analysis {transition="convex" .H2}
-
-```{r}
-source(here::here("presentation/code/table_ba.R"))
-
-tab_ba_crude
-```
-
-## Descriptives of Sleep Quality Statistics Across Methods {transition="convex" .H2 .smaller}
-
-```{r}
-source(here::here("code/evaluate_models/table_descriptives_of_sleep_stats.R"))
-
-tab_descriptives
-```
-
-## In-bed classification flow {transition="convex" .H2}
-
-```{r}
-read_rds(here::here("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/decision_tree_in_bed_AXED.rds")) %>%
-  extract_fit_engine() |>
-  visTree(
-    height = "550px",
-    nodesPopSize = TRUE,
-    minNodeSize = 10,
-    maxNodeSize = 30,
-    fallenLeaves = TRUE,
-    legend = FALSE,
-    digits = 3,
-    direction = "UD",
-    colorVar = c(
-      "#CC5500", "#8B0000", "#FFD700",
-      "#228B22", "#654321", "#8B0000", "#FFDB58"
-    ),
-    export = FALSE
-  ) |>
-  visNodes(font = list(
-    color = "#EEE8D5",
-    size = 20,
-    strokeWidth = 1
-  )) |>
-  visEdges(font = list(
-    color = "#EEE8D5",
-    size = 20,
-    strokeWidth = 1
-  )) |>
-  visInteraction(
-    dragNodes = FALSE,
-    dragView = FALSE,
-    zoomView = FALSE
-  )
-```
-
----
-
-## Sleep classification flow {transition="convex" .H2}
-
-```{r}
-read_rds(here::here("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/decision_tree_sleep_AXED.rds")) %>% 
-  extract_fit_engine() |>
-  visTree(
-    height = "550px",
-    nodesPopSize = TRUE,
-    minNodeSize = 10,
-    maxNodeSize = 30,
-    fallenLeaves = TRUE,
-    legend = FALSE,
-    digits = 3,
-    direction = "UD",
-    colorVar = c(
-      "#CC5500", "#8B0000", "#FFD700",
-      "#228B22", "#654321", "#8B0000", "#FFDB58"
-    ),
-    export = FALSE
-  ) |>
-  visNodes(font = list(
-    color = "#EEE8D5",
-    strokeWidth = 1
-  )) |>
-  visEdges(font = list(
-    color = "#EEE8D5",
-    strokeWidth = 1
-  )) |>
-  visInteraction(
-    dragNodes = FALSE,
-    dragView = FALSE,
-    zoomView = FALSE
-  )
-```
+<!-- se_plots[[4]] -->
+<!-- ``` -->
 
 
-# Discussion {transition="convex"}
+<!-- ### Latency Until Persistant Sleep {.smaller} -->
 
-## Discussion {transition="convex" .smaller}
+<!-- ```{r} -->
+<!-- lps_plots[[1]] -->
 
-- heteroscedasticity
-- Cheung 2018 table 4: actigraphy provides a sufficiently narrow range of possible mean differences (CI 95%) clinical significant thresholds
-- could be interesting to build models on thigh and hip ocmbined.
-- multiclass vs multilabel classification
-- in-bed awake/sleep is highly imbalanced -> maybe train a new classifier accounting for imbalanced data (SMOTE)
-- model combined preds instead?
+<!-- lps_plots[[2]] -->
 
-## References {transition="convex"}
+<!-- lps_plots[[3]] -->
+
+<!-- lps_plots[[4]] -->
+<!-- ``` -->
+
+<!-- ### Wake After Sleep Onset {.smaller} -->
+
+<!-- ```{r} -->
+<!-- waso_plots[[1]] -->
+
+<!-- waso_plots[[2]] -->
+
+<!-- waso_plots[[3]] -->
+
+<!-- waso_plots[[4]] -->
+<!-- ``` -->
+
+<!-- ::: -->
+
+<!-- ## Bland-Altman Analysis {transition="convex" .H2} -->
+
+<!-- ```{r} -->
+<!-- source(here::here("presentation/code/table_ba.R")) -->
+
+<!-- tab_ba_crude -->
+<!-- ``` -->
+
+<!-- ## Descriptives of Sleep Quality Statistics Across Methods {transition="convex" .H2 .smaller} -->
+
+<!-- ```{r} -->
+<!-- source(here::here("code/evaluate_models/table_descriptives_of_sleep_stats.R")) -->
+
+<!-- tab_descriptives -->
+<!-- ``` -->
+
+<!-- ## In-bed classification flow {transition="convex" .H2} -->
+
+<!-- ```{r} -->
+<!-- read_rds(here::here("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/decision_tree_in_bed_AXED.rds")) %>% -->
+<!--   extract_fit_engine() |> -->
+<!--   visTree( -->
+<!--     height = "550px", -->
+<!--     nodesPopSize = TRUE, -->
+<!--     minNodeSize = 10, -->
+<!--     maxNodeSize = 30, -->
+<!--     fallenLeaves = TRUE, -->
+<!--     legend = FALSE, -->
+<!--     digits = 3, -->
+<!--     direction = "UD", -->
+<!--     colorVar = c( -->
+<!--       "#CC5500", "#8B0000", "#FFD700", -->
+<!--       "#228B22", "#654321", "#8B0000", "#FFDB58" -->
+<!--     ), -->
+<!--     export = FALSE -->
+<!--   ) |> -->
+<!--   visNodes(font = list( -->
+<!--     color = "#EEE8D5", -->
+<!--     size = 20, -->
+<!--     strokeWidth = 1 -->
+<!--   )) |> -->
+<!--   visEdges(font = list( -->
+<!--     color = "#EEE8D5", -->
+<!--     size = 20, -->
+<!--     strokeWidth = 1 -->
+<!--   )) |> -->
+<!--   visInteraction( -->
+<!--     dragNodes = FALSE, -->
+<!--     dragView = FALSE, -->
+<!--     zoomView = FALSE -->
+<!--   ) -->
+<!-- ``` -->
+
+<!-- --- -->
+
+<!-- ## Sleep classification flow {transition="convex" .H2} -->
+
+<!-- ```{r} -->
+<!-- read_rds(here::here("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/decision_tree_sleep_AXED.rds")) %>%  -->
+<!--   extract_fit_engine() |> -->
+<!--   visTree( -->
+<!--     height = "550px", -->
+<!--     nodesPopSize = TRUE, -->
+<!--     minNodeSize = 10, -->
+<!--     maxNodeSize = 30, -->
+<!--     fallenLeaves = TRUE, -->
+<!--     legend = FALSE, -->
+<!--     digits = 3, -->
+<!--     direction = "UD", -->
+<!--     colorVar = c( -->
+<!--       "#CC5500", "#8B0000", "#FFD700", -->
+<!--       "#228B22", "#654321", "#8B0000", "#FFDB58" -->
+<!--     ), -->
+<!--     export = FALSE -->
+<!--   ) |> -->
+<!--   visNodes(font = list( -->
+<!--     color = "#EEE8D5", -->
+<!--     strokeWidth = 1 -->
+<!--   )) |> -->
+<!--   visEdges(font = list( -->
+<!--     color = "#EEE8D5", -->
+<!--     strokeWidth = 1 -->
+<!--   )) |> -->
+<!--   visInteraction( -->
+<!--     dragNodes = FALSE, -->
+<!--     dragView = FALSE, -->
+<!--     zoomView = FALSE -->
+<!--   ) -->
+<!-- ``` -->
+
+
+<!-- # Discussion {transition="convex"} -->
+
+<!-- ## Discussion {transition="convex" .smaller} -->
+
+<!-- - heteroscedasticity -->
+<!-- - Cheung 2018 table 4: actigraphy provides a sufficiently narrow range of possible mean differences (CI 95%) clinical significant thresholds -->
+<!-- - could be interesting to build models on thigh and hip ocmbined. -->
+<!-- - multiclass vs multilabel classification -->
+<!-- - in-bed awake/sleep is highly imbalanced -> maybe train a new classifier accounting for imbalanced data (SMOTE) -->
+<!-- - model combined preds instead? -->
+
+<!-- ## References {transition="convex"} -->

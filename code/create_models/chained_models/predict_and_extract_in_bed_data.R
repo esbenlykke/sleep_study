@@ -4,12 +4,12 @@ library(arrow)
 library(slider)
 
 
-extract_in_bed_data <- function(fit, test) {
+extract_in_bed_data <- function(fit, test, epoch_length) {
   fit %>%
     augment(test) %>%
     mutate(
       in_bed_filtered = slider::slide_dbl(as.numeric(.pred_class) - 1, median,
-        .after = 50, .before = 50
+        .after = (7.5 * 60) / epoch_length, .before = (7.5 * 60) / epoch_length
       ),
     ) %>%
     group_by(id, noon_day) %>%
@@ -33,9 +33,9 @@ in_bed_CART_fit_30 <-
   read_rds("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/in_bed_simple_tree_fit_30_AXED.rds")
 
 ### 10 sec data ###
-extract_in_bed_data(in_bed_CART_fit_10, data_10) %>% 
+extract_in_bed_data(in_bed_CART_fit_10, data_10, 10) %>% 
   write_parquet("data/data_for_modelling/only_in_bed_data_10.parquet")
 
 ### 30 sec data ###
-extract_in_bed_data(in_bed_CART_fit_30, data_30) %>% 
+extract_in_bed_data(in_bed_CART_fit_30, data_30, 30) %>% 
   write_parquet("data/data_for_modelling/only_in_bed_data_30.parquet")
