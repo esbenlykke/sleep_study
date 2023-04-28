@@ -11,12 +11,10 @@ options(tidymodels.dark = TRUE)
 
 # Read training data from parquet files
 train_10 <-
-  read_parquet("data/data_for_modelling/only_in_bed_training_data_10_sec_epochs.parquet") %>%
-  slice_sample(n = 1000)
+  read_parquet("data/data_for_modelling/chained_classifiers/only_in_bed_training_data_10_sec_epochs.parquet") 
 
 train_30 <-
-  read_parquet("data/data_for_modelling/only_in_bed_training_data_30_sec_epochs.parquet") %>%
-  slice_sample(n = 1000)
+  read_parquet("data/data_for_modelling/chained_classifiers/only_in_bed_training_data_30_sec_epochs.parquet") 
 
 
 # Define a function to finalize and fit the best workflow from grid search results
@@ -29,7 +27,7 @@ finalize_and_fit_best_wf <- function(grid_results_fnames, training_data) {
   wf_names <- 
     unique(grid_results$wflow_id)
   paths <- 
-    str_c("/media/esbenlykke/My Passport/chained_models/fitted_workflows/", 
+    str_c("/media/esbenlykke/My Passport/chained_models/fitted_workflows/sleep/", 
           wf_names, "_", parse_number(deparse(substitute(training_data))), 
           "_sec_epochs", "_fit.rds")
 
@@ -54,8 +52,9 @@ finalize_and_fit_best_wf <- function(grid_results_fnames, training_data) {
 }
 
 # List all grid result files in the specified directory
-grid_results_fnames <- list.files("/media/esbenlykke/My Passport/chained_models/grid_results", full.names = TRUE) %>%
-  str_subset("30")
+grid_results_fnames <- 
+  list.files("/media/esbenlykke/My Passport/chained_models/grid_results/", full.names = TRUE) %>% 
+  str_subset(".rds")
 
 # Apply the finalize_and_fit_best_wf function to each grid result file and the training data
 walk(grid_results_fnames, ~ finalize_and_fit_best_wf(.x, train_30), 
