@@ -57,8 +57,8 @@ grid_results_fnames_30 <-
   str_subset("30.rds")
 
 # Apply the finalize_and_fit_best_wf function to each grid result file and the training data
-walk(grid_results_fnames_30, ~ finalize_and_fit_best_wf(.x, train_30), 
-     .progress = TRUE)
+# walk(grid_results_fnames_30, ~ finalize_and_fit_best_wf(.x, train_30), 
+#      .progress = TRUE)
 
 grid_results_fnames_10 <- 
   list.files("/media/esbenlykke/My Passport/chained_models/grid_results", full.names = TRUE) %>% 

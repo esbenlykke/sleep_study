@@ -300,7 +300,7 @@ plot_tst
 ```{r}
 source(here::here("presentation/code/tables_performance.R"))
 
-tab_in_bed
+table_in_bed_metrics
 ```
 :::
 
@@ -309,26 +309,9 @@ tab_in_bed
 ## Lots of Metrics {transition="convex" .H2}
 
 ## {transition="convex"}
-::: {layout="[[-1], [1], [-1]]"}
-```{r}
-source(here::here("presentation/code/tables_performance.R"))
-
-tab_multi_metrics
-```
-:::
-
-## {transition="convex" .H2}
-
-::: {layout="[[-1], [1], [-1]]"}
-```{r}
-tab_crude_metrics
-```
-:::
-
-## {transition="convex" .H2}
 
 ```{r}
-tab_br_metrics
+table_sleep_metrics
 ```
 
 ## Bland-Altman Plots {transition="convex" .smaller}

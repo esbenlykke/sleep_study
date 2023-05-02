@@ -1,0 +1,61 @@
+group,model,.metric,.estimator,.estimate
+raw,Decision Tree,f_meas,binary,0.8986767971517188
+raw,Decision Tree,accuracy,binary,0.8304208484262948
+raw,Decision Tree,sensitivity,binary,0.9735162474708635
+raw,Decision Tree,precision,binary,0.8345225433472279
+raw,Decision Tree,specificity,binary,0.3445481546939627
+raw,Logistic Regression,f_meas,binary,0.8926461019559935
+raw,Logistic Regression,accuracy,binary,0.8194052262076871
+raw,Logistic Regression,sensitivity,binary,0.9719474825208317
+raw,Logistic Regression,precision,binary,0.8253089844316505
+raw,Logistic Regression,specificity,binary,0.3014562391840642
+raw,Neural Network,f_meas,binary,0.8995431372697306
+raw,Neural Network,accuracy,binary,0.8330888907659347
+raw,Neural Network,sensitivity,binary,0.9673948109665346
+raw,Neural Network,precision,binary,0.8405856731967433
+raw,Neural Network,specificity,binary,0.3770603974127668
+raw,XGBoost,f_meas,binary,0.8916085405799884
+raw,XGBoost,accuracy,binary,0.8206303476901748
+raw,XGBoost,sensitivity,binary,0.955001929327862
+raw,XGBoost,precision,binary,0.8361074146216421
+raw,XGBoost,specificity,binary,0.3643789044761098
+median_5,Decision Tree,f_meas,binary,0.9167042267326438
+median_5,Decision Tree,accuracy,binary,0.8552527694377215
+median_5,Decision Tree,sensitivity,binary,0.9841746711933645
+median_5,Decision Tree,precision,binary,0.8578911911410659
+median_5,Decision Tree,specificity,binary,0.30809724454271564
+median_5,Logistic Regression,f_meas,binary,0.9107690676383337
+median_5,Logistic Regression,accuracy,binary,0.8449142798903464
+median_5,Logistic Regression,sensitivity,binary,0.9779582246511821
+median_5,Logistic Regression,precision,binary,0.8522186593786221
+median_5,Logistic Regression,specificity,binary,0.28026445361262525
+median_5,Neural Network,f_meas,binary,0.9191335810313979
+median_5,Neural Network,accuracy,binary,0.8607368459997864
+median_5,Neural Network,sensitivity,binary,0.977917684483639
+median_5,Neural Network,precision,binary,0.867015947838775
+median_5,Neural Network,specificity,binary,0.3634113930306369
+median_5,XGBoost,f_meas,binary,0.9260519837267767
+median_5,XGBoost,accuracy,binary,0.8732658946423448
+median_5,XGBoost,sensitivity,binary,0.9805234684442237
+median_5,XGBoost,precision,binary,0.8773141359478658
+median_5,XGBoost,specificity,binary,0.41805562165268867
+median_10,Decision Tree,f_meas,binary,0.9226496186953034
+median_10,Decision Tree,accuracy,binary,0.864692138489687
+median_10,Decision Tree,sensitivity,binary,0.983120554347937
+median_10,Decision Tree,precision,binary,0.8691866628771987
+median_10,Decision Tree,specificity,binary,0.3220855429526619
+median_10,Logistic Regression,f_meas,binary,0.9168563911412435
+median_10,Logistic Regression,accuracy,binary,0.8545351484211988
+median_10,Logistic Regression,sensitivity,binary,0.977102021655492
+median_10,Logistic Regression,precision,binary,0.8636084840776971
+median_10,Logistic Regression,specificity,binary,0.29296727360574804
+median_10,Neural Network,f_meas,binary,0.9263993611843848
+median_10,Neural Network,accuracy,binary,0.8723444357495335
+median_10,Neural Network,sensitivity,binary,0.9787365588654509
+median_10,Neural Network,precision,binary,0.8793754250303729
+median_10,Neural Network,specificity,binary,0.3848848400307041
+median_10,XGBoost,f_meas,binary,0.9337784472383
+median_10,XGBoost,accuracy,binary,0.8857726048875018
+median_10,XGBoost,sensitivity,binary,0.981124582010906
+median_10,XGBoost,precision,binary,0.8907915157785825
+median_10,XGBoost,specificity,binary,0.4488959371578418
