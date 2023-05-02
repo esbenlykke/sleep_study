@@ -306,7 +306,9 @@ table_in_bed_metrics
 
 ::::
 
-## Lots of Metrics {transition="convex" .H2}
+## Roc curves for sleep models {transition="convex}
+
+![](visuals/plot_sleep_roc.png)
 
 ## {transition="convex"}
 
