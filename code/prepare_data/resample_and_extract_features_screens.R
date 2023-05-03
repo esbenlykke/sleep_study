@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
 
-suppressMessages(library(tidyverse))
-suppressMessages(library(furrr))
-suppressMessages(library(slider))
-suppressMessages(library(arrow))
-suppressMessages(library(read.cwa))
-suppressMessages(library(glue))
-suppressMessages(library(lubridate))
-suppressMessages(library(signal))
+library(tidyverse)
+library(furrr)
+library(slider)
+library(arrow)
+library(read.cwa)
+library(glue)
+library(lubridate)
+library(signal)
 
 args <- R.utils::commandArgs(trailingOnly = TRUE)
 

@@ -9,7 +9,7 @@ cat("Creating sensor-independent features. This won't take long...")
 # data <-
 #   read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
 data <-
-  read_parquet("data/data_for_modelling/all_thigh.parquet")
+  read_parquet("data/data_for_modelling/") #TODO FIX!
 
 
 # Subject-level in-bed time -----------------------------------------------

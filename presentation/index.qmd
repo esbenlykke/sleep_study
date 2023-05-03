@@ -307,8 +307,21 @@ table_in_bed_metrics
 ::::
 
 ## Roc curves for sleep models {transition="convex}
+:::: {.columns}
 
+::: {.column width="60%"}
 ![](visuals/plot_sleep_roc.png)
+:::
+
+::: {.column width="40%"}
+```{r}
+source(here::here("presentation/code/table_roc_auc_sleep.R"))
+
+gt::as_raw_html(table_sleep_roc_auc)
+```
+:::
+
+::::
 
 ## {transition="convex"}
 

@@ -103,7 +103,6 @@ table_sleep_metrics <-
   tab_header(
     title = md("Performance Metrics")
   ) |>
-  tab_options(table.font.names = "ibm") |>
   cols_width(everything() ~ px(120)) |>
   cols_align(align = "center") %>%
   cols_label(.metric = "") %>% 
