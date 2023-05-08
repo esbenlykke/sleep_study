@@ -9,24 +9,13 @@ cat("Creating sensor-independent features. This won't take long...")
 # data <-
 #   read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
 data <-
-  read_parquet("data/data_for_modelling/") #TODO FIX!
+  read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet") 
 
 
 # Subject-level in-bed time -----------------------------------------------
 
 # clock_proxy <-
 #   data |>
-  # TODO work out a programmatic solution to the threshold problem...
-  # problematic BASELINE time stamps
-  # problematic FOLLOWUP time stamps
-  # filter((id != 604804 | noon_day != 9) &
-  #   (id != 757104 | !noon_day %in% c(1, 2, 29)) &
-  #   (id != 2596204 | noon_day != 28) &
-  #   (id != 447104 | noon_day != 13) &
-  #   (id != 447105 | !noon_day %in% c(11, 13)) &
-  #   (id != 1054804 | noon_day != 31) &
-  #   (id != 1262105 | !noon_day %in% c(2, 3)) &
-  #   (id != 1587606 | noon_day != 27)) |>
   # group_by(id, noon_day) |>
   # mutate(
   #   threshold_in_bed = sdacc_y < .1 & incl < 45 &
@@ -64,31 +53,20 @@ data <-
   # ungroup()
 
 
-# Create static clock proxies for problematic time stamps -----------------
+# Create static clock proxies --------------------------------------------
 
 
-data |> 
+data_10 <- 
+  data |> 
   mutate(
-    month = month(datetime),
+    sleep = if_else(score %in% c(2, 3, 5), 1, 0),
     sleep_median5 = slider::slide_dbl(sleep, median, .after = 30),
     sleep_median10 = slider::slide_dbl(sleep, median, .after = 60),
-    .after = day
+    .after = score
   ) %>% 
   mutate(
     across(x:z, list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30)))
   ) %>% 
-  # problematic BASELINE time stamps
-  # # problematic FOLLOWUP time stamps
-  # filter(
-  #   (id == 604804 & noon_day == 9) |
-  #     (id == 757104 & noon_day %in% c(1, 2, 29)) |
-  #     (id == 2596204 & noon_day == 28) |
-  #     (id == 447104 & noon_day == 13) |
-  #     (id == 447105 & noon_day %in% c(11, 13)) |
-  #     (id == 1054804 & noon_day == 31) |
-  #     (id == 1262105 & noon_day %in% c(2, 3)) |
-  #     (id == 1587606 & noon_day == 27)
-  # ) |>
   group_by(id, noon_day) |>
   mutate(
     clock_group = if_else((hms::as_hms(datetime) > hms("19:00:00") | hms::as_hms(datetime) < hms("10:00:00")), 1, 0),
@@ -102,32 +80,22 @@ data |>
     clock_proxy_linear = if_else(clock_group == 1,
       seq(0, 1, length.out = n()), 0
     ),
-    .after = 1
+    .after = sleep_median10
   ) |>
-  ungroup() %>% 
-  write_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features.parquet")
+  ungroup() 
 
+write_parquet(data_10, "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet")
 
-# d %>%
-#   filter(id == 3404) %>%
-#   ggplot(aes(datetime)) +
-#   geom_step(aes(y = sleep)) +
-#   geom_step(aes(y = sleep_median - 1.2), color = "darkorange") +
-#   geom_line(aes(y = scale(incl) - 3.2), color = "grey80") +
-#   facet_wrap(~ noon_day, scales = "free") +
-#   theme_light()
+data_30 <-  
+  data_10 %>% 
+  mutate(
+    datetime = floor_date(datetime, unit = "30 seconds")
+  ) %>% 
+  mutate(
+    across(c(score:sleep_median10, sensor_code, weekday), as_factor)
+  ) %>% 
+  group_by(id, noon_day, month, datetime) %>% 
+  summarise(across(where(is.numeric), mean), .groups = "drop")
+
+write_parquet(data_30, "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
   
-# Merge and write ---------------------------------------------------------
-
-
-# clock_proxy |>
-#   bind_rows(static_proxy) |>
-#   replace_na(list(
-#     threshold_in_bed = FALSE, threshold_out_bed = FALSE, proxy = 0
-#   )) |>
-#   select(
-#     id, datetime, unix_time, day, noon_day, age, placement,
-#     clock_proxy_cos, clock_proxy_linear, incl, theta, temp:time_day
-#   ) |>
-#   write_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features.parquet")
-
