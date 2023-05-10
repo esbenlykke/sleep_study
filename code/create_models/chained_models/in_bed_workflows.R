@@ -72,8 +72,6 @@ in_bed_raw_30_sec_norm_rec <- create_recipe("in_bed", train_30, normalize = TRUE
 in_bed_median5_30_sec_rec <- create_recipe("in_bed_median5", train_30)
 in_bed_median5_30_sec_norm_rec <- create_recipe("in_bed_median5", train_30, normalize = TRUE)
 
-# Rest of the code remains the same
-
 
 # Model specifications ----------------------------------------------------
 

@@ -3,53 +3,76 @@ library(tidymodels)
 library(arrow)
 library(slider)
 
-# Define a function to filter and extract in-bed data based on the fitted model and test data
-extract_in_bed_data <- function(fit, test, epoch_length) {
-  fit %>%
-    augment(test) %>%
-    mutate(
-      # Compute median-filtered in_bed_filtered values for the specified epoch_length
-      in_bed_filtered = slider::slide_dbl(as.numeric(.pred_class) - 1, median,
-                                          .after = (7.5 * 60) / epoch_length, .before = (7.5 * 60) / epoch_length
-      ),
-    ) %>%
+
+process_data <- function(input_file, output_file) {
+  read_parquet(input_file) %>%
     group_by(id, noon_day, month) %>%
     group_modify(~ .x %>%
                    # Filter rows where row_number is within the in_bed_filtered range
-                   filter(row_number() > min(row_number()[in_bed_filtered == 1]) &
-                            row_number() < max(row_number()[in_bed_filtered == 1]))) %>%
-    ungroup()
+                   filter(row_number() >= min(row_number()[in_bed_median5 == 1]) &
+                            row_number() <= max(row_number()[in_bed_median5 == 1]))) %>%
+    ungroup() %>%
+    write_parquet(output_file)
 }
 
-# Read the 10-second epoch dataset
-data_10 <-
-  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features_10_sec_epochs.parquet") 
+# Define input and output file paths
+files <- list(
+  list(input = "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet",
+       output = "data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet"),
+  list(input = "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet",
+       output = "data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+)
 
-# Read the 30-second epoch dataset
-data_30 <-
-  read_parquet("data/data_for_modelling/all_data_incl_sensor_independent_features_30_sec_epochs.parquet") 
+# Process each file
+walk(files, ~process_data(.x$input, .x$output))
 
-# Read the fitted decision tree model for the 10-second epoch data
-in_bed_CART_fit_10 <-
-  read_rds("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/in_bed_simple_tree_fit_10_AXED.rds")
 
-# Read the fitted decision tree model for the 30-second epoch data
-in_bed_CART_fit_30 <-
-  read_rds("/media/esbenlykke/My Passport/crude/fitted_models/axed_models/in_bed_simple_tree_fit_30_AXED.rds")
+# EDA
+# data_30 <-
+#   read_parquet("data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+# 
+# data_30 %>%
+#   filter(id == 3404) %>%
+#   mutate(
+#     in_bed_median5 = slider::slide_dbl(in_bed, median, .before = 15, .after = 15)
+#   ) %>%
+#   ggplot(aes(datetime)) +
+#   geom_line(aes(y = sleep_median5), color = "pink") +
+#   geom_line(aes(y = sleep_median10 + .2), color = "lightblue") +
+#   geom_line(aes(y = in_bed_median5 + 1.2), color = "grey60") +
+#   geom_line(aes(y = y_sd), color = "brown") +
+#   geom_line(aes(y = scale(incl)), color = "darkgreen") +
+#   scale_x_datetime(date_labels = "%H", breaks = "1 hour") +
+#   facet_wrap(~noon_day, scales = "free", ncol = 1) +
+#   theme_classic() +
+#   theme(
+#     strip.background = element_rect(color = NA),
+#     strip.text = element_text(size = 16, face = "bold")
+#   )
+# 
+# data_30_no_in_bed <- 
+#   read_parquet("data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+# 
+# data_30_no_in_bed %>%
+#   filter(id == 3404) %>%
+#   group_by(id, noon_day, month) %>%
+#   group_modify(~ .x %>%
+#     # Filter rows where row_number is within the in_bed_filtered range
+#     filter(row_number() >= min(row_number()[in_bed_median5 == 1]) &
+#       row_number() <= max(row_number()[in_bed_median5 == 1]))) %>%
+#   ungroup() %>%
+#   ggplot(aes(datetime)) +
+#   geom_line(aes(y = sleep_median5), color = "pink") +
+#   geom_line(aes(y = sleep_median10 + .2), color = "lightblue") +
+#   geom_line(aes(y = in_bed_median5 + 1.2), color = "grey60") +
+#   geom_line(aes(y = y_sd), color = "brown") +
+#   geom_line(aes(y = scale(incl)), color = "darkgreen") +
+#   scale_x_datetime(date_labels = "%H", breaks = "1 hour") +
+#   facet_wrap(~noon_day, scales = "free", ncol = 1) +
+#   theme_classic() +
+#   theme(
+#     strip.background = element_rect(color = NA),
+#     strip.text = element_text(size = 16, face = "bold")
+#   )
 
-### Process 10-second epoch data ###
-
-# Use the extract_in_bed_data function to filter the 10-second epoch data based on the fitted model
-filtered_data_10 <- extract_in_bed_data(in_bed_CART_fit_10, data_10, 10)
-
-# Write the filtered 10-second epoch data to a parquet file
-write_parquet(filtered_data_10, "data/data_for_modelling/only_in_bed_data_10.parquet")
-
-### Process 30-second epoch data ###
-
-# Use the extract_in_bed_data function to filter the 30-second epoch data based on the fitted model
-filtered_data_30 <- extract_in_bed_data(in_bed_CART_fit_30, data_30, 30)
-
-# Write the filtered 30-second epoch data to a parquet file
-write_parquet(filtered_data_30, "data/data_for_modelling/only_in_bed_data_30.parquet")
-
+beepr::beep(4)

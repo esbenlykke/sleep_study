@@ -7,128 +7,81 @@ library(arrow)
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
-# TODO import in-bed data predicted by best in-bed model. Both 10-sec and 30-sec epoch data.
-# Also consider a SMOTE variant for waso
-
-data_10 <-
-  read_parquet("data/data_for_modelling/chained_classifiers/only_in_bed_data_10.parquet") %>%
-  mutate(across(contains("sleep"), as_factor)) 
-
-data_30 <-
-  read_parquet("data/data_for_modelling/chained_classifiers/only_in_bed_data_30.parquet") %>%
-  mutate(across(contains("sleep"), as_factor)) 
-
-set.seed(123)
-spl_10 <-
-  group_initial_split(data_10, group = id, prop = .5)
-
-train_10 <-
-  training(spl_10)
-
-test_10 <-
-  testing(spl_10)
-
-spl_30 <-
-  group_initial_split(data_30, group = id, prop = .5)
-
-train_30 <-
-  training(spl_30)
-
-test_30 <-
-  testing(spl_30)
-
-folds_10 <-
-  group_mc_cv(train_10, group = id, times = 5, prop = .5)
-
-folds_30 <-
-  group_mc_cv(train_30, group = id, times = 5, prop = .5)
+# Function to read data from parquet files
+load_data <- function(train_path, test_path) {
+  train <- read_parquet(train_path) %>% 
+    mutate(across(contains("in_bed"), as_factor))
+  test <- read_parquet(test_path) %>% 
+    mutate(across(contains("in_bed"), as_factor))
+  return(list(train, test))
+}
 
 
-# Recipes -----------------------------------------------------------------
+# Load data
+cat("Spending data budget...\n")
+data_10 <- load_data(
+  "data/data_for_modelling/chained_classifiers/training_10_sec_only_in_bed_data.parquet",
+  "data/data_for_modelling/chained_classifiers/testing_10_sec_only_in_bed_data.parquet"
+)
+train_10 <- data_10[[1]]
+test_10 <- data_10[[2]]
+
+data_30 <- load_data(
+  "data/data_for_modelling/chained_classifiers/training_30_sec_only_in_bed_data.parquet",
+  "data/data_for_modelling/chained_classifiers/testing_30_sec_only_in_bed_data.parquet"
+)
+train_30 <- data_30[[1]] 
+test_30 <- data_30[[2]]
+
+# Create cross-validation objects
+folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
+folds_30 <- group_mc_cv(train_30, group = id, times = 1, prop = .5)
+
+
+# Function to create preprocessing recipes
+create_recipe <- function(target_var, data, normalize = FALSE) {
+  # Create a formula using paste and as.formula
+  formula_str <- paste(target_var, "~ age + weekday + incl + theta + x_mean + y_mean + z_mean +
+                              x_sd + y_sd + z_sd + sd_max + temp_mean + temp_sd + clock_proxy_cos +
+                              clock_proxy_linear + x_sd_long + y_sd_long + z_sd_long")
+  
+  formula_obj <- as.formula(formula_str)
+  
+  rec <- recipe(formula_obj, data = data)
+  
+  if (normalize) {
+    rec <- rec %>%
+      step_normalize(all_numeric_predictors())
+  }
+  
+  return(rec)
+}
+
+# Define preprocessing recipes
 cat("Creating preprocessing recipes...\n")
 
-### 10 sec epochs ###
-sleep_raw_rec_10 <-
-  recipe(
-    sleep ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_10
-  ) |>
-  step_zv(all_predictors())
+# 10 second epochs data
+sleep_raw_10_sec_rec <- create_recipe("sleep", train_10)
+sleep_raw_10_sec_norm_rec <- create_recipe("sleep", train_10, normalize = TRUE)
+sleep_median5_10_sec_rec <- create_recipe("sleep_median5", train_10)
+sleep_median5_10_sec_norm_rec <- create_recipe("sleep_median5", train_10, normalize = TRUE)
+sleep_median10_10_sec_rec <- create_recipe("sleep_median10", train_10)
+sleep_median10_10_sec_norm_rec <- create_recipe("sleep_median10", train_10, normalize = TRUE)
 
-sleep_raw_norm_rec_10 <-
-  sleep_raw_rec_10 |>
-  step_normalize(all_numeric_predictors())
-
-sleep_median5_rec_10 <-
-  recipe(
-    sleep_median5 ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_10
-  ) |>
-  step_zv(all_predictors())
-
-sleep_median5_norm_rec_10 <-
-  sleep_median5_rec_10 |>
-  step_normalize(all_numeric_predictors())
-
-sleep_median10_rec_10 <-
-  recipe(
-    sleep_median5 ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_10
-  ) |>
-  step_zv(all_predictors())
-
-sleep_median10_norm_rec_10 <-
-  sleep_median10_rec_10 |>
-  step_normalize(all_numeric_predictors())
-
-### 30 sec epochs ###
-
-sleep_raw_rec_30 <-
-  recipe(
-    sleep ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_30
-  ) |>
-  step_zv(all_predictors())
-
-sleep_raw_norm_rec_30 <-
-  sleep_raw_rec_30 |>
-  step_normalize(all_numeric_predictors())
-
-sleep_median5_rec_30 <-
-  recipe(
-    sleep_median5 ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_30
-  ) |>
-  step_zv(all_predictors())
-
-sleep_median5_norm_rec_30 <-
-  sleep_median5_rec_30 |>
-  step_normalize(all_numeric_predictors())
-
-sleep_median10_rec_30 <-
-  recipe(
-    sleep_median5 ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_30
-  ) |>
-  step_zv(all_predictors())
-
-sleep_median10_norm_rec_30 <-
-  sleep_median10_rec_30 |>
-  step_normalize(all_numeric_predictors())
+# 30 second epochs data
+sleep_raw_30_sec_rec <- create_recipe("sleep", train_30)
+sleep_raw_30_sec_norm_rec <- create_recipe("sleep", train_30, normalize = TRUE)
+sleep_median5_30_sec_rec <- create_recipe("sleep_median5", train_30)
+sleep_median5_30_sec_norm_rec <- create_recipe("sleep_median5", train_30, normalize = TRUE)
+sleep_median10_30_sec_rec <- create_recipe("sleep_median10", train_30)
+sleep_median10_30_sec_norm_rec <- create_recipe("sleep_median10", train_30, normalize = TRUE)
 
 # Model specifications ----------------------------------------------------
+
+CART_spec <-
+  decision_tree(cost_complexity = tune(), tree_depth = tune(), min_n = tune()) %>%
+  set_mode("classification") %>%
+  set_engine("rpart")
 
 glmnet_spec <-
   logistic_reg(penalty = tune(), mixture = tune()) |>
@@ -140,31 +93,40 @@ nnet_spec <-
   set_engine("nnet", MaxNWts = 500) |> # MaxNWts is a regularization term based on number of predictors
   set_mode("classification")
 
-CART_spec <-
-  decision_tree(cost_complexity = tune(), tree_depth = tune(), min_n = tune()) %>%
-  set_mode("classification") %>%
-  set_engine("rpart")
+# mars_spec <-
+#   mars(prod_degree = tune(), num_terms = tune()) |> #<- use GCV to choose terms
+#   set_engine("earth") |>
+#   set_mode("classification")
+
+# rf_spec <-
+# rand_forest(mtry = tune(), min_n = tune(), trees = tune()) |>
+# set_engine("ranger") |>
+# set_mode("classification")
 
 xgb_spec <-
   boost_tree(
     tree_depth = tune(), learn_rate = tune(),
     loss_reduction = tune(), min_n = tune(),
-    sample_size = tune(), trees = seq(100, 1000, 200)
+    sample_size = tune(), trees = tune()
   ) |>
   set_engine("xgboost", verbose = TRUE) |>
   set_mode("classification")
 
-
-# update nnet params
 nnet_param <-
   nnet_spec |>
   extract_parameter_set_dials() |>
-  update(hidden_units = hidden_units(c(1, 27)))
+  recipes::update(hidden_units = hidden_units(c(3, 27)))
 
 rpart_param <-
   CART_spec %>%
   extract_parameter_set_dials() %>%
-  update(tree_depth = tree_depth(c(3, 7)))
+  recipes::update(tree_depth = tree_depth(c(3, 7)))
+
+xgb_param <- 
+  xgb_spec %>% 
+  extract_parameter_set_dials() %>% 
+  recipes::update(trees = trees(c(200, 800)))
+
 
 
 # Create workflow sets ----------------------------------------------------
@@ -174,9 +136,9 @@ cat("Creating workflow sets...\n")
 sleep_norm_wfs_10 <-
   workflow_set(
     preproc = list(
-      sleep_raw = sleep_raw_norm_rec_10,
-      sleep_5_min_median = sleep_median5_norm_rec_10,
-      sleep_10_min_median = sleep_median10_norm_rec_10
+      sleep_raw = sleep_raw_10_sec_norm_rec,
+      sleep_5_min_median = sleep_median5_10_sec_norm_rec,
+      sleep_10_min_median = sleep_median10_10_sec_norm_rec
     ),
     models = list(
       logistic_regression = glmnet_spec, # works in parallel
@@ -193,9 +155,9 @@ sleep_norm_wfs_10 <-
 sleep_no_norms_wfs_10 <-
   workflow_set(
     preproc = list(
-      sleep_raw = sleep_raw_rec_10,
-      sleep_5_min_median = sleep_median5_rec_10,
-      sleep_10_min_median = sleep_median10_rec_10
+      sleep_raw = sleep_raw_10_sec_rec,
+      sleep_5_min_median = sleep_median5_10_sec_rec,
+      sleep_10_min_median = sleep_median10_10_sec_rec
     ),
     models = list(
       decision_tree = CART_spec,
@@ -209,6 +171,11 @@ sleep_no_norms_wfs_10 <-
     "sleep_raw_decision_tree",
     "sleep_5_min_median_decision_tree",
     "sleep_10_min_median_decision_tree"
+  )) %>% 
+  option_add(param_info = xgb_param, id = c(
+    "sleep_raw_xgboost",
+    "sleep_5_min_median_xgboost",
+    "sleep_10_min_median_xgboost"
   ))
 
 
@@ -216,25 +183,25 @@ sleep_no_norms_wfs_10 <-
 all_wfs_10 <- list(
   decision_tree_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "decision")),
+    filter(str_detect(wflow_id, "decision")),
   log_reg_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "logistic")),
+    filter(str_detect(wflow_id, "logistic")),
   nnet_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "neural")),
+    filter(str_detect(wflow_id, "neural")),
   xgb_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "xgboost"))
+    filter(str_detect(wflow_id, "xgboost"))
 )
 
 ### 30 sec epochs ###
 sleep_norm_wfs_30 <-
   workflow_set(
     preproc = list(
-      sleep_raw = sleep_raw_norm_rec_30,
-      sleep_5_min_median = sleep_median5_norm_rec_30,
-      sleep_10_min_median = sleep_median10_norm_rec_30
+      sleep_raw = sleep_raw_30_sec_norm_rec,
+      sleep_5_min_median = sleep_median5_30_sec_norm_rec,
+      sleep_10_min_median = sleep_median10_30_sec_norm_rec
     ),
     models = list(
       logistic_regression = glmnet_spec, # works in parallel
@@ -251,9 +218,9 @@ sleep_norm_wfs_30 <-
 sleep_no_norms_wfs_30 <-
   workflow_set(
     preproc = list(
-      sleep_raw = sleep_raw_rec_30,
-      sleep_5_min_median = sleep_median5_rec_30,
-      sleep_10_min_median = sleep_median10_rec_30
+      sleep_raw = sleep_raw_30_sec_rec,
+      sleep_5_min_median = sleep_median5_30_sec_rec,
+      sleep_10_min_median = sleep_median10_30_sec_rec
     ),
     models = list(
       decision_tree = CART_spec,
@@ -267,25 +234,29 @@ sleep_no_norms_wfs_30 <-
     "sleep_raw_decision_tree",
     "sleep_5_min_median_decision_tree",
     "sleep_10_min_median_decision_tree"
+  )) %>% 
+  option_add(param_info = xgb_param, id = c(
+    "sleep_raw_xgboost",
+    "sleep_5_min_median_xgboost",
+    "sleep_10_min_median_xgboost"
   ))
 
 
 ### all 30 sec epoch workdflows ###
-all_wfs_30 <-
-  list(
-    decision_tree_wfs_30 =
-      bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-        filter(str_detect(wflow_id, "decision")),
-    log_reg_wfs_30 =
-      bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-        filter(str_detect(wflow_id, "logistic")),
-    nnet_wfs_30 =
-      bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-        filter(str_detect(wflow_id, "neural")),
-    xgb_wfs_30 =
-      bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-        filter(str_detect(wflow_id, "xgboost"))
-  )
+all_wfs_30 <- list(
+  decision_tree_wfs_30 =
+    bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
+    filter(str_detect(wflow_id, "decision")),
+  log_reg_wfs_30 =
+    bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
+    filter(str_detect(wflow_id, "logistic")),
+  nnet_wfs_30 =
+    bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
+    filter(str_detect(wflow_id, "neural")),
+  xgb_wfs_30 =
+    bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
+    filter(str_detect(wflow_id, "xgboost"))
+)
 
 
 # Setup parallel cluster --------------------------------------------------
@@ -305,43 +276,28 @@ grid_ctrl <-
     save_workflow = FALSE
   )
 
-tune_wf_and_write_10 <- function(wfs, fname) {
-  res <-
-    wfs |>
+tune_wf_and_write <- function(wfs, fname, folds) {
+  tictoc::tic()
+  wfs |>
     workflow_map(
       seed = 123,
       "tune_grid",
-      resamples = folds_10,
+      resamples = folds,
       grid = 5,
       control = grid_ctrl,
-      metrics = metric_set(f_meas, accuracy),
-      verbose = TRUE
-    ) %>% 
+      metrics = metric_set(f_meas),
+      verbose = TRUE) %>%
     write_rds(fname)
+  tictoc::toc()
 }
 
-tune_wf_and_write_30 <- function(wfs, fname) {
-  res <-
-    wfs |>
-    workflow_map(
-      seed = 123,
-      "tune_grid",
-      resamples = folds_30,
-      grid = 5,
-      control = grid_ctrl,
-      metrics = metric_set(f_meas, accuracy),
-      verbose = TRUE
-    ) %>% 
-    write_rds(fname)
-}
 
 fnames_10 <- 
-  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep", names(all_wfs_10), ".rds")
-
-
+  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_10), ".rds")
 fnames_30 <- 
-  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep", names(all_wfs_30), ".rds")
+  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_30), ".rds")
 
 
-walk2(all_wfs_10, fnames_10, tune_wf_and_write_10)
-walk2(all_wfs_30, fnames_30, tune_wf_and_write_30)
+walk2(all_wfs_10, fnames_10, ~tune_wf_and_write(.x, .y, folds_10))
+walk2(all_wfs_30, fnames_30, ~tune_wf_and_write(.x, .y, folds_30))
+
