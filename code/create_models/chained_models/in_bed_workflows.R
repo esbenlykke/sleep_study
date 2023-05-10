@@ -7,38 +7,75 @@ library(arrow)
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
-train <- 
-  read_parquet("data/data_for_modelling/chained_classifiers/training_10_sec_data.parquet") %>% 
-  filter(id %in% c(3404, 8505, 54704, 55704, 132804))
-
-# write out train data for later fitting of optimized workflows
-# write_parquet(train, "data/processed/training_data.parquet")
-
-# write out test data for later evaluation
-# write_parquet(test, "data/processed/testing_data.parquet")
-
-folds <-
-  group_mc_cv(train, group = id, times = 5, prop = .5)
+# Function to read data from parquet files
+load_data <- function(train_path, test_path) {
+  train <- read_parquet(train_path) %>% 
+    mutate(across(contains("in_bed"), as_factor))
+  test <- read_parquet(test_path) %>% 
+    mutate(across(contains("in_bed"), as_factor))
+  return(list(train, test))
+}
 
 
-# Recipes -----------------------------------------------------------------
+# Load data
+cat("Spending data budget...\n")
+data_10 <- load_data(
+  "data/data_for_modelling/chained_classifiers/training_10_sec_data.parquet",
+  "data/data_for_modelling/chained_classifiers/testing_10_sec_data.parquet"
+)
+train_10 <- data_10[[1]]
+test_10 <- data_10[[2]]
+
+data_30 <- load_data(
+  "data/data_for_modelling/chained_classifiers/training_30_sec_data.parquet",
+  "data/data_for_modelling/chained_classifiers/testing_30_sec_data.parquet"
+)
+train_30 <- data_30[[1]] # %>% filter(id %in% c(3404, 37304))
+test_30 <- data_30[[2]]
+
+# Create cross-validation objects
+folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
+folds_30 <- group_mc_cv(train_30, group = id, times = 5, prop = .5)
+
+
+# Function to create preprocessing recipes
+create_recipe <- function(target_var, data, normalize = FALSE) {
+  # Create a formula using paste and as.formula
+  formula_str <- paste(target_var, "~ age + weekday + incl + theta + x_mean + y_mean + z_mean +
+                              x_sd + y_sd + z_sd + sd_max + temp_mean + temp_sd + clock_proxy_cos +
+                              clock_proxy_linear + x_sd_long + y_sd_long + z_sd_long")
+
+  formula_obj <- as.formula(formula_str)
+
+  rec <- recipe(formula_obj, data = data)
+
+  if (normalize) {
+    rec <- rec %>%
+      step_normalize(all_numeric_predictors())
+  }
+
+  return(rec)
+}
+
+# Define preprocessing recipes
 cat("Creating preprocessing recipes...\n")
 
-in_bed_rec <-
-  recipe(
-    in_bed ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + 
-      clock_proxy_linear + x_sd_long + y_sd_long + z_sd_long,
-    data = train
-  ) |>
-  step_zv(all_predictors())
+# 10 second epochs data
+in_bed_raw_10_sec_rec <- create_recipe("in_bed", train_10)
+in_bed_raw_10_sec_norm_rec <- create_recipe("in_bed", train_10, normalize = TRUE)
+in_bed_median5_10_sec_rec <- create_recipe("in_bed_median5", train_10)
+in_bed_median5_10_sec_norm_rec <- create_recipe("in_bed_median5", train_10, normalize = TRUE)
 
-in_bed_norm_rec <-
-  in_bed_rec |>
-  step_normalize(all_numeric_predictors())
+# 30 second epochs data
+in_bed_raw_30_sec_rec <- create_recipe("in_bed", train_30)
+in_bed_raw_30_sec_norm_rec <- create_recipe("in_bed", train_30, normalize = TRUE)
+in_bed_median5_30_sec_rec <- create_recipe("in_bed_median5", train_30)
+in_bed_median5_30_sec_norm_rec <- create_recipe("in_bed_median5", train_30, normalize = TRUE)
+
+# Rest of the code remains the same
+
 
 # Model specifications ----------------------------------------------------
-
 
 CART_spec <-
   decision_tree(cost_complexity = tune(), tree_depth = tune(), min_n = tune()) %>%
@@ -69,46 +106,47 @@ xgb_spec <-
   boost_tree(
     tree_depth = tune(), learn_rate = tune(),
     loss_reduction = tune(), min_n = tune(),
-    sample_size = tune(), trees = seq(200, 1000, 200)
+    sample_size = tune(), trees = tune()
   ) |>
   set_engine("xgboost", verbose = TRUE) |>
   set_mode("classification")
 
-
-
-# update nnet params
 nnet_param <-
   nnet_spec |>
   extract_parameter_set_dials() |>
-  update(hidden_units = hidden_units(c(5, 27)))
+  recipes::update(hidden_units = hidden_units(c(1, 27)))
 
 rpart_param <-
   CART_spec %>%
   extract_parameter_set_dials() %>%
-  update(tree_depth = tree_depth(c(3, 7)))
+  recipes::update(tree_depth = tree_depth(c(3, 7)))
 
+xgb_param <- 
+  xgb_spec %>% 
+  extract_parameter_set_dials() %>% 
+  recipes::update(trees = trees(c(200, 800)))
 
 # Create workflow sets ----------------------------------------------------
 cat("Creating workflow sets...\n")
-
-normalized_in_bed_wf <-
+# 10 second epochs data
+# in-bed raw
+normalized_in_bed_raw_10_sec_wf <-
   workflow_set(
     preproc = list(
-      in_bed = in_bed_norm_rec
+      in_bed_raw = in_bed_raw_10_sec_norm_rec
     ),
     models = list(
       logistic_regression = glmnet_spec, # works in parallel
       neural_network = nnet_spec # works in parallel
     ),
     cross = FALSE
-  ) |>
-  option_add(param_info = nnet_param, id = "in_bed_neural_network")
+  ) 
 
 
-no_preproc_in_bed_wf <-
+no_preproc_in_bed_raw_10_sec_wf <-
   workflow_set(
     preproc = list(
-      in_bed = in_bed_rec
+      in_bed_raw = in_bed_raw_10_sec_rec
     ),
     models = list(
       decision_tree = CART_spec,
@@ -119,9 +157,126 @@ no_preproc_in_bed_wf <-
     cross = FALSE
   )
 
-all_in_bed_workflows <-
-  bind_rows(normalized_in_bed_wf, no_preproc_in_bed_wf)
+all_in_bed_raw_10_sec_workflows <-
+  bind_rows(normalized_in_bed_raw_10_sec_wf, no_preproc_in_bed_raw_10_sec_wf) %>% 
+  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>% 
+  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>% 
+  option_add(param_info = xgb_param, id = "in_bed_raw_xgboost")
 
+# in-bed median 5
+normalized_in_bed_median5_10_sec_wf <-
+  workflow_set(
+    preproc = list(
+      in_bed_median5 = in_bed_median5_10_sec_norm_rec
+    ),
+    models = list(
+      logistic_regression = glmnet_spec, # works in parallel
+      neural_network = nnet_spec # works in parallel
+    ),
+    cross = FALSE
+  )
+
+
+no_preproc_in_bed_median5_10_sec_wf <-
+  workflow_set(
+    preproc = list(
+      in_bed_median5 = in_bed_median5_10_sec_rec
+    ),
+    models = list(
+      decision_tree = CART_spec,
+      # MARS = mars_spec, # works in parallel
+      # random_forest = rf_spec, # works in parallel
+      xgboost = xgb_spec # works in parallel
+    ),
+    cross = FALSE
+  )
+
+all_in_bed_median5_10_sec_workflows <-
+  bind_rows(normalized_in_bed_median5_10_sec_wf, no_preproc_in_bed_median5_10_sec_wf) %>% 
+  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>% 
+  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>% 
+  option_add(param_info = xgb_param, id = "in_bed_median5_xgboost")
+
+
+wf_10_sec_epoch <-
+  list(
+    in_bed_raw_10_sec_epoch = all_in_bed_raw_10_sec_workflows,
+    in_bed_median5_10_sec_epoch = all_in_bed_median5_10_sec_workflows
+  )
+
+# 30 second epochs data
+# in-bed raw
+normalized_in_bed_raw_30_sec_wf <-
+  workflow_set(
+    preproc = list(
+      in_bed_raw = in_bed_raw_30_sec_norm_rec
+    ),
+    models = list(
+      logistic_regression = glmnet_spec, # works in parallel
+      neural_network = nnet_spec # works in parallel
+    ),
+    cross = FALSE
+  )
+
+no_preproc_in_bed_raw_30_sec_wf <-
+  workflow_set(
+    preproc = list(
+      in_bed_raw = in_bed_raw_30_sec_rec
+    ),
+    models = list(
+      decision_tree = CART_spec,
+      # MARS = mars_spec, # works in parallel
+      # random_forest = rf_spec, # works in parallel
+      xgboost = xgb_spec # works in parallel
+    ),
+    cross = FALSE
+  )
+
+all_in_bed_raw_30_sec_workflows <-
+  bind_rows(normalized_in_bed_raw_30_sec_wf, no_preproc_in_bed_raw_30_sec_wf) %>% 
+  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>% 
+  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>% 
+  option_add(param_info = xgb_param, id = "in_bed_raw_xgboost")
+
+# in-bed median 5
+normalized_in_bed_median5_30_sec_wf <-
+  workflow_set(
+    preproc = list(
+      in_bed_median5 = in_bed_median5_30_sec_norm_rec
+    ),
+    models = list(
+      logistic_regression = glmnet_spec, # works in parallel
+      neural_network = nnet_spec # works in parallel
+    ),
+    cross = FALSE
+  )
+
+
+no_preproc_in_bed_median5_30_sec_wf <-
+  workflow_set(
+    preproc = list(
+      in_bed_median5 = in_bed_median5_30_sec_rec
+    ),
+    models = list(
+      decision_tree = CART_spec,
+      # MARS = mars_spec, # works in parallel
+      # random_forest = rf_spec, # works in parallel
+      xgboost = xgb_spec # works in parallel
+    ),
+    cross = FALSE
+  )
+
+all_in_bed_median5_30_sec_workflows <-
+  bind_rows(normalized_in_bed_median5_30_sec_wf, no_preproc_in_bed_median5_30_sec_wf) %>% 
+  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>% 
+  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>% 
+  option_add(param_info = xgb_param, id = "in_bed_median5_xgboost")
+
+wf_30_sec_epoch <-
+  list(
+    in_bed_raw_30_sec_epoch = all_in_bed_raw_30_sec_workflows,
+    in_bed_median5_30_sec_epoch = all_in_bed_median5_30_sec_workflows
+  )
 
 # Setup parallel cluster --------------------------------------------------
 
@@ -140,104 +295,25 @@ grid_ctrl <-
     save_workflow = FALSE
   )
 
-# In bed
+tune_wf_and_write <- function(wfs, fname, folds) {
+  tictoc::tic()
+  wfs |>
+    workflow_map(
+      seed = 123,
+      "tune_grid",
+      resamples = folds,
+      grid = 5,
+      control = grid_ctrl,
+      metrics = metric_set(f_meas),
+      verbose = TRUE) %>%
+    write_rds(fname)
+  tictoc::toc()
+}
 
-cat("Tuning the following workflows:\n")
-all_in_bed_workflows
+fnames_10 <- 
+  str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_10_sec_epoch), "_grid_results.rds")
+fnames_30 <- 
+  str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_30_sec_epoch), "_grid_results.rds")
 
-tictoc::tic()
-in_bed_grid_results <-
-  all_in_bed_workflows |>
-  workflow_map(
-    seed = 123,
-    "tune_grid",
-    resamples = folds,
-    grid = 5,
-    control = grid_ctrl,
-    metrics = metric_set(f_meas, roc_auc),
-    verbose = TRUE
-  )
-tictoc::toc()
-
-write_rds(
-  in_bed_grid_results,
-  "/media/esbenlykke/My Passport/chained_models/grid_results/in_bed/in_bed_workflowsets_results_10_sec.rds"
-)
-
-
-### 30 second epohs ###
-
-train_30_sec <-
-  read_parquet("data/data_for_modelling/chained_classifiers/training_30_sec_data.parquet") %>% 
-  filter(id %in% c(8504, 8505, 37304, 132804, 182604))
-
-folds_30_sec <-
-  group_mc_cv(train_30_sec, group = id, times = 5, prop = .5)
-
-in_bed_rec_30_sec <-
-  recipe(
-    in_bed ~ age + incl + temp + macc_x + macc_y + macc_z +
-      sdacc_x + sdacc_y + sdacc_z + sdmax + temp_sd + clock_proxy_cos + clock_proxy_linear +
-      x_sd_long + y_sd_long + z_sd_long,
-    data = train_30_sec
-  ) |>
-  step_zv(all_predictors())
-
-in_bed_norm_rec_30_sec <-
-  in_bed_rec_30_sec |>
-  step_normalize(all_numeric_predictors())
-
-normalized_in_bed_30_sec_wf <-
-  workflow_set(
-    preproc = list(
-      in_bed = in_bed_norm_rec_30_sec
-    ),
-    models = list(
-      logistic_regression = glmnet_spec, # works in parallel
-      neural_network = nnet_spec # works in parallel
-    ),
-    cross = FALSE
-  ) |>
-  option_add(param_info = nnet_param, id = "in_bed_neural_network")
-
-no_preproc_in_bed_30_sec_wf <-
-  workflow_set(
-    preproc = list(
-      in_bed = in_bed_rec_30_sec
-    ),
-    models = list(
-      decision_tree = CART_spec,
-      # MARS = mars_spec, # works in parallel
-      # random_forest = rf_spec, # works in parallel
-      xgboost = xgb_spec # works in parallel
-    ),
-    cross = FALSE
-  )
-
-all_in_bed_workflows_30_sec <-
-  bind_rows(normalized_in_bed_30_sec_wf, no_preproc_in_bed_30_sec_wf)
-
-
-# In bed
-
-cat("Tuning the following workflows:\n")
-all_in_bed_workflows_30_sec
-
-tictoc::tic()
-in_bed_grid_results_30_sec <-
-  all_in_bed_workflows_30_sec |>
-  workflow_map(
-    seed = 123,
-    "tune_grid",
-    resamples = folds,
-    grid = 5,
-    control = grid_ctrl,
-    metrics = metric_set(f_meas, roc_auc),
-    verbose = TRUE
-  )
-tictoc::toc()
-
-write_rds(
-  in_bed_grid_results_30_sec,
-  "/media/esbenlykke/My Passport/chained_models/grid_results/in_bed/in_bed_workflowsets_results_30_sec.rds"
-)
+walk2(wf_10_sec_epoch, fnames_10, ~tune_wf_and_write(.x, .y, folds_10))
+walk2(wf_30_sec_epoch, fnames_30, ~tune_wf_and_write(.x, .y, folds_30))

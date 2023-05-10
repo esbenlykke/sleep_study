@@ -53,18 +53,21 @@ zm_data <- read_tsv("data/processed/zm_scores.tsv", progress = FALSE) %>%
 #     !recording_length > (14 * 60 * 60) / epoch_length)
 
 # remove nights with edge SP and remove nights shorter that 7 hours and longer that 14 hours
-zm_acc_data_clean <- 
+zm_data_clean <-
   zm_data %>%
+  # Keep only the groups that are also present in the distinct_acc_days data frame
+  # based on the matching values of id, noon_day, and month columns (the kids)
+  semi_join(distinct_acc_days, by = c("id", "noon_day", "month")) %>% 
   group_by(id, noon_day, month) %>%
   # For each group, perform the following steps
   group_modify(~ {
     # Store the data of the current group
     current_date_data <- .x
-    
+
     # Check if the first or last recording of the night has a sensor problem (score == -5)
     first_problem <- current_date_data$score[1] == -5
     last_problem <- tail(current_date_data$score, n = 1) == -5
-    
+
     # If there's no sensor problem at the beginning or end of the night, return the data
     if (!(first_problem | last_problem)) {
       return(current_date_data)
@@ -72,18 +75,17 @@ zm_acc_data_clean <-
       # Otherwise, return an empty tibble, effectively removing this group from the final output
       return(tibble())
     }
-  }) %>%
-  
+  }) %>% 
   # For the remaining groups, perform the following steps
   group_modify(~ {
     # Store the data of the current group
     current_group_data <- .x
     # Calculate the recording length as the number of rows in the group
     recording_length <- nrow(current_group_data)
-    
+
     # Check if the recording_length is within the acceptable range (between 7 and 14 hours)
     if (recording_length >= (7 * 60 * 60) / epoch_length &&
-        recording_length <= (14 * 60 * 60) / epoch_length) {
+      recording_length <= (14 * 60 * 60) / epoch_length) {
       # If the recording_length is within the acceptable range, return the current group data
       return(current_group_data)
     } else {
@@ -91,14 +93,20 @@ zm_acc_data_clean <-
       return(tibble())
     }
   }) %>%
-  ungroup() %>% 
-  
-  # Keep only the groups that are also present in the distinct_acc_days data frame
-  # based on the matching values of id, noon_day, and month columns
-  semi_join(distinct_acc_days, by = c("id", "noon_day", "month")) %>% 
-  inner_join(data, by = c("id", "noon_day", "month", "datetime"))
+  ungroup()
 
-write_parquet(zm_acc_data_clean, "data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
+# Get distinct id, noon_day, and month from the cleaned data
+valid_zm_days <-
+  zm_data_clean %>%
+  distinct(id, noon_day, month)
+
+# Join the data with valid_zm_days based on matching id, noon_day, and month columns
+# Then, right join with the cleaned zm_data based on matching id, noon_day, month, and datetime columns
+# Finally, write the output to a parquet file
+data %>%
+  semi_join(valid_zm_days, by = c("id", "noon_day", "month")) %>%
+  left_join(zm_data_clean, by = c("id", "noon_day", "month", "datetime")) %>% 
+  write_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
 
 # Plot histogram of sensor problem days
 # zm_data %>%

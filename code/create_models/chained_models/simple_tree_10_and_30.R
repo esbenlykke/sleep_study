@@ -17,11 +17,11 @@ path <- "/media/esbenlykke/My Passport/crude/"
 # Spend data budget -------------------------------------------------------
 cat("Spending data budget...\n")
 
-train_10 <- read_parquet("data/data_for_modelling/crude_training_data.parquet")
-test_10 <- read_parquet("data/data_for_modelling/crude_testing_data.parquet")
+train_10 <- read_parquet("data/data_for_modelling/chained_classifiers/training_10_sec_data.parquet")
+test_10 <- read_parquet("data/data_for_modelling/chained_classifiers/testing_10_sec_data.parquet")
 
-train_30 <- read_parquet("data/data_for_modelling/crude_training_30_sec_data.parquet")
-test_30 <- read_parquet("data/data_for_modelling/crude_testing_30_sec_data.parquet")
+train_30 <- read_parquet("data/data_for_modelling/chained_classifiers/training_30_sec_data.parquet")
+test_30 <- read_parquet("data/data_for_modelling/chained_classifiers/testing_30_sec_data.parquet")
 
 folds_10 <-
   group_mc_cv(train_10, group = id, times = 5, prop = .5)
@@ -39,7 +39,10 @@ in_bed_rec_10 <-
       x_sd_long + y_sd_long + z_sd_long,
     data = train_10
   ) |>
-  step_zv(all_predictors())
+  step_zv(all_predictors()) %>% 
+  step_corr(all_numeric_predictors()) %>% 
+  step_lincomb(all_numeric_predictors()) %>% 
+  step_dummy(all_nominal_predictors())
 
 in_bed_rec_30 <-
   recipe(
@@ -65,12 +68,6 @@ tree_grid <-
     size = 15
   )
 
-# Setup parallel back-end -------------------------------------------------
-
-
-doParallel::registerDoParallel(cores = 6)
-
-
 # Workflows ---------------------------------------------------------------
 
 in_bed_wf_10 <-
@@ -78,6 +75,12 @@ in_bed_wf_10 <-
 
 in_bed_wf_30 <-
   workflow(in_bed_rec_30, cart_spec)
+
+# Setup parallel back-end -------------------------------------------------
+
+
+doParallel::registerDoParallel(cores = 6)
+
 
 # Tune grids --------------------------------------------------------------
 
