@@ -9,7 +9,7 @@ cat("Creating sensor-independent features. This won't take long...")
 # data <-
 #   read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
 data <-
-  read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
+  read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet") 
 
 
 # Create static clock proxies --------------------------------------------
@@ -27,12 +27,17 @@ data_10 <-
     weekday = wday(datetime, label = F, week_start = 1),
     .after = score
   ) %>%
-  # Calculate the standard deviation for columns x, y, and z with a sliding window of 5 minutes
-  mutate(
-    across(x:z, list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30)))
-  ) %>%
   # Group the data by id and noon_day
   group_by(id, noon_day, month) |>
+  # Calculate the standard deviation for columns x, y, and z with a sliding window of 5 minutes
+  mutate(
+    across(x:z, list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30))),
+    across(c(incl:sd_max, -datetime), list(
+      lag_1min = ~ lag(.x, 1), # Value from 1 minute ago
+      lag_5min = ~ lag(.x, 5), # Value from 5 minutes ago
+      lag_30min = ~ lag(.x, 30) # Value from 30 minutes ago
+    )) 
+  ) %>%
   # Create a new feature for clock_group based on the datetime column
   mutate(
     clock_group = if_else((hms::as_hms(datetime) > lubridate::hms("19:00:00") |
@@ -75,9 +80,9 @@ data_30 <-
     across(where(is.factor), ~ slider::slide_dbl(as.numeric(.x) - 1, median))
   ) %>%
   mutate(
-      in_bed = if_else(in_bed > 0, 1, 0),
-      in_bed_median5 = if_else(in_bed_median5 > 0, 1, 0)
-    ) %>% 
+    in_bed = if_else(in_bed > 0, 1, 0),
+    in_bed_median5 = if_else(in_bed_median5 > 0, 1, 0)
+  ) %>%
   distinct()
 
 # Write the processed data to a new parquet file

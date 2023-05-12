@@ -1,91 +1,55 @@
 #!/usr/bin/env Rscript
 
+# Load necessary libraries
 library(tidyverse)
 library(tidymodels)
 library(arrow)
+library(butcher)
 
-
+# Set tidymodels to preferred and set theme to dark
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
-path <- "/media/esbenlykke/My Passport/crude/"
+# Define the output path
+output_path <- "/media/esbenlykke/My Passport/chained_models/fitted_workflows/in_bed/"
 
-train10 <- 
-  read_parquet("data/data_for_modelling/crude_training_data.parquet")
+# Load training data
+train30 <- read_parquet("data/data_for_modelling/chained_classifiers/30_sec_training_data.parquet") %>% 
+  mutate(
+    across(contains("in_bed"), as_factor)
+  )
 
-train30 <- 
-  read_parquet("data/data_for_modelling/crude_training_30_sec_data.parquet")
+cat("Reading in-bed workflowsets\n\n")
 
-# for testing purposes
-# ids <- train %>% distinct(id) %>% slice(1:10)
-# 
-# train <- train %>%
-#   filter(id %in% ids$id) %>%
-#   group_by(id, in_bed, sleep) %>%
-#   slice_sample(n = 100) %>%
-#   ungroup()
-###
+# Load grid results
+in_bed_median5_30_sec_grid_res <- read_rds("/media/esbenlykke/My Passport/chained_models/grid_results/in_bed/in_bed_median5_30_sec_epoch_grid_results.rds")
 
-# IN-BED ------------------------------------------------------------------
-cat("Reading in-bed workflowsets\n")
+glue::glue("{str_c(unique(in_bed_median5_30_sec_grid_res$wflow_id), collapse = ' + ')} 
+           \nWill be fitted! Please be patient...\n\n")
 
-in_bed_grid_results_10_sec_10_sec <-
-  read_rds(str_c(path, "/grid_results/in_bed_workflowsets_results_10_sec.rds"))
+# Function to process models
+process_model <- function(model_name){
+  cat(paste("Finalizing and fitting", model_name, "model\n"))
+  
+  # Extract the best result
+  best_result <- in_bed_median5_30_sec_grid_res %>%
+    extract_workflow_set_result(model_name) |>
+    select_best(metric = "f_meas")
+  
+  # Finalize the workflow, fit it, and save the result
+  in_bed_median5_30_sec_grid_res |>
+    extract_workflow(model_name) |>
+    finalize_workflow(best_result) %>%
+    fit(train30) %>%
+    butcher() %>% 
+    write_rds(str_c(output_path, model_name, "_30_sec_epoch_fit.rds"))
+}
 
-# Logistic regression
-cat("Finalizing and fitting logistic regression model\n")
+# Get unique model names
+model_names <- unique(in_bed_median5_30_sec_grid_res$wflow_id)
 
-best_in_bed_logistic_result <-
-  in_bed_grid_results_10_sec %>%
-  extract_workflow_set_result("in_bed_logistic_regression") |>
-  select_best(metric = "f_meas")
-
-in_bed_grid_results_10_sec |>
-  extract_workflow("in_bed_logistic_regression") |>
-  finalize_workflow(best_in_bed_logistic_result) %>%
-  fit(train) %>%
-  write_rds(str_c(path, "fitted_models/crude_in_bed_log_reg_fit.rds"))
-
-# Neural network
-cat("Finalizing and fitting neural network model\n")
-
-best_in_bed_nn_result <-
-  in_bed_grid_results_10_sec %>%
-  extract_workflow_set_result("in_bed_neural_network") |>
-  select_best(metric = "f_meas")
-
-in_bed_grid_results_10_sec |>
-  extract_workflow("in_bed_neural_network") |>
-  finalize_workflow(best_in_bed_nn_result)  %>%
-  fit(train) %>%
-  write_rds(str_c(path, "fitted_models/crude_in_bed_nnet_fit.rds"))
-
-# Decision tree
-cat("Finalizing and fitting decision tree model\n")
-
-best_in_bed_CART_result <-
-  in_bed_grid_results_10_sec %>%
-  extract_workflow_set_result("in_bed_logistic_regression") |>
-  select_best(metric = "f_meas")
-
-in_bed_grid_results_10_sec |>
-  extract_workflow("in_bed_logistic_regression") |>
-  finalize_workflow(best_in_bed_logistic_result) %>%
-  fit(train) %>%
-  write_rds(str_c(path, "fitted_models/crude_in_bed_simple_tree_fit.rds"))
-
-# XGboost
-cat("Finalizing and fitting XGBoost model\n")
-
-best_in_bed_xgboost_result <-
-  in_bed_grid_results_10_sec %>%
-  extract_workflow_set_result("in_bed_xgboost") |>
-  select_best(metric = "f_meas")
-
-in_bed_grid_results_10_sec |>
-  extract_workflow("in_bed_xgboost") |>
-  finalize_workflow(best_in_bed_xgboost_result)  %>%
-  fit(train) %>%
-  write_rds(str_c(path, "fitted_models/crude_in_bed_xgb_fit.rds"))
+# Process each model
+map(model_names, process_model, .progress = TRUE)
 
 cat("All done\n")
+

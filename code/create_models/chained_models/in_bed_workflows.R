@@ -7,31 +7,17 @@ library(arrow)
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
-# Function to read data from parquet files
-load_data <- function(train_path, test_path) {
-  train <- read_parquet(train_path) %>% 
+load_data <- function(input_path) {
+  read_parquet(input_path) %>%
     mutate(across(contains("in_bed"), as_factor))
-  test <- read_parquet(test_path) %>% 
-    mutate(across(contains("in_bed"), as_factor))
-  return(list(train, test))
 }
 
+train_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_training_data.parquet")
+test_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_testing_data.parquet")
 
-# Load data
-cat("Spending data budget...\n")
-data_10 <- load_data(
-  "data/data_for_modelling/chained_classifiers/training_10_sec_data.parquet",
-  "data/data_for_modelling/chained_classifiers/testing_10_sec_data.parquet"
-)
-train_10 <- data_10[[1]]
-test_10 <- data_10[[2]]
 
-data_30 <- load_data(
-  "data/data_for_modelling/chained_classifiers/training_30_sec_data.parquet",
-  "data/data_for_modelling/chained_classifiers/testing_30_sec_data.parquet"
-)
-train_30 <- data_30[[1]] # %>% filter(id %in% c(3404, 37304))
-test_30 <- data_30[[2]]
+train_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_training_data.parquet")
+test_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_testing_data.parquet")
 
 # Create cross-validation objects
 folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
@@ -42,8 +28,20 @@ folds_30 <- group_mc_cv(train_30, group = id, times = 5, prop = .5)
 create_recipe <- function(target_var, data, normalize = FALSE) {
   # Create a formula using paste and as.formula
   formula_str <- paste(target_var, "~ age + weekday + incl + theta + x_mean + y_mean + z_mean +
-                              x_sd + y_sd + z_sd + sd_max + temp_mean + temp_sd + clock_proxy_cos +
-                              clock_proxy_linear + x_sd_long + y_sd_long + z_sd_long")
+                              x_sd + y_sd + z_sd + x_sd_long + y_sd_long + z_sd_long + sd_max +
+                              temp_mean + temp_sd + clock_proxy_cos + clock_proxy_linear +
+                       sd_max_lag_1min + sd_max_lag_5min + sd_max_lag_30min +
+                       temp_mean_lag_1min + temp_mean_lag_5min + temp_mean_lag_30min +
+                       temp_sd_lag_1min + temp_sd_lag_5min + temp_sd_lag_30min +
+                       theta_lag_1min + theta_lag_5min + theta_lag_30min +
+                       x_mean_lag_1min + x_mean_lag_1min + x_mean_lag_1min +
+                       y_mean_lag_1min + y_mean_lag_5min + y_mean_lag_30min +
+                       z_mean_lag_1min + z_mean_lag_5min + z_mean_lag_30min +
+                       x_sd_lag_1min + x_sd_lag_5min + x_sd_lag_30min +
+                       y_sd_lag_1min + y_sd_lag_1min + y_sd_lag_1min +
+                       z_sd_lag_1min + z_sd_lag_1min + z_sd_lag_1min")
+
+
 
   formula_obj <- as.formula(formula_str)
 
@@ -119,9 +117,9 @@ rpart_param <-
   extract_parameter_set_dials() %>%
   recipes::update(tree_depth = tree_depth(c(3, 7)))
 
-xgb_param <- 
-  xgb_spec %>% 
-  extract_parameter_set_dials() %>% 
+xgb_param <-
+  xgb_spec %>%
+  extract_parameter_set_dials() %>%
   recipes::update(trees = trees(c(200, 800)))
 
 # Create workflow sets ----------------------------------------------------
@@ -138,7 +136,7 @@ normalized_in_bed_raw_10_sec_wf <-
       neural_network = nnet_spec # works in parallel
     ),
     cross = FALSE
-  ) 
+  )
 
 
 no_preproc_in_bed_raw_10_sec_wf <-
@@ -156,9 +154,9 @@ no_preproc_in_bed_raw_10_sec_wf <-
   )
 
 all_in_bed_raw_10_sec_workflows <-
-  bind_rows(normalized_in_bed_raw_10_sec_wf, no_preproc_in_bed_raw_10_sec_wf) %>% 
-  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>% 
-  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>% 
+  bind_rows(normalized_in_bed_raw_10_sec_wf, no_preproc_in_bed_raw_10_sec_wf) %>%
+  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>%
+  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>%
   option_add(param_info = xgb_param, id = "in_bed_raw_xgboost")
 
 # in-bed median 5
@@ -190,9 +188,9 @@ no_preproc_in_bed_median5_10_sec_wf <-
   )
 
 all_in_bed_median5_10_sec_workflows <-
-  bind_rows(normalized_in_bed_median5_10_sec_wf, no_preproc_in_bed_median5_10_sec_wf) %>% 
-  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>% 
-  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>% 
+  bind_rows(normalized_in_bed_median5_10_sec_wf, no_preproc_in_bed_median5_10_sec_wf) %>%
+  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>%
+  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>%
   option_add(param_info = xgb_param, id = "in_bed_median5_xgboost")
 
 
@@ -231,9 +229,9 @@ no_preproc_in_bed_raw_30_sec_wf <-
   )
 
 all_in_bed_raw_30_sec_workflows <-
-  bind_rows(normalized_in_bed_raw_30_sec_wf, no_preproc_in_bed_raw_30_sec_wf) %>% 
-  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>% 
-  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>% 
+  bind_rows(normalized_in_bed_raw_30_sec_wf, no_preproc_in_bed_raw_30_sec_wf) %>%
+  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>%
+  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>%
   option_add(param_info = xgb_param, id = "in_bed_raw_xgboost")
 
 # in-bed median 5
@@ -265,9 +263,9 @@ no_preproc_in_bed_median5_30_sec_wf <-
   )
 
 all_in_bed_median5_30_sec_workflows <-
-  bind_rows(normalized_in_bed_median5_30_sec_wf, no_preproc_in_bed_median5_30_sec_wf) %>% 
-  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>% 
-  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>% 
+  bind_rows(normalized_in_bed_median5_30_sec_wf, no_preproc_in_bed_median5_30_sec_wf) %>%
+  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>%
+  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>%
   option_add(param_info = xgb_param, id = "in_bed_median5_xgboost")
 
 wf_30_sec_epoch <-
@@ -303,15 +301,16 @@ tune_wf_and_write <- function(wfs, fname, folds) {
       grid = 5,
       control = grid_ctrl,
       metrics = metric_set(f_meas),
-      verbose = TRUE) %>%
+      verbose = TRUE
+    ) %>%
     write_rds(fname)
   tictoc::toc()
 }
 
-fnames_10 <- 
+fnames_10 <-
   str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_10_sec_epoch), "_grid_results.rds")
-fnames_30 <- 
+fnames_30 <-
   str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_30_sec_epoch), "_grid_results.rds")
 
-walk2(wf_10_sec_epoch, fnames_10, ~tune_wf_and_write(.x, .y, folds_10))
-walk2(wf_30_sec_epoch, fnames_30, ~tune_wf_and_write(.x, .y, folds_30))
+walk2(wf_10_sec_epoch, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
+walk2(wf_30_sec_epoch, fnames_30, ~ tune_wf_and_write(.x, .y, folds_30))

@@ -89,12 +89,7 @@ zm_sleep <-
     sleep_12_cumsum_filter_5 = slide_dbl(sleep_filter_5, sum, .after = 24)
   )
 
-# Define a function to count zeros in runs of at least three consecutive zeros
-count_each_zero_in_consecutive_zeros <-
-  function(x, n = 3) {
-    rle_x <- rle(x == 0)
-    sum(rle_x$lengths[rle_x$values & rle_x$lengths >= n])
-  }
+
 
 # Calculate sleep metrics using both calculated sleep stats and ZM determined sleep stats
 zm_sleep %>%

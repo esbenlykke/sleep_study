@@ -8,30 +8,20 @@ tidymodels_prefer()
 options(tidymodels.dark = TRUE)
 
 # Function to read data from parquet files
-load_data <- function(train_path, test_path) {
-  train <- read_parquet(train_path) %>% 
-    mutate(across(contains("in_bed"), as_factor))
-  test <- read_parquet(test_path) %>% 
-    mutate(across(contains("in_bed"), as_factor))
-  return(list(train, test))
+load_data <- function(input_path) {
+  read_parquet(input_path) %>%
+    mutate(across(contains("sleep"), as_factor))
 }
 
 
 # Load data
 cat("Spending data budget...\n")
-data_10 <- load_data(
-  "data/data_for_modelling/chained_classifiers/training_10_sec_only_in_bed_data.parquet",
-  "data/data_for_modelling/chained_classifiers/testing_10_sec_only_in_bed_data.parquet"
-)
-train_10 <- data_10[[1]]
-test_10 <- data_10[[2]]
 
-data_30 <- load_data(
-  "data/data_for_modelling/chained_classifiers/training_30_sec_only_in_bed_data.parquet",
-  "data/data_for_modelling/chained_classifiers/testing_30_sec_only_in_bed_data.parquet"
-)
-train_30 <- data_30[[1]] 
-test_30 <- data_30[[2]]
+train_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_only_in_bed_training_data.parquet")
+test_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_only_in_bed_testing_data.parquet")
+
+train_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_training_data.parquet")
+test_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_testing_data.parquet")
 
 # Create cross-validation objects
 folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
@@ -42,18 +32,28 @@ folds_30 <- group_mc_cv(train_30, group = id, times = 1, prop = .5)
 create_recipe <- function(target_var, data, normalize = FALSE) {
   # Create a formula using paste and as.formula
   formula_str <- paste(target_var, "~ age + weekday + incl + theta + x_mean + y_mean + z_mean +
-                              x_sd + y_sd + z_sd + sd_max + temp_mean + temp_sd + clock_proxy_cos +
-                              clock_proxy_linear + x_sd_long + y_sd_long + z_sd_long")
-  
+                              x_sd + y_sd + z_sd + x_sd_long + y_sd_long + z_sd_long + sd_max +
+                              temp_mean + temp_sd + clock_proxy_cos + clock_proxy_linear +
+                       sd_max_lag_1min + sd_max_lag_5min + sd_max_lag_30min +
+                       temp_mean_lag_1min + temp_mean_lag_5min + temp_mean_lag_30min +
+                       temp_sd_lag_1min + temp_sd_lag_5min + temp_sd_lag_30min +
+                       theta_lag_1min + theta_lag_5min + theta_lag_30min +
+                       x_mean_lag_1min + x_mean_lag_1min + x_mean_lag_1min +
+                       y_mean_lag_1min + y_mean_lag_5min + y_mean_lag_30min +
+                       z_mean_lag_1min + z_mean_lag_5min + z_mean_lag_30min +
+                       x_sd_lag_1min + x_sd_lag_5min + x_sd_lag_30min +
+                       y_sd_lag_1min + y_sd_lag_1min + y_sd_lag_1min +
+                       z_sd_lag_1min + z_sd_lag_1min + z_sd_lag_1min")
+
   formula_obj <- as.formula(formula_str)
-  
+
   rec <- recipe(formula_obj, data = data)
-  
+
   if (normalize) {
     rec <- rec %>%
       step_normalize(all_numeric_predictors())
   }
-  
+
   return(rec)
 }
 
@@ -122,9 +122,9 @@ rpart_param <-
   extract_parameter_set_dials() %>%
   recipes::update(tree_depth = tree_depth(c(3, 7)))
 
-xgb_param <- 
-  xgb_spec %>% 
-  extract_parameter_set_dials() %>% 
+xgb_param <-
+  xgb_spec %>%
+  extract_parameter_set_dials() %>%
   recipes::update(trees = trees(c(200, 800)))
 
 
@@ -171,7 +171,7 @@ sleep_no_norms_wfs_10 <-
     "sleep_raw_decision_tree",
     "sleep_5_min_median_decision_tree",
     "sleep_10_min_median_decision_tree"
-  )) %>% 
+  )) %>%
   option_add(param_info = xgb_param, id = c(
     "sleep_raw_xgboost",
     "sleep_5_min_median_xgboost",
@@ -183,16 +183,16 @@ sleep_no_norms_wfs_10 <-
 all_wfs_10 <- list(
   decision_tree_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-    filter(str_detect(wflow_id, "decision")),
+      filter(str_detect(wflow_id, "decision")),
   log_reg_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-    filter(str_detect(wflow_id, "logistic")),
+      filter(str_detect(wflow_id, "logistic")),
   nnet_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-    filter(str_detect(wflow_id, "neural")),
+      filter(str_detect(wflow_id, "neural")),
   xgb_wfs_10 =
     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-    filter(str_detect(wflow_id, "xgboost"))
+      filter(str_detect(wflow_id, "xgboost"))
 )
 
 ### 30 sec epochs ###
@@ -234,7 +234,7 @@ sleep_no_norms_wfs_30 <-
     "sleep_raw_decision_tree",
     "sleep_5_min_median_decision_tree",
     "sleep_10_min_median_decision_tree"
-  )) %>% 
+  )) %>%
   option_add(param_info = xgb_param, id = c(
     "sleep_raw_xgboost",
     "sleep_5_min_median_xgboost",
@@ -246,16 +246,16 @@ sleep_no_norms_wfs_30 <-
 all_wfs_30 <- list(
   decision_tree_wfs_30 =
     bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-    filter(str_detect(wflow_id, "decision")),
+      filter(str_detect(wflow_id, "decision")),
   log_reg_wfs_30 =
     bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-    filter(str_detect(wflow_id, "logistic")),
+      filter(str_detect(wflow_id, "logistic")),
   nnet_wfs_30 =
     bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-    filter(str_detect(wflow_id, "neural")),
+      filter(str_detect(wflow_id, "neural")),
   xgb_wfs_30 =
     bind_rows(sleep_norm_wfs_30, sleep_no_norms_wfs_30) %>%
-    filter(str_detect(wflow_id, "xgboost"))
+      filter(str_detect(wflow_id, "xgboost"))
 )
 
 
@@ -286,18 +286,18 @@ tune_wf_and_write <- function(wfs, fname, folds) {
       grid = 5,
       control = grid_ctrl,
       metrics = metric_set(f_meas),
-      verbose = TRUE) %>%
+      verbose = TRUE
+    ) %>%
     write_rds(fname)
   tictoc::toc()
 }
 
 
-fnames_10 <- 
+fnames_10 <-
   str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_10), ".rds")
-fnames_30 <- 
+fnames_30 <-
   str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_30), ".rds")
 
 
-walk2(all_wfs_10, fnames_10, ~tune_wf_and_write(.x, .y, folds_10))
-walk2(all_wfs_30, fnames_30, ~tune_wf_and_write(.x, .y, folds_30))
-
+walk2(all_wfs_10, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
+walk2(all_wfs_30, fnames_30, ~ tune_wf_and_write(.x, .y, folds_30))
