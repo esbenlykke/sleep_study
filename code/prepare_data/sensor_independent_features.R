@@ -4,12 +4,14 @@ library(tidyverse)
 library(lubridate)
 library(arrow)
 
-cat("Creating sensor-independent features. This won't take long...")
+conflicted::conflicts_prefer(dplyr::lag)
+conflicted::conflicts_prefer(dplyr::filter)
+cat("Creating sensor-independent features. This will take a while...\n")
 
 # data <-
 #   read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
 data <-
-  read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet") 
+  read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
 
 
 # Create static clock proxies --------------------------------------------
@@ -32,10 +34,13 @@ data_10 <-
   # Calculate the standard deviation for columns x, y, and z with a sliding window of 5 minutes
   mutate(
     across(x:z, list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30))),
-    across(c(incl:sd_max, -datetime), list(
+    across(c(incl, theta, temp_mean, x_sd, y_sd, z_sd), list(
       lag_1min = ~ lag(.x, 1), # Value from 1 minute ago
       lag_5min = ~ lag(.x, 5), # Value from 5 minutes ago
-      lag_30min = ~ lag(.x, 30) # Value from 30 minutes ago
+      lag_30min = ~ lag(.x, 30), # Value from 30 minutes ago
+      lead_1min = ~ lead(.x, 1),  # Value from 1 minute in the future
+      lead_5min = ~ lead(.x, 5),  # Value from 5 minutes in the future
+      lead_30min = ~ lead(.x, 30)  # Value from 30 minutes in the future
     )) 
   ) %>%
   # Create a new feature for clock_group based on the datetime column
@@ -57,6 +62,8 @@ data_10 <-
     .after = sleep_median10
   ) |>
   ungroup()
+
+cat("10 sec data done...\n")
 
 # Write the processed data to a new parquet file
 write_parquet(data_10, "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet")
@@ -84,6 +91,8 @@ data_30 <-
     in_bed_median5 = if_else(in_bed_median5 > 0, 1, 0)
   ) %>%
   distinct()
+
+cat("30 sec data done...\n")
 
 # Write the processed data to a new parquet file
 write_parquet(data_30, "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")

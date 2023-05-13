@@ -13,7 +13,7 @@ process_data <- function(file_path, output_prefix) {
   data <- read_parquet(file_path)
   
   # Perform an initial 50/50 split of the data by the 'id' column
-  split <- group_initial_split(data, group = id, prop = .5)
+  split <- group_initial_split(data, group = id, prop = .25)
   
   # Write the training set to a parquet file
   training(split) %>%

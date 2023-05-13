@@ -145,3 +145,4 @@ s <- "/media/esbenlykke/My Passport/chained_models/fitted_workflows/in_bed/in_be
 match <- str_match(s, ".*/(.*).rds$")
 
 print(filename_no_ext)
+

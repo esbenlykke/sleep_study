@@ -24,8 +24,8 @@ train_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_i
 test_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_testing_data.parquet")
 
 # Create cross-validation objects
-folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
-folds_30 <- group_mc_cv(train_30, group = id, times = 1, prop = .5)
+folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .25)
+folds_30 <- group_mc_cv(train_30, group = id, times = 1, prop = .25)
 
 
 # Function to create preprocessing recipes
@@ -34,16 +34,18 @@ create_recipe <- function(target_var, data, normalize = FALSE) {
   formula_str <- paste(target_var, "~ age + weekday + incl + theta + x_mean + y_mean + z_mean +
                               x_sd + y_sd + z_sd + x_sd_long + y_sd_long + z_sd_long + sd_max +
                               temp_mean + temp_sd + clock_proxy_cos + clock_proxy_linear +
-                       sd_max_lag_1min + sd_max_lag_5min + sd_max_lag_30min +
-                       temp_mean_lag_1min + temp_mean_lag_5min + temp_mean_lag_30min +
-                       temp_sd_lag_1min + temp_sd_lag_5min + temp_sd_lag_30min +
-                       theta_lag_1min + theta_lag_5min + theta_lag_30min +
-                       x_mean_lag_1min + x_mean_lag_1min + x_mean_lag_1min +
-                       y_mean_lag_1min + y_mean_lag_5min + y_mean_lag_30min +
-                       z_mean_lag_1min + z_mean_lag_5min + z_mean_lag_30min +
-                       x_sd_lag_1min + x_sd_lag_5min + x_sd_lag_30min +
-                       y_sd_lag_1min + y_sd_lag_1min + y_sd_lag_1min +
-                       z_sd_lag_1min + z_sd_lag_1min + z_sd_lag_1min")
+                              temp_mean_lag_1min + temp_mean_lag_5min + temp_mean_lag_30min +
+                              temp_mean_lead_1min + temp_mean_lead_5min + temp_mean_lead_30min +
+                              theta_lag_1min + theta_lag_5min + theta_lag_30min +
+                              theta_lead_1min + theta_lead_5min + theta_lead_30min +
+                              incl_lag_1min + incl_lag_5min + incl_lag_30min +
+                              incl_lead_1min + incl_lead_5min + incl_lead_30min +
+                              x_sd_lag_1min + x_sd_lag_5min + x_sd_lag_30min +
+                              y_sd_lag_1min + y_sd_lag_1min + y_sd_lag_1min +
+                              z_sd_lag_1min + z_sd_lag_1min + z_sd_lag_1min +
+                              x_sd_lead_1min + x_sd_lead_5min + x_sd_lead_30min +
+                              y_sd_lead_1min + y_sd_lead_1min + y_sd_lead_1min +
+                              z_sd_lead_1min + z_sd_lead_1min + z_sd_lead_1min")
 
   formula_obj <- as.formula(formula_str)
 
