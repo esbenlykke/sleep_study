@@ -92,7 +92,7 @@ glmnet_spec <-
 
 nnet_spec <-
   mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) |>
-  set_engine("nnet", MaxNWts = 500) |> # MaxNWts is a regularization term based on number of predictors
+  set_engine("nnet", MaxNWts = 7000) |> # MaxNWts is a regularization term based on number of predictors
   set_mode("classification")
 
 # mars_spec <-

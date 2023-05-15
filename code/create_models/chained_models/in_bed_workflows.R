@@ -12,15 +12,15 @@ load_data <- function(input_path) {
     mutate(across(contains("in_bed"), as_factor))
 }
 
-train_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_training_data.parquet")
-test_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_testing_data.parquet")
+# train_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_training_data.parquet")
+# test_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_testing_data.parquet")
 
 
 train_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_training_data.parquet")
 test_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_testing_data.parquet")
 
 # Create cross-validation objects
-folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .25)
+# folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .25)
 folds_30 <- group_mc_cv(train_30, group = id, times = 5, prop = .25)
 
 
@@ -61,10 +61,10 @@ create_recipe <- function(target_var, data, normalize = FALSE) {
 cat("Creating preprocessing recipes...\n")
 
 # 10 second epochs data
-in_bed_raw_10_sec_rec <- create_recipe("in_bed", train_10)
-in_bed_raw_10_sec_norm_rec <- create_recipe("in_bed", train_10, normalize = TRUE)
-in_bed_median5_10_sec_rec <- create_recipe("in_bed_median5", train_10)
-in_bed_median5_10_sec_norm_rec <- create_recipe("in_bed_median5", train_10, normalize = TRUE)
+# in_bed_raw_10_sec_rec <- create_recipe("in_bed", train_10)
+# in_bed_raw_10_sec_norm_rec <- create_recipe("in_bed", train_10, normalize = TRUE)
+# in_bed_median5_10_sec_rec <- create_recipe("in_bed_median5", train_10)
+# in_bed_median5_10_sec_norm_rec <- create_recipe("in_bed_median5", train_10, normalize = TRUE)
 
 # 30 second epochs data
 in_bed_raw_30_sec_rec <- create_recipe("in_bed", train_30)
@@ -87,7 +87,7 @@ glmnet_spec <-
 
 nnet_spec <-
   mlp(hidden_units = tune(), penalty = tune(), epochs = tune()) |>
-  set_engine("nnet", MaxNWts = 500) |> # MaxNWts is a regularization term based on number of predictors
+  set_engine("nnet", MaxNWts = 7000) |> # MaxNWts is a regularization term based on number of predictors
   set_mode("classification")
 
 # mars_spec <-
@@ -128,79 +128,79 @@ xgb_param <-
 cat("Creating workflow sets...\n")
 # 10 second epochs data
 # in-bed raw
-normalized_in_bed_raw_10_sec_wf <-
-  workflow_set(
-    preproc = list(
-      in_bed_raw = in_bed_raw_10_sec_norm_rec
-    ),
-    models = list(
-      logistic_regression = glmnet_spec, # works in parallel
-      neural_network = nnet_spec # works in parallel
-    ),
-    cross = FALSE
-  )
-
-
-no_preproc_in_bed_raw_10_sec_wf <-
-  workflow_set(
-    preproc = list(
-      in_bed_raw = in_bed_raw_10_sec_rec
-    ),
-    models = list(
-      decision_tree = CART_spec,
-      # MARS = mars_spec, # works in parallel
-      # random_forest = rf_spec, # works in parallel
-      xgboost = xgb_spec # works in parallel
-    ),
-    cross = FALSE
-  )
-
-all_in_bed_raw_10_sec_workflows <-
-  bind_rows(normalized_in_bed_raw_10_sec_wf, no_preproc_in_bed_raw_10_sec_wf) %>%
-  option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>%
-  option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>%
-  option_add(param_info = xgb_param, id = "in_bed_raw_xgboost")
-
-# in-bed median 5
-normalized_in_bed_median5_10_sec_wf <-
-  workflow_set(
-    preproc = list(
-      in_bed_median5 = in_bed_median5_10_sec_norm_rec
-    ),
-    models = list(
-      logistic_regression = glmnet_spec, # works in parallel
-      neural_network = nnet_spec # works in parallel
-    ),
-    cross = FALSE
-  )
-
-
-no_preproc_in_bed_median5_10_sec_wf <-
-  workflow_set(
-    preproc = list(
-      in_bed_median5 = in_bed_median5_10_sec_rec
-    ),
-    models = list(
-      decision_tree = CART_spec,
-      # MARS = mars_spec, # works in parallel
-      # random_forest = rf_spec, # works in parallel
-      xgboost = xgb_spec # works in parallel
-    ),
-    cross = FALSE
-  )
-
-all_in_bed_median5_10_sec_workflows <-
-  bind_rows(normalized_in_bed_median5_10_sec_wf, no_preproc_in_bed_median5_10_sec_wf) %>%
-  option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>%
-  option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>%
-  option_add(param_info = xgb_param, id = "in_bed_median5_xgboost")
-
-
-wf_10_sec_epoch <-
-  list(
-    in_bed_raw_10_sec_epoch = all_in_bed_raw_10_sec_workflows,
-    in_bed_median5_10_sec_epoch = all_in_bed_median5_10_sec_workflows
-  )
+# normalized_in_bed_raw_10_sec_wf <-
+#   workflow_set(
+#     preproc = list(
+#       in_bed_raw = in_bed_raw_10_sec_norm_rec
+#     ),
+#     models = list(
+#       logistic_regression = glmnet_spec, # works in parallel
+#       neural_network = nnet_spec # works in parallel
+#     ),
+#     cross = FALSE
+#   )
+# 
+# 
+# no_preproc_in_bed_raw_10_sec_wf <-
+#   workflow_set(
+#     preproc = list(
+#       in_bed_raw = in_bed_raw_10_sec_rec
+#     ),
+#     models = list(
+#       decision_tree = CART_spec,
+#       # MARS = mars_spec, # works in parallel
+#       # random_forest = rf_spec, # works in parallel
+#       xgboost = xgb_spec # works in parallel
+#     ),
+#     cross = FALSE
+#   )
+# 
+# all_in_bed_raw_10_sec_workflows <-
+#   bind_rows(normalized_in_bed_raw_10_sec_wf, no_preproc_in_bed_raw_10_sec_wf) %>%
+#   option_add(param_info = nnet_param, id = "in_bed_raw_neural_network") %>%
+#   option_add(param_info = rpart_param, id = "in_bed_raw_decision_tree") %>%
+#   option_add(param_info = xgb_param, id = "in_bed_raw_xgboost")
+# 
+# # in-bed median 5
+# normalized_in_bed_median5_10_sec_wf <-
+#   workflow_set(
+#     preproc = list(
+#       in_bed_median5 = in_bed_median5_10_sec_norm_rec
+#     ),
+#     models = list(
+#       logistic_regression = glmnet_spec, # works in parallel
+#       neural_network = nnet_spec # works in parallel
+#     ),
+#     cross = FALSE
+#   )
+# 
+# 
+# no_preproc_in_bed_median5_10_sec_wf <-
+#   workflow_set(
+#     preproc = list(
+#       in_bed_median5 = in_bed_median5_10_sec_rec
+#     ),
+#     models = list(
+#       decision_tree = CART_spec,
+#       # MARS = mars_spec, # works in parallel
+#       # random_forest = rf_spec, # works in parallel
+#       xgboost = xgb_spec # works in parallel
+#     ),
+#     cross = FALSE
+#   )
+# 
+# all_in_bed_median5_10_sec_workflows <-
+#   bind_rows(normalized_in_bed_median5_10_sec_wf, no_preproc_in_bed_median5_10_sec_wf) %>%
+#   option_add(param_info = nnet_param, id = "in_bed_median5_neural_network") %>%
+#   option_add(param_info = rpart_param, id = "in_bed_median5_decision_tree") %>%
+#   option_add(param_info = xgb_param, id = "in_bed_median5_xgboost")
+# 
+# 
+# wf_10_sec_epoch <-
+#   list(
+#     in_bed_raw_10_sec_epoch = all_in_bed_raw_10_sec_workflows,
+#     in_bed_median5_10_sec_epoch = all_in_bed_median5_10_sec_workflows
+#   )
 
 # 30 second epochs data
 # in-bed raw
@@ -309,10 +309,10 @@ tune_wf_and_write <- function(wfs, fname, folds) {
   tictoc::toc()
 }
 
-fnames_10 <-
-  str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_10_sec_epoch), "_grid_results.rds")
+# fnames_10 <-
+#   str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_10_sec_epoch), "_grid_results.rds")
 fnames_30 <-
   str_c("/media/esbenlykke/My\ Passport/chained_models/grid_results/in_bed/", names(wf_30_sec_epoch), "_grid_results.rds")
 
-walk2(wf_10_sec_epoch, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
+# walk2(wf_10_sec_epoch, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
 walk2(wf_30_sec_epoch, fnames_30, ~ tune_wf_and_write(.x, .y, folds_30))
