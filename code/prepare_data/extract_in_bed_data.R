@@ -7,6 +7,7 @@ library(slider)
 
 
 process_data <- function(input_file, output_file) {
+  cat(glue::glue("Extracting in-bed time from {str_match(input_file, '(?<=/)[^/]+$')}\n"))
   read_parquet(input_file) %>%
     group_by(id, noon_day, month) %>%
     group_modify(~ .x %>%
@@ -19,10 +20,10 @@ process_data <- function(input_file, output_file) {
 
 # Define input and output file paths
 files <- list(
-  list(input = "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet",
-       output = "data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet"),
-  list(input = "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet",
-       output = "data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+  list(input = "data/data_for_modelling/no_edge_sp_incl_features_10_sec_epochs.parquet",
+       output = "data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_features_10_sec_epochs.parquet"),
+  list(input = "data/data_for_modelling/no_edge_sp_incl_features_30_sec_epochs.parquet",
+       output = "data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_features_30_sec_epochs.parquet")
 )
 
 # Process each file
@@ -31,7 +32,7 @@ walk(files, ~process_data(.x$input, .x$output))
 
 # EDA
 # data_30 <-
-#   read_parquet("data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+#   read_parquet("data/data_for_modelling/no_edge_sp_incl_features_30_sec_epochs.parquet")
 # 
 # data_30 %>%
 #   filter(id == 3404) %>%
@@ -53,7 +54,7 @@ walk(files, ~process_data(.x$input, .x$output))
 #   )
 # 
 # data_30_no_in_bed <- 
-#   read_parquet("data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+#   read_parquet("data/data_for_modelling/only_in_bed_data_no_edge_sp_incl_features_30_sec_epochs.parquet")
 # 
 # data_30_no_in_bed %>%
 #   filter(id == 3404) %>%

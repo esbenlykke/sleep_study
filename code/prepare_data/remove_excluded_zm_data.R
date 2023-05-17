@@ -9,8 +9,7 @@ library(arrow)
 epoch_length <- 10
 
 # Read and preprocess the thigh data
-data <- read_parquet("data/processed/all_thigh_data.parquet") %>%
-  rename(datetime = time) %>%
+data <- read_parquet("data/processed/all_thigh.parquet") %>%
   mutate(
     id = as.numeric(id),
     noon_day = day(datetime - hours(12)),
@@ -18,7 +17,10 @@ data <- read_parquet("data/processed/all_thigh_data.parquet") %>%
     unix_time = as.integer(datetime) %/% epoch_length * epoch_length,
     datetime = as_datetime(unix_time),
     .after = 1
-  )
+  ) %>% 
+  rename(x_mean = macc_x, y_mean = macc_y, z_mean = macc_z,
+         x_sd = sdacc_x, y_sd = sdacc_y, z_sd = sdacc_z, sd_max = sdmax) %>% 
+  select(-in_bed, -sleep, -location, -sensor_code)
 
 # Calculate distinct accelerometer days
 distinct_acc_days <- data %>%

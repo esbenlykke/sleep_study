@@ -18,13 +18,13 @@ data <-
 
 # Process the data for 10-second epochs
 data_10 <-
-  data %>% 
-  filter(id == 3404) %>% 
+  data %>%
+  # filter(id == 3404) %>% 
   # Create new features for sleep, sleep_median5, sleep_median10
   mutate(
-    sleep = if_else(score %in% c(2L, 3L, 5L), 1L, 0L),
     in_bed = if_else(score %in% c(0L, 2L, 3L, 5L, -5L), 1L, 0L),
     in_bed_median5 = slider::slide_dbl(in_bed, median, .before = 15, .after = 15),
+    sleep = if_else(score %in% c(2L, 3L, 5L), 1L, 0L),
     sleep_median5 = slider::slide_dbl(sleep, median, .before = 15, .after = 15),
     sleep_median10 = slider::slide_dbl(sleep, median, .before = 30, .after = 30),
     weekday = wday(datetime, label = F, week_start = 1),
@@ -36,7 +36,7 @@ data_10 <-
   mutate(
     clock_group = if_else((hms::as_hms(datetime) > lubridate::hms("19:00:00") |
                              hms::as_hms(datetime) < lubridate::hms("10:00:00")), 1, 0),
-    across(x:z, list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30))),
+    across(c(x, y, z), list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30))),
     across(c(incl, theta, temp_mean, x_sd, y_sd, z_sd), list(
       lag_1min = ~ lag(.x, 1, default = mean(.x)), # Value from 1 minute ago
       lag_5min = ~ lag(.x, 5, default = mean(.x)), # Value from 5 minutes ago
@@ -44,7 +44,8 @@ data_10 <-
       lead_1min = ~ lead(.x, 1, default = mean(.x)), # Value from 1 minute in the future
       lead_5min = ~ lead(.x, 5, default = mean(.x)), # Value from 5 minutes in the future
       lead_30min = ~ lead(.x, 30, default = mean(.x)) # Value from 30 minutes in the future
-    ))
+    )),
+    .after = sd_max
   )  %>% 
   # Group the data by id, noon_day, month, and clock_group
   group_by(id, noon_day, month, clock_group) |>
@@ -56,17 +57,17 @@ data_10 <-
     clock_proxy_linear = if_else(clock_group == 1,
       seq(0, 1, length.out = n()), 0
     ),
-    .after = sleep_median10
+    .after = sd_max
   ) |>
   ungroup()
 
 cat("10 sec data done...\n")
 
 # Write the processed data to a new parquet file
-write_parquet(data_10, "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_10_sec_epochs.parquet")
+write_parquet(data_10, "data/data_for_modelling/no_edge_sp_incl_features_10_sec_epochs.parquet")
 
 # Process the data for 30-second epochs
-data_30 <-
+# data_30 <-
 #   data_10 %>%
 #   mutate(
 # datetime = floor_date(datetime, unit = "30 seconds"),
@@ -98,7 +99,7 @@ process_and_write_chunk <- function(chunk_indices, index) {
   data_30 <- chunk %>%
     mutate(
       datetime = floor_date(datetime, unit = "30 seconds"),
-      across(c(score:sleep_median10, sensor_code, weekday), as_factor)
+      across(c(score:sleep_median10, weekday), as_factor)
     ) %>%
     group_by(id, noon_day, month, datetime) %>%
     summarise(
@@ -129,7 +130,7 @@ parquet_files <- list.files("data/data_for_modelling/", pattern = "data_30_chunk
 data_30 <- map_df(parquet_files, read_parquet)
 
 # Write the processed data to a new parquet file
-write_parquet(data_30, "data/data_for_modelling/no_edge_sp_incl_sensor_independent_features_30_sec_epochs.parquet")
+write_parquet(data_30, "data/data_for_modelling/no_edge_sp_incl_features_30_sec_epochs.parquet")
 
 file.remove(parquet_files)
 
