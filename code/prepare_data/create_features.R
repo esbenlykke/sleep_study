@@ -19,9 +19,10 @@ data <-
 # Process the data for 10-second epochs
 data_10 <-
   data %>%
-  # filter(id == 3404) %>% 
+  # filter(id == 3404) %>%
   # Create new features for sleep, sleep_median5, sleep_median10
   mutate(
+    score = if_else(is.na(score), 1, score),
     in_bed = if_else(score %in% c(0L, 2L, 3L, 5L, -5L), 1L, 0L),
     in_bed_median5 = slider::slide_dbl(in_bed, median, .before = 15, .after = 15),
     sleep = if_else(score %in% c(2L, 3L, 5L), 1L, 0L),
@@ -45,6 +46,7 @@ data_10 <-
       lead_5min = ~ lead(.x, 5, default = mean(.x)), # Value from 5 minutes in the future
       lead_30min = ~ lead(.x, 30, default = mean(.x)) # Value from 30 minutes in the future
     )),
+    across(x_sd_long:z_sd_long, ~ replace_na(.x, mean(.x, na.rm = TRUE))),
     .after = sd_max
   )  %>% 
   # Group the data by id, noon_day, month, and clock_group
@@ -59,7 +61,7 @@ data_10 <-
     ),
     .after = sd_max
   ) |>
-  ungroup()
+  ungroup() 
 
 cat("10 sec data done...\n")
 
@@ -104,11 +106,8 @@ process_and_write_chunk <- function(chunk_indices, index) {
     group_by(id, noon_day, month, datetime) %>%
     summarise(
       across(where(is.numeric), mean),
-      across(where(is.factor), ~median(as.numeric(.x) - 1)),
+      across(where(is.factor), ~ceiling(median(as.numeric(.x) - 1))),
       .groups = "drop"
-    ) %>% 
-    mutate(
-      across(c(in_bed:in_bed_median5, sleep:sleep_median10), ~ if_else(.x > 0, 1, 0))
     )
   
   # Define file name

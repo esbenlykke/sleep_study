@@ -25,7 +25,7 @@ test_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in
 
 # Create cross-validation objects
 folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
-folds_30 <- group_mc_cv(train_30, group = id, times = 1, prop = .5)
+folds_30 <- group_mc_cv(train_30, group = id, times = 5, prop = .5)
 
 
 # Function to create preprocessing recipes

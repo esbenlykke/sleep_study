@@ -7,7 +7,7 @@ library(slider)
 
 
 process_data <- function(input_file, output_file) {
-  cat(glue::glue("Extracting in-bed time from {str_match(input_file, '(?<=/)[^/]+$')}\n"))
+  cat(glue::glue("Extracting in-bed time from {str_match(input_file, '(?<=/)[^/]+$')}"), "\n")
   read_parquet(input_file) %>%
     group_by(id, noon_day, month) %>%
     group_modify(~ .x %>%

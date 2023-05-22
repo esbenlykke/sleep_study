@@ -9,13 +9,13 @@ set.seed(123)
 
 # Define a function to read data, split it and write the split data to parquet files
 process_data <- function(file_path, output_prefix) {
-  cat(glue::glue("Processing {str_match(file_path, '(?<=/)[^/]+$')}\n"))
+  cat(glue::glue("Processing {str_match(file_path, '(?<=/)[^/]+$')}"), "\n")
   
   # Read data from a parquet file
   data <- read_parquet(file_path)
   
   # Perform an initial 50/50 split of the data by the 'id' column
-  split <- group_initial_split(data, group = id, prop = .5)
+  split <- group_initial_split(data, group = id, prop = .25)
   
   # Write the training set to a parquet file
   training(split) %>%
