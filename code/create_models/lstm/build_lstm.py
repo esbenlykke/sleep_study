@@ -155,6 +155,5 @@ for epoch in range(num_epochs):
     train_acc, train_f1 = check_accuracy(train_loader, model, "Train")
     test_acc, test_f1 = check_accuracy(test_loader, model, "Test")
 
-# Save the model object
+# Save the entire model object
 torch.save(model, "/home/esbenlykke/projects/sleep_study/models/lstm_model.pt")
-
