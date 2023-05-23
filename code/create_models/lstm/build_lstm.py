@@ -81,8 +81,6 @@ def check_accuracy(loader, model, dataset_name):
     return accuracy, f1
 
 
-
-
 # Load train tensors
 train_predictors = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/train_predictors.pt")
 train_labels = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/train_labels.pt")

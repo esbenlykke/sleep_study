@@ -8,7 +8,21 @@ library(torch)
 prepare_data <- function(data_path, sequence_length, step_size) {
   # Load the data
   data <- read_parquet(data_path) %>%
-    select(-c(id, datetime, unix_time, noon_day))
+    select(c(age, weekday, incl, theta, x_mean, y_mean, z_mean,
+             x_sd, y_sd, z_sd, x_sd_long, y_sd_long, z_sd_long, sd_max,
+             temp_mean, temp_sd, clock_proxy_cos, clock_proxy_linear,
+             temp_mean_lag_1min, temp_mean_lag_5min, temp_mean_lag_30min,
+             temp_mean_lead_1min, temp_mean_lead_5min, temp_mean_lead_30min,
+             theta_lag_1min, theta_lag_5min, theta_lag_30min,
+             theta_lead_1min, theta_lead_5min, theta_lead_30min,
+             incl_lag_1min, incl_lag_5min, incl_lag_30min,
+             incl_lead_1min, incl_lead_5min, incl_lead_30min,
+             x_sd_lag_1min, x_sd_lag_5min, x_sd_lag_30min,
+             y_sd_lag_1min, y_sd_lag_5min, y_sd_lag_30min,
+             z_sd_lag_1min, z_sd_lag_5min, z_sd_lag_30min,
+             x_sd_lead_1min, x_sd_lead_5min, x_sd_lead_30min,
+             y_sd_lead_1min, y_sd_lead_5min, y_sd_lead_30min,
+             z_sd_lead_1min, z_sd_lead_5min, z_sd_lead_30min, score))
   
   # Define the preprocessing recipe and prep data
   prep_rec <- recipe(score ~ ., data = data) %>% 
@@ -60,7 +74,8 @@ train_data <- prepare_data("data/data_for_modelling/chained_classifiers/30_sec_t
 test_data <- prepare_data("data/data_for_modelling/chained_classifiers/30_sec_testing_data.parquet", sequence_length, step_size)
 
 # Save the tensors
-torch_save(train_data$predictors, "data/data_for_modelling/lstm/train_predictors.pt")
-torch_save(train_data$labels, "data/data_for_modelling/lstm/train_labels.pt")
-torch_save(test_data$predictors, "data/data_for_modelling/lstm/test_predictors.pt")
-torch_save(test_data$labels, "data/data_for_modelling/lstm/test_labels.pt")
+torch_save(train_data$predictors, "data/data_for_modelling/lstm/r_train_predictors.pt")
+torch_save(train_data$labels, "data/data_for_modelling/lstm/r_train_labels.pt")
+torch_save(test_data$predictors, "data/data_for_modelling/lstm/r_test_predictors.pt")
+torch_save(test_data$labels, "data/data_for_modelling/lstm/r_test_labels.pt")
+
