@@ -12,18 +12,18 @@ import pandas as pd
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+print("The device being used is: {} \n".format(device))
+
 # Hyperparameters
-input_size = 54
+input_size = 64
 sequence_length = 20  # or n, depending on your data
-step = 10
+step = 2
 hidden_size = 128
-num_layers = 2
-num_classes = 5
+num_layers = 4
+num_classes = 3
 learning_rate = 3e-4
 batch_size = 64
 num_epochs = 25
-sequence_length = 20
-step = 10
 
 # Create a bidirectional LSTM
 class biLSTM(nn.Module):
@@ -34,16 +34,22 @@ class biLSTM(nn.Module):
         self.lstm = nn.LSTM(
             input_size, hidden_size, num_layers, batch_first=True, bidirectional=True
         )
-        self.fc = nn.Linear(hidden_size * 2, num_classes)
+        self.fc1 = nn.Linear(hidden_size * 2, hidden_size)  # Additional fully connected layer
+        self.fc2 = nn.Linear(hidden_size, num_classes)  # Output layer
 
     def forward(self, x):
         h0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(device)
         c0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(device)
 
-        out, _ = self.lstm(x)
-        out = self.fc(out[:, -1, :])
+        out, _ = self.lstm(x, (h0, c0))
+        out = out[:, -1, :]
+        out = self.fc1(out)  # Apply linear transformation
+        out = self.fc2(out)  # Output layer
+        out = F.softmax(out, dim=1)  # Apply softmax
 
         return out
+
+
 
 # define check_accuracy function
 def check_accuracy(loader, model, dataset_name):
@@ -86,15 +92,16 @@ def check_accuracy(loader, model, dataset_name):
 train_predictors = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_train_sequences.pt")
 train_labels = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_train_labels.pt")
 
+
 train_predictors = train_predictors.to(device)
-train_labels = train_labels.to(device).long() +1
+train_labels = train_labels.to(device).long() 
 
 # load validation tensors
 valid_predictors = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_valid_sequences.pt")
 valid_labels = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_valid_labels.pt")
 
 valid_predictors = valid_predictors.to(device)
-valid_labels = valid_labels.to(device).long() + 1
+valid_labels = valid_labels.to(device).long()
 
 # Create a TensorDataset from your tensors
 train_data = TensorDataset(train_predictors, train_labels)

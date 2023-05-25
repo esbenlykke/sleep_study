@@ -28,20 +28,24 @@ folds_30 <- group_mc_cv(train_30, group = id, times = 5, prop = .5)
 create_recipe <- function(target_var, data, normalize = FALSE) {
   # Create a formula using paste and as.formula
   formula_str <- paste(target_var, "~ age + weekday + incl + theta + x_mean + y_mean + z_mean +
-                         x_sd + y_sd + z_sd + x_sd_long + y_sd_long + z_sd_long + sd_max +
-                         temp_mean + temp_sd + clock_proxy_cos + clock_proxy_linear +
-                         temp_mean_lag_1min + temp_mean_lag_5min + temp_mean_lag_30min +
-                         temp_mean_lead_1min + temp_mean_lead_5min + temp_mean_lead_30min +
-                         theta_lag_1min + theta_lag_5min + theta_lag_30min +
-                         theta_lead_1min + theta_lead_5min + theta_lead_30min +
-                         incl_lag_1min + incl_lag_5min + incl_lag_30min +
-                         incl_lead_1min + incl_lead_5min + incl_lead_30min +
-                         x_sd_lag_1min + x_sd_lag_5min + x_sd_lag_30min +
-                         y_sd_lag_1min + y_sd_lag_5min + y_sd_lag_30min +
-                         z_sd_lag_1min + z_sd_lag_5min + z_sd_lag_30min +
-                         x_sd_lead_1min + x_sd_lead_5min + x_sd_lead_30min +
-                         y_sd_lead_1min + y_sd_lead_5min + y_sd_lead_30min +
-                         z_sd_lead_1min + z_sd_lead_5min + z_sd_lead_30min")
+                       x_sd + y_sd + z_sd + x_sd_long + y_sd_long + z_sd_long + sd_max +
+                       temp_mean + temp_sd + clock_proxy_cos + clock_proxy_linear +
+                       temp_mean_lag_1min + temp_mean_lag_5min + temp_mean_lag_30min +
+                       temp_mean_lead_1min + temp_mean_lead_5min + temp_mean_lead_30min +
+                       theta_lag_1min + theta_lag_5min + theta_lag_30min +
+                       theta_lead_1min + theta_lead_5min + theta_lead_30min +
+                       incl_lag_1min + incl_lag_5min + incl_lag_30min +
+                       incl_lead_1min + incl_lead_5min + incl_lead_30min +
+                       x_sd_lag_1min + x_sd_lag_5min + x_sd_lag_30min +
+                       y_sd_lag_1min + y_sd_lag_5min + y_sd_lag_30min +
+                       z_sd_lag_1min + z_sd_lag_5min + z_sd_lag_30min +
+                       x_sd_lead_1min + x_sd_lead_5min + x_sd_lead_30min +
+                       y_sd_lead_1min + y_sd_lead_5min + y_sd_lead_30min +
+                       z_sd_lead_1min + z_sd_lead_5min + z_sd_lead_30min +
+                       vector_magnitude + 
+                       x_crossing_rate + y_crossing_rate + z_crossing_rate + 
+                       x_skewness + y_skewness + z_skewness +
+                       x_kurtosis + y_kurtosis + z_kurtosis")
 
 
 

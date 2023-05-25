@@ -3,6 +3,8 @@
 library(tidyverse)
 library(lubridate)
 library(arrow)
+library(moments)
+library(slider)
 
 conflicted::conflicts_prefer(dplyr::lag)
 conflicted::conflicts_prefer(dplyr::filter)
@@ -13,22 +15,35 @@ cat("Creating sensor-independent features. This will take a while...\n")
 data <-
   read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
 
+# The mean_crossing_rate function takes the signal as input and calculates 
+# the mean crossing rate. It counts the number of times the signal crosses 
+# the mean value and divides it by the length of the signal.
+mean_crossing_rate <- function(signal) {
+  crossings <- sum(abs(diff(sign(signal))) / 2)
+  crossing_rate <- crossings / length(signal)
+  return(crossing_rate)
+}
 
 # Create static clock proxies --------------------------------------------
 
 # Process the data for 10-second epochs
 data_10 <-
-  data %>%
-  # filter(id == 3404) %>%
+  data %>% 
+  # filter(id == 3404) %>% 
   # Create new features for sleep, sleep_median5, sleep_median10
   mutate(
-    score = if_else(is.na(score), 1, score),
+    score = if_else(is.na(score), 1, score), # 1 = out-bed awake, otherwise see ZM guide doc
+    score_simple = if_else(score %in% c(2, 3, 5, -5), 2, score), # 0 = in-bed awake, 1 = out-bed awake, 2 = in-bed asleep
     in_bed = if_else(score %in% c(0L, 2L, 3L, 5L, -5L), 1L, 0L),
-    in_bed_median5 = slider::slide_dbl(in_bed, median, .before = 15, .after = 15),
+    in_bed_median5 = slide_dbl(in_bed, median, .before = 15, .after = 15),
     sleep = if_else(score %in% c(2L, 3L, 5L), 1L, 0L),
-    sleep_median5 = slider::slide_dbl(sleep, median, .before = 15, .after = 15),
-    sleep_median10 = slider::slide_dbl(sleep, median, .before = 30, .after = 30),
+    sleep_median5 = slide_dbl(sleep, median, .before = 15, .after = 15),
+    sleep_median10 = slide_dbl(sleep, median, .before = 30, .after = 30),
     weekday = wday(datetime, label = F, week_start = 1),
+    vector_magnitude = sqrt(x^2 + y^2 + z^2),
+    across(c(x, y, z), list(crossing_rate = ~ slide_dbl(.x, mean_crossing_rate, .before = 15, .after = 15),
+                            skewness = ~ slide_dbl(.x, skewness, .before = 15, .after = 15),
+                            kurtosis = ~ slide_dbl(.x, kurtosis, .before = 15, .after = 15))),
     .after = score
   ) %>%
   # Group the data by id and noon_day
@@ -38,6 +53,7 @@ data_10 <-
     clock_group = if_else((hms::as_hms(datetime) > lubridate::hms("19:00:00") |
                              hms::as_hms(datetime) < lubridate::hms("10:00:00")), 1, 0),
     across(c(x, y, z), list(sd_long = ~ slider::slide_dbl(.x, sd, .after = 30))),
+    across(x_sd_long:z_sd_long, ~ replace_na(.x, mean(.x, na.rm = TRUE))),
     across(c(incl, theta, temp_mean, x_sd, y_sd, z_sd), list(
       lag_1min = ~ lag(.x, 1, default = mean(.x)), # Value from 1 minute ago
       lag_5min = ~ lag(.x, 5, default = mean(.x)), # Value from 5 minutes ago
@@ -46,7 +62,6 @@ data_10 <-
       lead_5min = ~ lead(.x, 5, default = mean(.x)), # Value from 5 minutes in the future
       lead_30min = ~ lead(.x, 30, default = mean(.x)) # Value from 30 minutes in the future
     )),
-    across(x_sd_long:z_sd_long, ~ replace_na(.x, mean(.x, na.rm = TRUE))),
     .after = sd_max
   )  %>% 
   # Group the data by id, noon_day, month, and clock_group
@@ -63,7 +78,10 @@ data_10 <-
   ) |>
   ungroup() 
 
-cat("10 sec data done...\n")
+if (data_10 %>% summarise(across(everything(), ~sum(is.na(.x)))) %>% rowwise() %>% sum() != 0){
+  stop("Script stopped. Missing values introduced")
+} else cat("10 sec data, all is good, moving on... \n")
+
 
 # Write the processed data to a new parquet file
 write_parquet(data_10, "data/data_for_modelling/no_edge_sp_incl_features_10_sec_epochs.parquet")

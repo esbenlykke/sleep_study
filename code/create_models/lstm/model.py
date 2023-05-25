@@ -12,12 +12,12 @@ from sklearn.metrics import f1_score
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Hyperparameters
-input_size = 68
+input_size = 64
 sequence_length = 20  # or n, depending on your data
-step = 10
+step = 1
 hidden_size = 128
 num_layers = 2
-num_classes = 5
+num_classes = 3
 learning_rate = 3e-4
 batch_size = 64
 num_epochs = 10
@@ -33,13 +33,17 @@ class biLSTM(nn.Module):
         self.lstm = nn.LSTM(
             input_size, hidden_size, num_layers, batch_first=True, bidirectional=True
         )
-        self.fc = nn.Linear(hidden_size * 2, num_classes)
+        self.fc1 = nn.Linear(hidden_size * 2, hidden_size)  # Additional fully connected layer
+        self.fc2 = nn.Linear(hidden_size, num_classes)  # Output layer
 
     def forward(self, x):
         h0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(device)
         c0 = torch.zeros(self.num_layers * 2, x.size(0), self.hidden_size).to(device)
 
-        out, _ = self.lstm(x)
-        out = self.fc(out[:, -1, :])
+        out, _ = self.lstm(x, (h0, c0))
+        out = out[:, -1, :]
+        out = self.fc1(out)  # Apply linear transformation
+        out = self.fc2(out)  # Output layer
+        out = F.softmax(out, dim=1)  # Apply softmax
 
         return out
