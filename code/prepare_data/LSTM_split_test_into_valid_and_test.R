@@ -5,11 +5,29 @@ library(tidymodels)
 library(arrow)
 library(torch)
 
-data <- read_parquet("data/data_for_modelling/chained_classifiers/30_sec_testing_data.parquet")
+# Step 1: Read the data from parquet files and combine them into a single data frame
+data <- 
+  read_parquet("data/data_for_modelling/chained_classifiers/30_sec_testing_data.parquet") %>% 
+  bind_rows(read_parquet("data/data_for_modelling/chained_classifiers/30_sec_training_data.parquet")) %>% 
+  arrange(-id)
 
-spl <- group_initial_split(data, group = id, prop = .5)
+# Step 2: Set the seed for reproducibility
+set.seed(123)
 
-read_parquet("data/data_for_modelling/chained_classifiers/30_sec_training_data.parquet") %>% 
-    write_parquet("data/data_for_modelling/lstm/30_sec_training.parquet")
-training(spl) %>% write_parquet("data/data_for_modelling/lstm/30_sec_validation.parquet")
+# Step 3: Split the data into train and test sets using group initial split
+spl <- group_initial_split(data, group = id, prop = 0.5)
+
+# Step 4: Get the training data
+all_train <- training(spl)
+
+# Step 5: Write the testing data to a parquet file
 testing(spl) %>% write_parquet("data/data_for_modelling/lstm/30_sec_testing.parquet")
+
+# Step 6: Split the training data into train and validation sets using group initial split
+spl_valid <- group_initial_split(all_train, group = id, prop = 0.4)
+
+# Step 7: Write the training and validation data to parquet files
+training(spl_valid) %>% write_parquet("data/data_for_modelling/lstm/30_sec_training.parquet")
+testing(spl_valid) %>% write_parquet("data/data_for_modelling/lstm/30_sec_validation.parquet")
+
+

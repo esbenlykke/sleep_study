@@ -11,7 +11,7 @@ num_layers = 4
 num_classes = 5
 learning_rate = 3e-4
 batch_size = 64
-num_epochs = 10
+num_epochs = 5
 sequence_length = 20
 step = 10
 

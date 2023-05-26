@@ -56,7 +56,7 @@ def prepare_data(data_path, sequence_length, step_size):
 
 # Sequence length and step size
 sequence_length = 20  # Corresponding to 10 minutes in 30 sec epoch data
-step_size = 2  # Corresponding to 60 sec. Thus will give one prediction per two data point when making predictions.
+step_size = 1  # Corresponding to 30 sec. Thus will give one prediction per data point when making predictions.
 
 # Prepare the train and test data
 train_sequences, train_labels = prepare_data("data/data_for_modelling/lstm/30_sec_training.parquet", sequence_length, step_size)
