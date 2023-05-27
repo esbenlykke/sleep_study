@@ -25,16 +25,16 @@ def prepare_data(data_path, sequence_length, step_size):
               'vector_magnitude',
               'x_crossing_rate', 'y_crossing_rate', 'z_crossing_rate',
               'x_skewness', 'y_skewness', 'z_skewness',
-              'x_kurtosis', 'y_kurtosis', 'z_kurtosis', 'score_simple']]
+              'x_kurtosis', 'y_kurtosis', 'z_kurtosis', 'score_simple_filtered']]
 
-    # Separate out 'score_simple'
-    score_simple = data.pop('score_simple')
+    # Separate out 'score_simple_filtered'
+    score_simple_filtered = data.pop('score_simple_filtered')
 
     # Normalize the data
     data = (data - data.mean()) / data.std()
 
-    # Add 'score_simple' back to the dataframe
-    data['score_simple'] = score_simple
+    # Add 'score_simple_filtered' back to the dataframe
+    data['score_simple_filtered'] = score_simple_filtered
 
     # Convert to PyTorch tensors
     data_tensor = torch.tensor(data.values, dtype=torch.float32)

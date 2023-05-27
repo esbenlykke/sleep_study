@@ -9,6 +9,9 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score
 import pandas as pd
 
+torch.manual_seed(42)
+torch.cuda.manual_seed_all(42)
+
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -23,7 +26,7 @@ num_layers = 4
 num_classes = 3
 learning_rate = 3e-4
 batch_size = 64
-num_epochs = 5
+num_epochs = 10
 
 # Create a bidirectional LSTM
 class biLSTM(nn.Module):
@@ -92,34 +95,17 @@ def check_accuracy(loader, model, dataset_name):
 train_predictors = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_train_sequences.pt")
 train_labels = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_train_labels.pt")
 
-
-train_predictors = train_predictors.to(device)
-train_labels = train_labels.to(device).long() 
-
 # load validation tensors
 valid_predictors = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_valid_sequences.pt")
 valid_labels = torch.load("/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_valid_labels.pt")
 
-valid_predictors = valid_predictors.to(device)
-valid_labels = valid_labels.to(device).long()
-
 # Create a TensorDataset from your tensors
 train_data = TensorDataset(train_predictors, train_labels)
 valid_data = TensorDataset(valid_predictors, valid_labels)
-# test_data = TensorDataset(test_predictors, test_labels)
 
 # Create your DataLoaders
 train_loader = DataLoader(train_data, shuffle=True, batch_size=batch_size)
 valid_loader = DataLoader(valid_data, shuffle=True, batch_size=batch_size)
-# test_loader = DataLoader(test_data, shuffle=True, batch_size=batch_size)
-
-# # Save validation tensors
-# torch.save(valid_predictors, "/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_valid_sequences.pt")
-# torch.save(valid_labels, "/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_valid_labels.pt")
-
-# # Save test tensors
-# torch.save(test_predictors, "/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_test_sequences.pt")
-# torch.save(test_labels, "/home/esbenlykke/projects/sleep_study/data/data_for_modelling/lstm/pytorch_test_labels.pt")
 
 print(torch.unique(train_labels, return_counts=True))
 print(torch.unique(valid_labels, return_counts=True))
@@ -134,14 +120,19 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 # Initialize DataFrame to store metrics
 metrics_df = pd.DataFrame(columns=['Epoch', 'Train Loss', 'Valid Loss', 'Train Accuracy', 'Train F1', 'Test Accuracy', 'Test F1'])
 
+# Set early stopping parameters
+best_valid_loss = float('inf')
+patience = 3  # Number of epochs with no improvement before stopping
+patience_counter = 0
+
 # Train network
 for epoch in range(num_epochs):
     running_train_loss = 0.0
     running_valid_loss = 0.0
     model.train()
-    for batch_idx, (data, targets) in enumerate(train_loader):  # use train_loader here
+    for batch_idx, (data, targets) in enumerate(train_loader):
         data = data.to(device=device)
-        targets = targets.to(device=device)
+        targets = targets.to(device=device, dtype=torch.int64)  # Convert targets to torch.int64
 
         # Forward
         scores = model(data)
@@ -159,7 +150,7 @@ for epoch in range(num_epochs):
     with torch.no_grad():
         for batch_idx, (data, targets) in enumerate(valid_loader):
             data = data.to(device=device)
-            targets = targets.to(device=device)
+            targets = targets.to(device=device, dtype=torch.int64)  # Convert targets to torch.int64
 
             scores = model(data)
             loss = criterion(scores, targets)
@@ -170,20 +161,36 @@ for epoch in range(num_epochs):
 
     print(f'Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Valid Loss: {valid_loss:.4f}')
 
+    # Save the model if validation loss has decreased
+    if valid_loss < best_valid_loss:
+        best_valid_loss = valid_loss
+        torch.save(model.state_dict(), '/home/esbenlykke/projects/sleep_study/models/lstm_model_best.pt')
+        torch.save(model, '/home/esbenlykke/projects/sleep_study/models/lstm_model_best_full.pt')
+        patience_counter = 0  # Reset counter
+    else:
+        patience_counter += 1  # Increment counter
+
+    # Stop training if patience limit is reached
+    if patience_counter >= patience:
+        print(f"Early stopping at epoch {epoch}!")
+        break
+
     # Evaluate model
     train_acc, train_f1 = check_accuracy(train_loader, model, "Train")
     test_acc, test_f1 = check_accuracy(valid_loader, model, "Validation")
 
     # Inside your training loop, after computing the metrics for each epoch...
-    metrics_df = metrics_df._append({  # use append() instead of _append()
-    'Epoch': epoch+1,
-    'Train Loss': train_loss,
-    'Valid Loss': valid_loss,
-    'Train Accuracy': train_acc,
-    'Train F1': train_f1,
-    'Test Accuracy': test_acc,
-    'Test F1': test_f1
+    metrics_df = metrics_df._append({
+        'Epoch': epoch+1,
+        'Train Loss': train_loss,
+        'Valid Loss': valid_loss,
+        'Train Accuracy': train_acc,
+        'Train F1': train_f1,
+        'Test Accuracy': test_acc,
+        'Test F1': test_f1
     }, ignore_index=True)
+
+
 
 # Save metrics DataFrame to a CSV file
 metrics_df.to_csv("/home/esbenlykke/projects/sleep_study/models/lstm_model_metrics.csv", index=False)
