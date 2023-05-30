@@ -19,21 +19,21 @@ test_preds <-
   mutate(probability_class_2 = abs(probability_class_0 + probability_class_1 - 1)) %>%
   bind_cols(test) %>%
   mutate(
-    across(c(score_simple, predicted_class), as_factor)
+    across(c(score_simple, score_simple_filtered, predicted_class), as_factor)
   )
 
 
 my_metrics <- metric_set(accuracy, sensitivity, specificity, precision, f_meas)
 
 metrics <- test_preds %>%
-  my_metrics(truth = score_simple, estimate = predicted_class, estimator = "macro_weighted")
+  my_metrics(truth = score_simple_filtered, estimate = predicted_class, estimator = "macro_weighted")
 
 test_preds %>% count(id)
 
 p <- test_preds %>%
   filter(id == 54704) %>%
   ggplot(aes(datetime)) +
-  geom_line(aes(y = score_simple, group = 1), color = "grey50") +
+  geom_line(aes(y = score_simple_filtered, group = 1), color = "grey50") +
   geom_line(aes(y = as.numeric(predicted_class) - 1.2, group = 1), color = "darkorange") +
   facet_wrap(~noon_day, scales = "free", ncol = 1) +
   theme_classic()

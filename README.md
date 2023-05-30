@@ -10,26 +10,3 @@ This research project aims to develop machine learning models from accelerometer
 
 A separate repo with instructions on how to preprocess and derive sleep quality metrics using the models developed in this study will be created soon...
 
-### Clone repo
-
-Use [git](https://git-scm.com/downloads) to clone this repo to a local computer with the following command in terminal.
-
-```
-git clone https://github.com/esbenlykke/sleep_study
-``` 
-
-### Install requirements
-
-Use [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge) to create an environment with all necessary software by running the following command in terminal.
-
-```
-mamba env create -f envirenment.yml
-```
-
-### Download models
-
-Download models from ??? maybe physionet.org??
-
-### Usage
-
-This will be added at later stages of the project. 
