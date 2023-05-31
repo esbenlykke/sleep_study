@@ -77,8 +77,8 @@ only_edge_SP_zm_data %>%
 
 # Filter the raw sleep data for ID 8505 and create a new dataset with sleep derivatives
 zm_sleep <- 
-  zm_raw %>%
-  filter(id == 37304 & !score == -5) %>%
+  zm_data %>%
+  filter(id == 8504 & !score == -5) %>%
   mutate(
     noon_day = day(datetime - hours(12)),
     month = month(datetime - hours(12)),
@@ -89,7 +89,12 @@ zm_sleep <-
     sleep_12_cumsum_filter_5 = slide_dbl(sleep_filter_5, sum, .after = 24)
   )
 
-
+# Define a function to count zeros in runs of at least three consecutive zeros (WASO)
+count_each_zero_in_consecutive_zeros <-
+  function(x, n = 3) {
+    rle_x <- rle(x == 0)
+    sum(rle_x$lengths[rle_x$values & rle_x$lengths >= n])
+  }
 
 # Calculate sleep metrics using both calculated sleep stats and ZM determined sleep stats
 zm_sleep %>%
@@ -107,8 +112,7 @@ zm_sleep %>%
   ) %>%
   bind_cols(zm_stats %>%
     mutate(noon_day = day(as_datetime(start_date)), .before = 1) %>%
-    filter(id == 37304) %>%
+    filter(id == 8504) %>%
     select(-id, -noon_day)) %>%
-  select(id, noon_day, matches("spt|tst|se|lps|waso")) %>%
-  select(id, noon_day, contains(c("spt")))
+  select(id, noon_day, matches("spt|tst|se|lps|waso")) 
 

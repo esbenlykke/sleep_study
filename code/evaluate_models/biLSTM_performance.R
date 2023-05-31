@@ -44,4 +44,7 @@ valid_metrics <-
   read_csv("models/lstm_model_metrics.csv") %>% 
   janitor::clean_names()
 
-valid_metrics
+valid_metrics %>% 
+  rename(valid_accuracy = test_accuracy, valid_f1 = test_f1)
+
+
