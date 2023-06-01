@@ -60,7 +60,7 @@ only_edge_SP_zm_data <-
     }
   }) 
 
-only_edge_SP_zm_data %>% 
+no_edge_SP_zm_data %>% 
   filter(id == 8504) %>%
   mutate(
     score_filter_5 = slide_dbl(score, median, .after = 10),
@@ -101,18 +101,14 @@ zm_sleep %>%
   group_by(id, noon_day, month) |>
   summarise(
     median_5_spt = n() * 30 / 60 / 60,
-    median_5_tst = sum(sleep_filter_5) * 30 / 60 / 60,
-    median_5_se = 100 * (median_5_tst / median_5_spt),
-    median_5_lps = (min(row_number()[sleep_12_cumsum_filter_5 == 20]) + 4) * 30 / 60,
-    median_5_waso = count_each_zero_in_consecutive_zeros(sleep_filter_5, 3) * 30 / 60 - median_5_lps,
+    # median_5_tst = sum(sleep_filter_5) * 30 / 60 / 60,
+    # median_5_se = 100 * (median_5_tst / median_5_spt),
+    # median_5_lps = (min(row_number()[sleep_12_cumsum_filter_5 == 20]) + 4) * 30 / 60,
+    # median_5_waso = count_each_zero_in_consecutive_zeros(sleep_filter_5, 3) * 30 / 60 - median_5_lps,
     raw_tst = sum(sleep_raw) * 30 / 60 / 60,
     raw_se_percent = 100 * (raw_tst / median_5_spt),
     raw_lps = (min(row_number()[sleep_12_cumsum_raw == 20]) + 4) * 30 / 60,
     raw_waso = count_each_zero_in_consecutive_zeros(sleep_raw, 3) * 30 / 60 - raw_lps
-  ) %>%
-  bind_cols(zm_stats %>%
-    mutate(noon_day = day(as_datetime(start_date)), .before = 1) %>%
-    filter(id == 8504) %>%
-    select(-id, -noon_day)) %>%
+  )  %>%
   select(id, noon_day, matches("spt|tst|se|lps|waso")) 
 

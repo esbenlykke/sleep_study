@@ -95,7 +95,8 @@ walk2(
       mutate(
         across(sleep_median_10_pred_class:sleep_raw_pred_class, ~ if_else(is.na(.x), as_factor(0), .x))
       ) %>%
-      distinct()
+      distinct() %>% 
+      arrange(id, month, noon_day, datetime)
 
     output_file <- str_c("data/data_for_modelling/chained_classifiers/sleep_predictions/", model_name, "_sleep_prediction_complete.parquet")
 
@@ -105,13 +106,13 @@ walk2(
   }
 )
 
-# test <- 
-#   read_parquet("data/data_for_modelling/chained_classifiers/sleep_predictions/xgboost_sleep_prediction_complete.parquet")
+# test <-
+#   read_parquet("data/data_for_modelling/chained_classifiers/sleep_predictions/decision_tree_sleep_prediction_complete.parquet")
 # 
-# test %>% count(sleep_median_10_pred_class)
-
+# test %>% count(sleep_raw_pred_class)
+# 
 # test %>%
-#   filter(id == 8505, noon_day == 9) %>%
+#   filter(id == 8505) %>% 
 #   ggplot(aes(datetime, group = 1)) +
 #   geom_line(aes(y = as.numeric(sleep_median5))) +
 #   # geom_line(aes(y = as.numeric(sleep_median_10_pred_class) - .1), color = "darkred") +
@@ -119,5 +120,6 @@ walk2(
 #   # geom_line(aes(y = as.numeric(sleep_raw_pred_class) - .3), color = "steelblue") +
 #   geom_line(aes(y = as.numeric(in_bed_class) - .5), color = "darkgreen") +
 #   geom_line(aes(y = as.numeric(in_bed) - .6), color = "darkblue") +
+#   scale_x_datetime(breaks = "2 hours") +
 #   facet_wrap(~ noon_day, scales = "free", ncol = 1) +
 #   theme_classic()
