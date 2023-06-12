@@ -6,26 +6,31 @@ library(arrow)
 library(slider)
 library(lubridate)
 
+# Function to predict sleep using a given model and in-bed data
 predict_sleep <- function(model_filename, in_bed_data_filename) {
   read_rds(model_filename) %>%
     augment(read_parquet(in_bed_data_filename)) %>%
     select(id, noon_day, month, datetime, contains("pred_class"))
 }
 
+# Function to get filenames in a directory matching a specific pattern
 get_filenames <- function(path, pattern) {
   list.files(path, full.names = TRUE) %>% str_subset(pattern)
 }
 
+# Function to run predictions using multiple models on a given data file
 run_predictions <- function(model_filenames, data_filename) {
   map(model_filenames, predict_sleep, in_bed_data_filename = data_filename)
 }
 
+# Function to pair model filenames with in-bed data filenames based on their types
 pair_filenames <- function(model_filenames, in_bed_data_filenames) {
   model_types <- str_extract(model_filenames, "(decision_tree|logistic_regression|neural_network|xgboost)")
   in_bed_data_types <- str_extract(in_bed_data_filenames, "(decision_tree|logistic_regression|neural_network|xgboost)")
   map(in_bed_data_types, ~ model_filenames[model_types == .x])
 }
 
+# Function to get predictions for each in-bed data file using multiple models
 get_preds <- function(in_bed_data_filenames, model_filenames) {
   paired_filenames <- pair_filenames(model_filenames, in_bed_data_filenames)
   map2(
@@ -55,7 +60,7 @@ extract_pred_class_by_model <- function(preds_list) {
     # Combine all predictions into a tibble
     preds_combined <- reduce(
       map2(preds_method, names(preds_method), function(preds_type, preds_name) {
-        # The predictions are deeply nested, so you have to get to the actual tibble
+        # The predictions are deeply nested, so we have to get to the actual tibble
         preds_tibble <- preds_type[[1]]
 
         # Select all columns from the predictions tibble
@@ -71,10 +76,11 @@ extract_pred_class_by_model <- function(preds_list) {
     )
 
     preds_combined
-  })
+  }) %>% 
+    map(distinct)
 }
 
-# Extract .pred_class columns from each tibble in preds_30_sec and combine them into tibbles by model
+# Extract .pred_class columns from each tibble in preds_30_sec and combine them into complete data by model
 pred_classes_30_sec_by_model <- extract_pred_class_by_model(preds_30_sec)
 
 complete_data_with_in_bed_preds_filenames <-

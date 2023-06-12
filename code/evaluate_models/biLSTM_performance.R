@@ -22,18 +22,25 @@ test_preds <-
     across(c(score_simple, score_simple_filtered, predicted_class), as_factor)
   )
 
+# write_parquet(test_preds, "data/data_for_modelling/lstm/predictions/lstm_multiclass_preds.parquet")
+
 
 my_metrics <- metric_set(accuracy, sensitivity, specificity, precision, f_meas)
 
-metrics <- test_preds %>%
+metrics_weighted <- test_preds %>%
   my_metrics(truth = score_simple_filtered, estimate = predicted_class, estimator = "macro_weighted")
+
+metrics_unweighted <- test_preds %>%
+  my_metrics(truth = score_simple_filtered, estimate = predicted_class, estimator = "macro")
+
 
 test_preds %>% count(id)
 
 p <- test_preds %>%
   filter(id == 54704) %>%
   ggplot(aes(datetime)) +
-  geom_line(aes(y = score_simple_filtered, group = 1), color = "grey50") +
+  geom_line(aes(y = as.numeric(score_simple) - 1, group = 1), color = "darkgreen") +
+  geom_line(aes(y = as.numeric(score_simple_filtered) - 1.5, group = 1), color = "grey50") +
   geom_line(aes(y = as.numeric(predicted_class) - 1.2, group = 1), color = "darkorange") +
   facet_wrap(~noon_day, scales = "free", ncol = 1) +
   theme_classic()
