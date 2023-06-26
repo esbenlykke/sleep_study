@@ -3,6 +3,7 @@
 library(tidyverse)
 library(tidymodels)
 library(arrow)
+library(themis)
 
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)

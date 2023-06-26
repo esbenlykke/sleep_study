@@ -4,7 +4,7 @@ library(slider)
 library(arrow)
 library(lubridate)
 
-epoch_length <- 10
+epoch_length <- 30
 
 # Read in the raw sleep data
 zm_data <- read_tsv("data/processed/zm_scores.tsv") %>%
@@ -60,29 +60,14 @@ only_edge_SP_zm_data <-
     }
   }) 
 
-no_edge_SP_zm_data %>% 
-  filter(id == 8504) %>%
-  mutate(
-    score_filter_5 = slide_dbl(score, median, .after = 10),
-    score_filter_10 = slide_dbl(score, median, .after = 20),
-    noon_day = day(datetime - hours(12))
-  ) %>%
-  ggplot() +
-  geom_step(aes(datetime, score), alpha = .5) +
-  # geom_step(aes(datetime, score_filter_5 - .2), color = "red") +
-  # geom_step(aes(datetime, score_filter_10 - .4), color = "darkgreen") +
-  scale_x_datetime(breaks = "1 hours", date_labels = "%H:%M") +
-  facet_wrap(~ noon_day, scales = "free") +
-  theme_light()
 
 # Filter the raw sleep data for ID 8505 and create a new dataset with sleep derivatives
 zm_sleep <- 
   zm_data %>%
-  filter(id == 8504 & !score == -5) %>%
   mutate(
     noon_day = day(datetime - hours(12)),
     month = month(datetime - hours(12)),
-    score_filtered = slide_dbl(score, median, .after = 10), # 5 min window
+    score_filtered = slide_dbl(score, median, .before = 5, .after = 5), # 5 min window
     sleep_raw = if_else(score != 0, 1, 0),
     sleep_filter_5 = if_else(score_filtered != 0, 1, 0),
     sleep_12_cumsum_raw = slide_dbl(sleep_raw, sum, .after = 24),

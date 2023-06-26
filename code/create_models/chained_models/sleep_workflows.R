@@ -3,6 +3,7 @@
 library(tidyverse)
 library(tidymodels)
 library(arrow)
+library(themis)
 
 tidymodels_prefer()
 options(tidymodels.dark = TRUE)
@@ -53,7 +54,8 @@ create_recipe <- function(target_var, data, normalize = FALSE) {
 
   formula_obj <- as.formula(formula_str)
 
-  rec <- recipe(formula_obj, data = data)
+  rec <- recipe(formula_obj, data = data) %>% 
+    step_smote(target_var)
 
   if (normalize) {
     rec <- rec %>%
