@@ -79,6 +79,9 @@
 \def\fps@figure{htbp}
 \makeatother
 
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
 \usepackage{lineno}\linenumbers
 \makeatletter
 \makeatother
@@ -202,7 +205,7 @@ volutpat elit eu nulla viverra, nec tempus orci pellentesque.
     Sleep quality metrics
 \end{keyword}
 \end{frontmatter}
-    \ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, interior hidden, sharp corners, frame hidden, breakable, enhanced]}{\end{tcolorbox}}\fi
+    \ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[enhanced, interior hidden, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}, frame hidden, breakable, sharp corners]}{\end{tcolorbox}}\fi
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -620,27 +623,174 @@ results underscore the influential role of median filters on sleep
 metrics.
 
 \hypertarget{tbl-summary_zm}{}
-\begin{longtable}[]{@{}llllllll@{}}
-\caption{\label{tbl-summary_zm}Summary of sleep quality metrics as
-calculated based on the raw, the 5-minute, and 10-minute median filtered
-raw ZM prediction.}\tabularnewline
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.2400}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1500}}@{}}
+\caption{\label{tbl-summary_zm}Summary of Sleep Quality Metrics based on
+Raw ZM Predictions and Median Filtering.}\tabularnewline
 \toprule\noalign{}
-& & Raw & & Median 5-Minute & & Median 10-Minute & \\
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+SPT
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+TST
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+SE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+LPS
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+WASO
+\end{minipage} \\
 \midrule\noalign{}
 \endfirsthead
 \toprule\noalign{}
-& & Raw & & Median 5-Minute & & Median 10-Minute & \\
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+SPT
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+TST
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+SE
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+LPS
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+WASO
+\end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-& & Mean & SD & Mean & SD & Mean & SD \\
-& SPT & 9.2 & 2.1 & 9.2 & 2.1 & 9.2 & 2.1 \\
-& TST & 7.7 & 1.9 & 8.1 & 2.0 & 8.2 & 2.1 \\
-& SE & 82.6 & 12.0 & 86.4 & 12.7 & 87.5 & 12.9 \\
-& LPS & 34.5 & 27.9 & 36.3 & 39.8 & 38.0 & 48.7 \\
-& WASO & 39.0 & 33.6 & 30.6 & 46.8 & 22.3 & 55.4 \\
+Raw & 9.2 (2.1) & 7.7 (1.9) & 82.6 (12.0) & 34.5 (27.9) & 39.0 (33.6) \\
+5-Min Median & 9.2 (2.1) & 8.1 (2.0) & 86.4 (12.7) & 36.3 (39.8) & 30.6
+(46.8) \\
+10-Min Median & 9.2 (2.1) & 8.2 (2.1) & 87.5 (12.9) & 38.0 (48.7) & 22.3
+(55.4) \\
 \end{longtable}
+
+\hypertarget{performance-on-epoch-to-epoch-basis}{%
+\subsection{Performance on Epoch-To-Epoch
+Basis}\label{performance-on-epoch-to-epoch-basis}}
+
+The results from the epoch-to-epoch evaluation of in-bed performance
+metrics for our included models are presented in
+Table~\ref{tbl-in_bed_performance}. The epoch-to-epoch evaluation of
+in-bed performance metrics, outlined in @tbl-in\_bed\_performance,
+demonstrates practically equivalent performance across all model types.
+While the Decision Tree model posted an F1 score of 94.4\% and accuracy
+of 95.3\%, the Logistic Regression and Feed-Forward Neural Network
+models each exhibited an F1 score of 95.0\% and similar accuracies of
+95.7\% and 95.8\%, respectively. The XGBoost model, despite recording
+the highest metrics with an F1 score of 95.4\% and accuracy of 96.1\%,
+outpaced the others only marginally. This underscores the consistency of
+performance among these models in monitoring in-bed conditions.
+
+\hypertarget{tbl-in_bed_performance}{}
+\begin{longtable}{lrrrrr}
+\caption{\label{tbl-in_bed_performance}In-Bed Performance Metrics }\tabularnewline
+
+\toprule
+model & F1 Score (\%) & Accuracy (\%) & Sensitivity (\%) & Precision (\%) & Specificity (\%) \\ 
+\midrule
+Decision Tree & $9,436.3\%$ & $9,527.2\%$ & $9,312.3\%$ & $9,563.6\%$ & $9,686.0\%$ \\ 
+Logistic Regression & $9,498.9\%$ & $9,573.9\%$ & $9,503.5\%$ & $9,494.3\%$ & $9,626.0\%$ \\ 
+Feed-Forward Neural Network & $9,502.9\%$ & $9,577.4\%$ & $9,507.1\%$ & $9,498.7\%$ & $9,629.2\%$ \\ 
+XGBoost & $9,538.4\%$ & $9,605.8\%$ & $9,582.7\%$ & $9,494.4\%$ & $9,622.9\%$ \\ 
+\bottomrule
+\end{longtable}
+
+Table~\ref{tbl-sleep_performance} details the performance metrics of the
+four machine learning models---Decision Tree, Logistic Regression,
+Neural Network, and XGBoost---applied to raw ZM predictions and 5- and
+10-minute median filtered predictions. For raw ZM predictions, all
+models demonstrated comparable performance, with F1 Scores between
+93.27\% and 93.58\%. The XGBoost model performed marginally better.
+However, it's crucial to highlight that Specificity was notably low
+across models, with the Neural Network model achieving the highest at
+48.31\%. Performance improved on 5-minute median data. XGBoost again
+outperformed other models in F1 Score and Accuracy, yet Specificity
+remained a concern, with scores ranging from 37.47\% to 50.90\%. On
+10-minute median data, all models showed further improvement, and
+XGBoost continued to lead in F1 Score and Accuracy. It is significant
+that both Neural Network and XGBoost models achieved a Sensitivity of
+99.10\%. However, low Specificity scores persisted, with the highest
+only at 50.98\% for the XGBoost model.
+
+\hypertarget{tbl-sleep_performance}{}
+\begin{longtable}{cccccc}
+\caption{\label{tbl-sleep_performance}Sleep Performance Metrics }\tabularnewline
+
+\toprule
+ & F1 Score (\%) & Accuracy (\%) & Sensitivity (\%) & Precision (\%) & Specificity (\%) \\ 
+\midrule
+\multicolumn{6}{l}{Raw ZM Predictions} \\ 
+\midrule
+Decision Tree & $93.27$ & $88.25$ & $96.92$ & $89.88$ & $42.73$ \\ 
+Logistic Regression & $93.30$ & $88.14$ & $98.33$ & $88.76$ & $34.65$ \\ 
+Neural Network & $93.54$ & $88.80$ & $96.52$ & $90.74$ & $48.31$ \\ 
+XGBoost & $93.58$ & $88.84$ & $96.92$ & $90.47$ & $46.41$ \\ 
+\midrule
+\multicolumn{6}{l}{5-Min Median} \\ 
+\midrule
+Decision Tree & $95.48$ & $91.87$ & $98.02$ & $93.07$ & $48.01$ \\ 
+Logistic Regression & $95.37$ & $91.55$ & $99.14$ & $91.87$ & $37.47$ \\ 
+Neural Network & $95.75$ & $92.33$ & $98.39$ & $93.24$ & $49.14$ \\ 
+XGBoost & $95.78$ & $92.41$ & $98.23$ & $93.45$ & $50.90$ \\ 
+\midrule
+\multicolumn{6}{l}{10-Min Median} \\ 
+\midrule
+Decision Tree & $96.02$ & $92.75$ & $98.30$ & $93.84$ & $47.95$ \\ 
+Logistic Regression & $96.04$ & $92.73$ & $99.20$ & $93.09$ & $40.56$ \\ 
+Neural Network & $96.18$ & $93.06$ & $98.29$ & $94.17$ & $50.90$ \\ 
+XGBoost & $96.60$ & $93.79$ & $99.10$ & $94.22$ & $50.98$ \\ 
+\bottomrule
+\end{longtable}
+
+Analyzing the area under the curve for precision-recall (AUC-PR) for all
+models across raw ZM predictions and 5- and 10-minute median filtered
+predictions yielded distinct results. Across all types of ZM
+predictions, the decision tree consistently yielded the highest AUC-PR,
+whereas the Neural Network generally performed least effectively. This
+highlights the superior predictive accuracy of the decision tree model
+in this context (see Figure~\ref{fig-pr_curves}). The Area Under the
+Receiver Operating Characteristics Curve (ROC-AUC) results indicate a
+varying performance of the four models across the ZM predictions types.
+The XGBoost model consistently outperforms the other models across all
+data types, suggesting its superior capacity for distinguishing between
+classes. In contrast, the Neural Network model consistently exhibits the
+lowest ROC-AUC values, suggesting a weaker performance in this specific
+context (see Figure~\ref{fig-roc_curves}).
+
+\begin{figure}[b]
+
+{\centering \includegraphics{visuals/plot_sleep_pr.pdf}
+
+}
+
+\caption{\label{fig-pr_curves}Precision-Recall curves of the models
+evaluated across the different ZM predictions, including raw ZM
+predictions, as well as 5-minute and 10-minute median smoothing of the
+ZM raw predictions. The x-axis of the plot represents the proportion of
+true wake epochs that were correctly classified as wake, while the
+y-axis represents the proportion of all epochs labeled as wake by the
+classifier that were classified correctly. The AUC values displayed in
+the plot indicate the area under the Precision-Recall curve for each
+model and condition.}
+
+\end{figure}
+
+\begin{figure}[b]
+
+{\centering \includegraphics{visuals/plot_sleep_roc.pdf}
+
+}
+
+\caption{\label{fig-roc_curves}Text bla bla}
+
+\end{figure}
 
 \newpage
 

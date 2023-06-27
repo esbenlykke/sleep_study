@@ -50,6 +50,7 @@ editor:
     wrap: 72
 ---
 
+
 # Introduction
 
 An extensive array of research underlines the importance of sleep for
@@ -445,16 +446,22 @@ metrics with an F1 score of 95.4% and accuracy of 96.1%, outpaced the
 others only marginally. This underscores the consistency of performance
 among these models in monitoring in-bed conditions.
 
-```{r}
-#| echo: false
-#| message: false
-#| label: tbl-in_bed_performance
-#| tbl-cap: In-Bed Performance Metrics
 
-source("code/table_in_bed_performance.R")
+::: {#tbl-in_bed_performance .cell tbl-cap='In-Bed Performance Metrics'}
+::: {.cell-output-display}
+\begin{longtable}{lrrrrr}
+\toprule
+model & F1 Score (\%) & Accuracy (\%) & Sensitivity (\%) & Precision (\%) & Specificity (\%) \\ 
+\midrule
+Decision Tree & $9,436.3\%$ & $9,527.2\%$ & $9,312.3\%$ & $9,563.6\%$ & $9,686.0\%$ \\ 
+Logistic Regression & $9,498.9\%$ & $9,573.9\%$ & $9,503.5\%$ & $9,494.3\%$ & $9,626.0\%$ \\ 
+Feed-Forward Neural Network & $9,502.9\%$ & $9,577.4\%$ & $9,507.1\%$ & $9,498.7\%$ & $9,629.2\%$ \\ 
+XGBoost & $9,538.4\%$ & $9,605.8\%$ & $9,582.7\%$ & $9,494.4\%$ & $9,622.9\%$ \\ 
+\bottomrule
+\end{longtable}
+:::
+:::
 
-tbl_in_bed
-```
 
 @tbl-sleep_performance details the performance metrics of the four
 machine learning models---Decision Tree, Logistic Regression, Neural
@@ -473,16 +480,38 @@ that both Neural Network and XGBoost models achieved a Sensitivity of
 99.10%. However, low Specificity scores persisted, with the highest only
 at 50.98% for the XGBoost model.
 
-```{r}
-#| echo: false
-#| message: false
-#| label: tbl-sleep_performance
-#| tbl-cap: Sleep Performance Metrics
 
-source("code/table_sleep_performance.R")
+::: {#tbl-sleep_performance .cell tbl-cap='Sleep Performance Metrics'}
+::: {.cell-output-display}
+\begin{longtable}{cccccc}
+\toprule
+ & F1 Score (\%) & Accuracy (\%) & Sensitivity (\%) & Precision (\%) & Specificity (\%) \\ 
+\midrule
+\multicolumn{6}{l}{Raw ZM Predictions} \\ 
+\midrule
+Decision Tree & $93.27$ & $88.25$ & $96.92$ & $89.88$ & $42.73$ \\ 
+Logistic Regression & $93.30$ & $88.14$ & $98.33$ & $88.76$ & $34.65$ \\ 
+Neural Network & $93.54$ & $88.80$ & $96.52$ & $90.74$ & $48.31$ \\ 
+XGBoost & $93.58$ & $88.84$ & $96.92$ & $90.47$ & $46.41$ \\ 
+\midrule
+\multicolumn{6}{l}{5-Min Median} \\ 
+\midrule
+Decision Tree & $95.48$ & $91.87$ & $98.02$ & $93.07$ & $48.01$ \\ 
+Logistic Regression & $95.37$ & $91.55$ & $99.14$ & $91.87$ & $37.47$ \\ 
+Neural Network & $95.75$ & $92.33$ & $98.39$ & $93.24$ & $49.14$ \\ 
+XGBoost & $95.78$ & $92.41$ & $98.23$ & $93.45$ & $50.90$ \\ 
+\midrule
+\multicolumn{6}{l}{10-Min Median} \\ 
+\midrule
+Decision Tree & $96.02$ & $92.75$ & $98.30$ & $93.84$ & $47.95$ \\ 
+Logistic Regression & $96.04$ & $92.73$ & $99.20$ & $93.09$ & $40.56$ \\ 
+Neural Network & $96.18$ & $93.06$ & $98.29$ & $94.17$ & $50.90$ \\ 
+XGBoost & $96.60$ & $93.79$ & $99.10$ & $94.22$ & $50.98$ \\ 
+\bottomrule
+\end{longtable}
+:::
+:::
 
-tbl_sleep_performance
-```
 
 Analyzing the area under the curve for precision-recall (AUC-PR) for all
 models across raw ZM predictions and 5- and 10-minute median filtered
@@ -514,3 +543,4 @@ condition.](visuals/plot_sleep_pr.pdf){#fig-pr_curves}
 \newpage
 
 # References
+

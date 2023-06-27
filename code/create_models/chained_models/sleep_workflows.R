@@ -18,14 +18,14 @@ load_data <- function(input_path) {
 # Load data
 cat("Spending data budget...\n")
 
-train_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_only_in_bed_training_data.parquet")
-test_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_only_in_bed_testing_data.parquet")
+# train_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_only_in_bed_training_data.parquet")
+# test_10 <- load_data("data/data_for_modelling/chained_classifiers/10_sec_only_in_bed_testing_data.parquet")
 
 train_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_training_data.parquet")
 test_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_testing_data.parquet")
 
 # Create cross-validation objects
-folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
+# folds_10 <- group_mc_cv(train_10, group = id, times = 5, prop = .5)
 folds_30 <- group_mc_cv(train_30, group = id, times = 5, prop = .5)
 
 
@@ -47,15 +47,15 @@ create_recipe <- function(target_var, data, normalize = FALSE) {
                        x_sd_lead_1min + x_sd_lead_5min + x_sd_lead_30min +
                        y_sd_lead_1min + y_sd_lead_5min + y_sd_lead_30min +
                        z_sd_lead_1min + z_sd_lead_5min + z_sd_lead_30min +
-                       vector_magnitude + 
-                       x_crossing_rate + y_crossing_rate + z_crossing_rate + 
+                       vector_magnitude +
+                       x_crossing_rate + y_crossing_rate + z_crossing_rate +
                        x_skewness + y_skewness + z_skewness +
                        x_kurtosis + y_kurtosis + z_kurtosis")
 
   formula_obj <- as.formula(formula_str)
 
-  rec <- recipe(formula_obj, data = data) %>% 
-    step_smote(target_var)
+  rec <- recipe(formula_obj, data = data) %>%
+    step_smote({{ target_var }})
 
   if (normalize) {
     rec <- rec %>%
@@ -69,12 +69,12 @@ create_recipe <- function(target_var, data, normalize = FALSE) {
 cat("Creating preprocessing recipes...\n")
 
 # 10 second epochs data
-sleep_raw_10_sec_rec <- create_recipe("sleep", train_10)
-sleep_raw_10_sec_norm_rec <- create_recipe("sleep", train_10, normalize = TRUE)
-sleep_median5_10_sec_rec <- create_recipe("sleep_median5", train_10)
-sleep_median5_10_sec_norm_rec <- create_recipe("sleep_median5", train_10, normalize = TRUE)
-sleep_median10_10_sec_rec <- create_recipe("sleep_median10", train_10)
-sleep_median10_10_sec_norm_rec <- create_recipe("sleep_median10", train_10, normalize = TRUE)
+# sleep_raw_10_sec_rec <- create_recipe("sleep", train_10)
+# sleep_raw_10_sec_norm_rec <- create_recipe("sleep", train_10, normalize = TRUE)
+# sleep_median5_10_sec_rec <- create_recipe("sleep_median5", train_10)
+# sleep_median5_10_sec_norm_rec <- create_recipe("sleep_median5", train_10, normalize = TRUE)
+# sleep_median10_10_sec_rec <- create_recipe("sleep_median10", train_10)
+# sleep_median10_10_sec_norm_rec <- create_recipe("sleep_median10", train_10, normalize = TRUE)
 
 # 30 second epochs data
 sleep_raw_30_sec_rec <- create_recipe("sleep", train_30)
@@ -141,67 +141,67 @@ xgb_param <-
 cat("Creating workflow sets...\n")
 
 ### 10 sec epochs ###
-sleep_norm_wfs_10 <-
-  workflow_set(
-    preproc = list(
-      sleep_raw = sleep_raw_10_sec_norm_rec,
-      sleep_5_min_median = sleep_median5_10_sec_norm_rec,
-      sleep_10_min_median = sleep_median10_10_sec_norm_rec
-    ),
-    models = list(
-      logistic_regression = glmnet_spec, # works in parallel
-      neural_network = nnet_spec # works in parallel
-    ),
-    cross = TRUE
-  ) %>%
-  option_add(param_info = nnet_param, id = c(
-    "sleep_raw_neural_network",
-    "sleep_5_min_median_neural_network",
-    "sleep_10_min_median_neural_network"
-  ))
-
-sleep_no_norms_wfs_10 <-
-  workflow_set(
-    preproc = list(
-      sleep_raw = sleep_raw_10_sec_rec,
-      sleep_5_min_median = sleep_median5_10_sec_rec,
-      sleep_10_min_median = sleep_median10_10_sec_rec
-    ),
-    models = list(
-      decision_tree = CART_spec,
-      # MARS = mars_spec, # works in parallel
-      # random_forest = rf_spec, # works in parallel
-      xgboost = xgb_spec # works in parallel
-    ),
-    cross = TRUE
-  ) %>%
-  option_add(param_info = rpart_param, id = c(
-    "sleep_raw_decision_tree",
-    "sleep_5_min_median_decision_tree",
-    "sleep_10_min_median_decision_tree"
-  )) %>%
-  option_add(param_info = xgb_param, id = c(
-    "sleep_raw_xgboost",
-    "sleep_5_min_median_xgboost",
-    "sleep_10_min_median_xgboost"
-  ))
-
-
-### all 10 sec epoch workdflows ###
-all_wfs_10 <- list(
-  decision_tree_wfs_10 =
-    bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "decision")),
-  log_reg_wfs_10 =
-    bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "logistic")),
-  nnet_wfs_10 =
-    bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "neural")),
-  xgb_wfs_10 =
-    bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
-      filter(str_detect(wflow_id, "xgboost"))
-)
+# sleep_norm_wfs_10 <-
+#   workflow_set(
+#     preproc = list(
+#       sleep_raw = sleep_raw_10_sec_norm_rec,
+#       sleep_5_min_median = sleep_median5_10_sec_norm_rec,
+#       sleep_10_min_median = sleep_median10_10_sec_norm_rec
+#     ),
+#     models = list(
+#       logistic_regression = glmnet_spec, # works in parallel
+#       neural_network = nnet_spec # works in parallel
+#     ),
+#     cross = TRUE
+#   ) %>%
+#   option_add(param_info = nnet_param, id = c(
+#     "sleep_raw_neural_network",
+#     "sleep_5_min_median_neural_network",
+#     "sleep_10_min_median_neural_network"
+#   ))
+#
+# sleep_no_norms_wfs_10 <-
+#   workflow_set(
+#     preproc = list(
+#       sleep_raw = sleep_raw_10_sec_rec,
+#       sleep_5_min_median = sleep_median5_10_sec_rec,
+#       sleep_10_min_median = sleep_median10_10_sec_rec
+#     ),
+#     models = list(
+#       decision_tree = CART_spec,
+#       # MARS = mars_spec, # works in parallel
+#       # random_forest = rf_spec, # works in parallel
+#       xgboost = xgb_spec # works in parallel
+#     ),
+#     cross = TRUE
+#   ) %>%
+#   option_add(param_info = rpart_param, id = c(
+#     "sleep_raw_decision_tree",
+#     "sleep_5_min_median_decision_tree",
+#     "sleep_10_min_median_decision_tree"
+#   )) %>%
+#   option_add(param_info = xgb_param, id = c(
+#     "sleep_raw_xgboost",
+#     "sleep_5_min_median_xgboost",
+#     "sleep_10_min_median_xgboost"
+#   ))
+#
+#
+# ### all 10 sec epoch workdflows ###
+# all_wfs_10 <- list(
+#   decision_tree_wfs_10 =
+#     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
+#       filter(str_detect(wflow_id, "decision")),
+#   log_reg_wfs_10 =
+#     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
+#       filter(str_detect(wflow_id, "logistic")),
+#   nnet_wfs_10 =
+#     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
+#       filter(str_detect(wflow_id, "neural")),
+#   xgb_wfs_10 =
+#     bind_rows(sleep_norm_wfs_10, sleep_no_norms_wfs_10) %>%
+#       filter(str_detect(wflow_id, "xgboost"))
+# )
 
 ### 30 sec epochs ###
 sleep_norm_wfs_30 <-
@@ -301,11 +301,11 @@ tune_wf_and_write <- function(wfs, fname, folds) {
 }
 
 
-fnames_10 <-
-  str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_10), ".rds")
+# fnames_10 <-
+#   str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_10), ".rds")
 fnames_30 <-
   str_c("/media/esbenlykke/My Passport/chained_models/grid_results/sleep/", names(all_wfs_30), ".rds")
 
 
-walk2(all_wfs_10, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
+# walk2(all_wfs_10, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
 walk2(all_wfs_30, fnames_30, ~ tune_wf_and_write(.x, .y, folds_30))
