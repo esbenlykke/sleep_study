@@ -8,13 +8,22 @@ library(gt)
 library(showtext)
 
 # Define a set of metrics to be used for evaluation
-my_metrics <- metric_set(f_meas, accuracy, sensitivity, precision, specificity)
+my_metrics <- metric_set(precision, npv, sensitivity, specificity)
 
 # Function to compute the specified performance metrics using the provided model and test data
-get_metrics <- function(fit, test_data, truth, estimate, estimator = "binary") {
-  fit %>%
-    augment(test_data) %>%
-    my_metrics(truth = {{ truth }}, estimate = {{ estimate }}, event_level = "second", estimator = estimator)
+get_metrics <- function(fit, test_data, truth, estimate) {
+  preds <- fit %>%
+    augment(test_data)
+  
+  f1_score <- preds %>%
+    f_meas(truth = {{ truth }}, estimate = {{ estimate }}, 
+           event_level = "second", estimator = "macro")
+  
+  other_metrics <- preds %>%
+    my_metrics(truth = {{ truth }}, estimate = {{ estimate }},
+               event_level = "second")
+  
+  bind_rows(f1_score, other_metrics)
 }
 
 # Define file paths for the model

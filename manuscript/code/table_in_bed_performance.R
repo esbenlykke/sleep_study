@@ -20,13 +20,10 @@ tbl_in_bed <-
     ),
     model = case_when(model == "decision_tree" ~ "Decision Tree",
                       model == "log_reg" ~ "Logistic Regression",
-                      model == "mlp" ~ "Feed-Forward Neural Network",
+                      model == "mlp" ~ "Feed-Forward Neural Net",
                       model == "xgboost" ~ "XGBoost")
   ) %>%
   select(-.estimator) %>%
   pivot_wider(names_from = .metric, values_from = .estimate) %>%
   gt() %>%
-  fmt_percent(
-    columns = 2:6,
-    decimals = 1
-  ) 
+  fmt_number(decimals = 2)

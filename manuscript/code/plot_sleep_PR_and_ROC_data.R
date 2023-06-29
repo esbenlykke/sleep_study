@@ -20,15 +20,13 @@ sleep_pr_auc <-
 pr_auc_labels <-
   sleep_pr_auc %>% 
   select(-.metric, -.estimator) %>% 
-    mutate(recall = .2, precision = rep(c(.25, .23, .21, .19), 3),
+    mutate(recall = .2, precision = rep(.5 + c(.25, .23, .21, .19), 3),
            label = paste(model, round(.estimate, digits = 2))) %>% 
   mutate(
     group = case_when(group == "raw" ~ "Raw ZM Predictions",
                       group == "median_5" ~ "5-Min Median",
                       group == "median_10" ~ "10-Min Median")
   ) 
-
-levels(sleep_pr_data$group)
 
 sleep_pr_data %>%
   mutate(
@@ -73,7 +71,7 @@ sleep_roc_auc <-
 roc_auc_labels <-
   sleep_pr_auc %>% 
   select(-.metric, -.estimator) %>% 
-  mutate(specificity = .75, sensitivity = rep(c(.25, .23, .21, .19), 3),
+  mutate(specificity = .6, sensitivity = rep(c(.25, .21, .17, .13), 3),
          label = paste(model, round(.estimate, digits = 2))) %>% 
   mutate(
     group = case_when(group == "raw" ~ "Raw ZM Predictions",

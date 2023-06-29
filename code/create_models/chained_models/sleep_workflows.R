@@ -171,7 +171,8 @@ cat("Creating workflow sets...\n")
 #       decision_tree = CART_spec,
 #       # MARS = mars_spec, # works in parallel
 #       # random_forest = rf_spec, # works in parallel
-#       xgboost = xgb_spec # works in parallel
+#       xgboost = xgtest_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_testing_data.parquet")
+b_spec # works in parallel
 #     ),
 #     cross = TRUE
 #   ) %>%
@@ -281,7 +282,8 @@ grid_ctrl <-
     allow_par = TRUE,
     parallel_over = "everything",
     save_pred = FALSE,
-    save_workflow = FALSE
+    save_workflow = FALSE,
+    
   )
 
 tune_wf_and_write <- function(wfs, fname, folds) {

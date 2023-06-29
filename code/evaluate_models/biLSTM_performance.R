@@ -31,7 +31,8 @@ metrics_weighted <- test_preds %>%
   my_metrics(truth = score_simple_filtered, estimate = predicted_class, estimator = "macro_weighted")
 
 metrics_unweighted <- test_preds %>%
-  my_metrics(truth = score_simple_filtered, estimate = predicted_class, estimator = "macro")
+  my_metrics(truth = score_simple_filtered, estimate = predicted_class, 
+             estimator = "macro", event_level = "first")
 
 
 test_preds %>% count(id)

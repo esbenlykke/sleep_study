@@ -20,16 +20,16 @@ tbl_sleep_performance <-
   mutate(
     .estimate = .estimate * 100,
     .metric = factor(.metric,
-      levels = c("f_meas", "accuracy", "sensitivity", "precision", "specificity"),
-      labels = c("F1 Score", "Accuracy", "Sensitivity", "Precision", "Specificity")
+      levels = c("f_meas", "precision", "npv", "sensitivity", "specificity"),
+      labels = c("F1 Score", "Precision", "NPV", "Sensitivity", "Specificity")
     )
-  ) |>
+  ) %>% 
   pivot_wider(names_from = .metric, values_from = .estimate) %>%
   rename_with(.cols = "F1 Score":"Specificity", ~ paste(.x, "(%)")) %>% 
   gt(groupname_col = "group") |>
   fmt_number(everything(), decimals = 2) %>% 
   tab_options(table.font.names = "ibm") |>
-  cols_width(everything() ~ px(120)) |>
+  cols_width(everything() ~ px(140)) |>
   cols_align(align = "center") %>%
   cols_label(model = "") %>%
   tab_options(
