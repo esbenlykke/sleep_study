@@ -22,7 +22,7 @@ count_awakenings_min_duration <- function(x, min_length = 1) {
   # Create a sequence of positions where each 'awake' period ends
   awakening_ends <- cumsum(rle_x$lengths)
   
-  # Record the lengths of each 'awake' period
+  # Store the lengths of each 'awake' period
   awakening_lengths <- rle_x$lengths
   
   # Find positions where the 'awake' periods have lengths greater or equal to 
@@ -39,7 +39,7 @@ count_awakenings_min_duration <- function(x, min_length = 1) {
   valid_awakening_ends <- awakening_ends[valid_awakening_start_positions]
   
   # Initiate the count of valid awakenings
-  number_of_valid_awakenings <- sum(sapply(1:length(valid_awakening_starts), function(i) {
+  number_of_valid_awakenings <- sum(map_int(1:length(valid_awakening_starts), \(i) {
     start_pos <- valid_awakening_starts[i]
     end_pos <- valid_awakening_ends[i]
     
@@ -60,11 +60,6 @@ count_awakenings_min_duration <- function(x, min_length = 1) {
   # Return the total count of valid awakenings
   return(number_of_valid_awakenings)
 }
-
-
-
-
-
 
 acc_ids <-
   read_parquet("data/data_for_modelling/no_edge_sp_incl_features_30_sec_epochs.parquet") %>%

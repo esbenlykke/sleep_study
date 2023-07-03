@@ -29,12 +29,13 @@ mean_crossing_rate <- function(signal) {
 # Process the data for 10-second epochs
 data_10 <-
   data %>% 
-  # filter(id == 3404) %>% 
+  # filter(id == 3404) %>%
   # Create new features for sleep, sleep_median5, sleep_median10
   mutate(
     score = if_else(is.na(score), 1, score), # 1 = out-bed awake, otherwise see ZM guide doc
     score_simple = if_else(score %in% c(2, 3, 5, -5), 2, score), # 0 = in-bed awake, 1 = out-bed awake, 2 = in-bed asleep
-    score_simple_filtered = slide_dbl(score_simple, median, .before = 15, .after = 15), # these are 5 minute windows
+    score_simple_median_5 = slide_dbl(score_simple, median, .before = 15, .after = 15), # these are 5 minute windows
+    score_simple_median_10 = slide_dbl(score_simple, median, .before = 30, .after = 30),
     in_bed = if_else(score %in% c(0L, 2L, 3L, 5L, -5L), 1L, 0L),
     in_bed_median5 = slide_dbl(in_bed, median, .before = 15, .after = 15),
     sleep = if_else(score %in% c(2L, 3L, 5L), 1L, 0L),

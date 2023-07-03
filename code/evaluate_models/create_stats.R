@@ -2,7 +2,6 @@
 library(tidyverse)
 library(slider)
 library(arrow)
-library(stringr)
 
 # Function to count zeros in runs of at least three consecutive zeros (WASO)
 count_each_zero_in_consecutive_zeros <- function(x, n = 3) {
@@ -131,10 +130,38 @@ calculated_zm_stats <-
     waso_3_min_median_10 = (count_each_zero_in_consecutive_zeros(sleep_median_10) * 30 / 60) - lps_min_median_10,
     .groups = "drop"
   ) %>%
-  rename_with(.cols = -c(id, noon_day, month), ~ paste0("zm_", .))
+  rename_with(.cols = -c(id, noon_day, month), ~ paste0("zm_", .)) %>%  
+  pivot_longer(-c(id, noon_day, month)) %>% 
+  mutate(name = case_when(str_detect(name, "(?=.*spt)(?=.*raw)") ~ "spt_raw",
+                          str_detect(name, "(?=.*tst)(?=.*raw)") ~ "tst_raw",
+                          str_detect(name, "(?=.*se)(?=.*raw)") ~ "se_raw",
+                          str_detect(name, "(?=.*lps)(?=.*raw)") ~ "lps_raw",
+                          str_detect(name, "(?=.*waso)(?=.*raw)") ~ "waso_raw",
+                          str_detect(name, "(?=.*spt)(?=.*median_5)") ~ "spt_median5",
+                          str_detect(name, "(?=.*tst)(?=.*median_5)") ~ "tst_median5",
+                          str_detect(name, "(?=.*se)(?=.*median_5)") ~ "se_median5",
+                          str_detect(name, "(?=.*lps)(?=.*median_5)") ~ "lps_median5",
+                          str_detect(name, "(?=.*waso)(?=.*median_5)") ~ "waso_median5",
+                          str_detect(name, "(?=.*spt)(?=.*median_10)") ~ "spt_median10",
+                          str_detect(name, "(?=.*tst)(?=.*median_10)") ~ "tst_median10",
+                          str_detect(name, "(?=.*se)(?=.*median_10)") ~ "se_median10",
+                          str_detect(name, "(?=.*lps)(?=.*median_10)") ~ "lps_median10",
+                          str_detect(name, "(?=.*waso)(?=.*median_10)") ~ "waso_median10")) %>%  
+  separate(name, c("metric", "type"), sep = "_") %>% 
+  pivot_wider(names_from = metric, values_from = value) %>%
+  rename_with(.cols = spt:waso, ~ paste0("zm_", .)) %>% 
+  arrange(desc(type)) %>% 
+  drop_na()
+  
 
-all_sleep_stats_incl_zm <- all_sleep_stats %>%
-  map(~ inner_join(.x, calculated_zm_stats, by = c("id", "noon_day", "month")) %>%
+all_sleep_stats_incl_zm <-
+  all_sleep_stats %>% 
+    map(~ .x %>% mutate(
+      sleep_type = case_when(sleep_type == "median_5" ~ "median5",
+                             sleep_type == "median_10" ~ "median10",
+                             TRUE ~ sleep_type)
+    ) %>% 
+    left_join(calculated_zm_stats, by = c("id", "noon_day", "month", "sleep_type" = "type")) %>%
     drop_na())
 
 walk2(

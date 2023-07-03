@@ -47,12 +47,12 @@ path_models <- "/media/esbenlykke/My Passport/chained_models/fitted_workflows/sl
 
 # Get the filenames for in-bed data and model files
 in_bed_data_30_sec_filenames <- get_filenames(path_data, "30_sec")
-in_bed_data_10_sec_filenames <- get_filenames(path_data, "10_sec")
+# in_bed_data_10_sec_filenames <- get_filenames(path_data, "10_sec")
 model_30_sec_filenames <- get_filenames(path_models, "30_sec")
-model_10_sec_filenames <- get_filenames(path_models, "10_sec")
+# model_10_sec_filenames <- get_filenames(path_models, "10_sec")
 
 preds_30_sec <- get_preds(in_bed_data_30_sec_filenames, model_30_sec_filenames)
-preds_10_sec <- get_preds(in_bed_data_10_sec_filenames, model_10_sec_filenames)
+# preds_10_sec <- get_preds(in_bed_data_10_sec_filenames, model_10_sec_filenames)
 
 # Combine the predictions into a tibble for each model
 extract_pred_class_by_model <- function(preds_list) {

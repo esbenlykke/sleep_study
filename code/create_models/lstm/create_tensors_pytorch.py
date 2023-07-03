@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 
 # Define the helper function
-def prepare_data(data_path, sequence_length, step_size):
+def prepare_data(data_path, sequence_length, step_size, target_var):
     # Load the data using pandas
     data = pd.read_parquet(data_path)
     data = data[['age', 'weekday', 'incl', 'theta', 'x_mean', 'y_mean', 'z_mean',
@@ -25,16 +25,16 @@ def prepare_data(data_path, sequence_length, step_size):
               'vector_magnitude',
               'x_crossing_rate', 'y_crossing_rate', 'z_crossing_rate',
               'x_skewness', 'y_skewness', 'z_skewness',
-              'x_kurtosis', 'y_kurtosis', 'z_kurtosis', 'score_simple_filtered']]
+              'x_kurtosis', 'y_kurtosis', 'z_kurtosis', target_var]]
 
-    # Separate out 'score_simple_filtered'
-    score_simple_filtered = data.pop('score_simple_filtered')
+    # Separate out the target variable
+    target = data.pop(target_var)
 
     # Normalize the data
     data = (data - data.mean()) / data.std()
 
-    # Add 'score_simple_filtered' back to the dataframe
-    data['score_simple_filtered'] = score_simple_filtered
+    # Add the target variable back to the dataframe
+    data[target_var] = target
 
     # Convert to PyTorch tensors
     data_tensor = torch.tensor(data.values, dtype=torch.float32)
@@ -50,27 +50,30 @@ def prepare_data(data_path, sequence_length, step_size):
     sequences_tensor = torch.stack(sequences)
     labels_tensor = torch.stack(labels)
 
-    return sequences_tensor, labels_tensor
+    # Generate file names
+    base_name = data_path.split("/")[-1].replace(".parquet", "")
+    sequences_file = f"data/data_for_modelling/lstm/pytorch_{base_name}_sequences_{target_var}.pt"
+    labels_file = f"data/data_for_modelling/lstm/pytorch_{base_name}_labels_{target_var}.pt"
 
+    # Save tensors to files
+    torch.save(sequences_tensor, sequences_file)
+    torch.save(labels_tensor, labels_file)
 
+    return sequences_file, labels_file
 
 # Sequence length and step size
 sequence_length = 20  # Corresponding to 10 minutes in 30 sec epoch data
 step_size = 1  # Corresponding to 30 sec. Thus will give one prediction per data point when making predictions.
 
-# Prepare the train and test data
-train_sequences, train_labels = prepare_data("data/data_for_modelling/lstm/30_sec_training.parquet", sequence_length, step_size)
-valid_sequences, valid_labels = prepare_data("data/data_for_modelling/lstm/30_sec_validation.parquet", sequence_length, step_size)
-test_sequences, test_labels = prepare_data("data/data_for_modelling/lstm/30_sec_testing.parquet", sequence_length, step_size)
+# Prepare the train and test data for each target variable
+prepare_data("data/data_for_modelling/lstm/30_sec_training.parquet", sequence_length, step_size, 'score_simple')
+prepare_data("data/data_for_modelling/lstm/30_sec_validation.parquet", sequence_length, step_size, 'score_simple')
+prepare_data("data/data_for_modelling/lstm/30_sec_testing.parquet", sequence_length, step_size, 'score_simple')
 
-print("train sequences have shape: {}".format(train_sequences.shape))
-print("valid sequences have shape: {}".format(valid_sequences.shape))
-print("test sequences have shape: {}".format(test_sequences.shape))
+prepare_data("data/data_for_modelling/lstm/30_sec_training.parquet", sequence_length, step_size, 'score_simple_median_5')
+prepare_data("data/data_for_modelling/lstm/30_sec_validation.parquet", sequence_length, step_size, 'score_simple_median_5')
+prepare_data("data/data_for_modelling/lstm/30_sec_testing.parquet", sequence_length, step_size, 'score_simple_median_5')
 
-# Save the validation and test tensors
-torch.save(train_sequences, "data/data_for_modelling/lstm/pytorch_train_sequences.pt")
-torch.save(train_labels, "data/data_for_modelling/lstm/pytorch_train_labels.pt")
-torch.save(valid_sequences, "data/data_for_modelling/lstm/pytorch_valid_sequences.pt")
-torch.save(valid_labels, "data/data_for_modelling/lstm/pytorch_valid_labels.pt")
-torch.save(test_sequences, "data/data_for_modelling/lstm/pytorch_test_sequences.pt")
-torch.save(test_labels, "data/data_for_modelling/lstm/pytorch_test_labels.pt")
+prepare_data("data/data_for_modelling/lstm/30_sec_training.parquet", sequence_length, step_size, 'score_simple_median_10')
+prepare_data("data/data_for_modelling/lstm/30_sec_validation.parquet", sequence_length, step_size, 'score_simple_median_10')
+prepare_data("data/data_for_modelling/lstm/30_sec_testing.parquet", sequence_length, step_size, 'score_simple_median_10')

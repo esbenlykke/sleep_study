@@ -7,9 +7,8 @@ library(torch)
 
 # Step 1: Read the data from parquet files and combine them into a single data frame
 data <- 
-  read_parquet("data/data_for_modelling/chained_classifiers/30_sec_testing_data.parquet") %>% 
-  bind_rows(read_parquet("data/data_for_modelling/chained_classifiers/30_sec_training_data.parquet")) %>% 
-  arrange(-id)
+  read_parquet("data/data_for_modelling/no_edge_sp_incl_features_30_sec_epochs.parquet") %>% 
+  arrange(id)
 
 # Step 2: Set the seed for reproducibility
 set.seed(123)

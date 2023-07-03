@@ -290,6 +290,8 @@ patterns yet feasible to train timely. Additionally, the bidirectional
 nature of the LSTM, doubling the hidden units at each time step,
 improved data comprehension and avoided overfitting.
 
+something on sequence length and step size
+
 The biLSTM model was chosen for sleep classification using accelerometer
 data from a thigh-mounted device due to its advantages in modeling
 temporal context, handling a large temporal scope, and enabling temporal
@@ -393,7 +395,8 @@ summaries. The sleep quality summaries included several metrics:
 5.  Wake After Sleep Onset (WASO) - This refers to the time spent awake
     after initially falling asleep and before the final awakening. In
     our analysis, a period is counted as 'awake' only if it consists of
-    3 or more contiguous 30-second epochs.
+    3 or more contiguous 30-second epochs which is also how the ZM
+    summarizes WASO.
 
 R version 4.3.0 (2023-04-21)[@R-lang] and the Tidymodels[@tidymodels]
 and Tidyverse[@tidyverse] suite of packages were used as the core tools
@@ -408,13 +411,9 @@ repository](https://github.com/esbenlykke/sleep_study).
 ![Flowchart of eligible nights included in the study - revise text
 boxes!](visuals/flowchart_of_elligible_nights.pdf)
 
-The children children included in the analyses were 9.4 years old (SD =
-2.1). The number of sleep epochs recorded in the study was 2,035,261,
-which accounted for approximately 86% of the total sleep duration. This
-metric indicates the granularity of sleep measurement, capturing the
-discrete moments of sleep throughout the sleep period. Sleep epochs are
-essential for analyzing sleep patterns and stages, as well as for
-assessing sleep quality and efficiency.
+The analysis included children with an average age of 9.4 years (SD =
+2.1). The raw ZM predictions covered 2,035,261 sleep epochs, or about
+86% of the total recording duration.
 
 As reported in @tbl-zm_overview the sleep quality metrics derived from
 ZM predictions were modified by the implementation of 5-minute and
@@ -431,14 +430,18 @@ out brief awakenings at sleep onset, leading to a prolonged time to
 persistent sleep. The most significant change was seen in Wake After
 Sleep Onset (WASO), which dropped from 39.0 ± 33.6 minutes in raw data
 to 30.6 ± 46.8 minutes and 22.3 ± 55.4 minutes in the 5-minute and
-10-minute filtered data, respectively. The results underscore the role
-of median filters on sleep metrics.
+10-minute filtered data, respectively. The number of awakenings was also
+considerably reduced with the application of filters. In the raw data,
+the average number of awakenings was 34.46 ± 11.33 per night, which
+reduced to 4.43 ± 3.26 and 1.95 ± 2.01 for the 5-minute and 10-minute
+filtered data sets respectively. These results underscore the role of
+median filters on sleep metrics.
 
 ```{r}
 #| echo: false
 #| message: false
 #| label: tbl-zm_overview
-#| tbl-cap: Overview of characteristics of the ZM sleep quality summaries. Values are represented as mean (SD).
+#| tbl-cap: Overview of characteristics of the ZM sleep quality summaries per night. Values are represented as mean (SD).
 
 source("code/table_overview_ZM_stats.R")
 
@@ -528,7 +531,36 @@ values displayed are displayed as color-coded text in the plot to
 indicate the area under the receiver operating characteristic curve for
 each model and condition.](visuals/plot_sleep_roc.pdf){#fig-roc_curves}
 
-The performance metrics of the biLSTM were...
+@tbl-biLSTM_performance presents the performance of the three-class
+biLSTM multiclassifier on raw and median-filtered (5-minute and
+10-minute) ZM predictions. Raw ZM predictions achieve F1 Scores ranging
+from 71.36% to 76.04%, indicating overall good performance. Applying
+5-minute median filtering improves the metrics further, resulting in F1
+Scores ranging from 75.99% to 78.53%, demonstrating enhanced precision
+and sensitivity. However, Specificity values are not available for this
+configuration. With 10-minute median filtering, F1 Scores range from
+73.45% to 73.93%, maintaining good performance but with limited
+information on Specificity. Further analysis is required to assess
+performance across all classes.
+
+```{r}
+#| echo: false
+#| message: false
+#| tbl-colwidths: auto
+#| label: tbl-biLSTM_performance
+#| tbl-cap: Performance of the three-class biLSTM multicclassifier.
+source("code/table_biLSTM_performance.R")
+
+tbl_biLSTM_performance
+```
+
+## Evaluation of Sleep Quality Summaries
+
+BA plots
+
+pearson regression
+
+scatterplots with identity line and best linear fit
 
 \newpage
 
