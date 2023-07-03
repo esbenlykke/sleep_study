@@ -371,10 +371,20 @@ awake as the negative labels in accordance with previous
 research[@hjorth2012; @kushida2001].
 
 To evaluate our developed models' performance in assessing sleep quality
-metrics, we employed Bland-Altman plots and Pearson correlations. These
-methods were used to compare the sleep quality summaries calculated by
-our models with those obtained from EEG-based ZM sleep quality
-summaries. The sleep quality summaries included several metrics:
+metrics, we employed Bland-Altman plots and Pearson correlations.
+Additionally, we used the Bland-Altman method to assess the agreement
+between two measurement techniques. Given the multiple observations per
+subject in our dataset, we incorporated a bootstrap procedure to account
+for this additional source of variability. We computed the mean
+difference (bias) and the limits of agreement as the mean difference
+±1.96 times the standard deviation of the differences. The 95%
+confidence intervals for the bias and the limits of agreement were
+estimated using the bias-corrected and accelerated bootstrap method with
+10,000 bootstrap replicates, to ensure our measurements are robust and
+account for intra-subject variability. These methods were used to
+compare the sleep quality summaries calculated by our models with those
+obtained from EEG-based ZM sleep quality summaries. The sleep quality
+summaries included the following metrics:
 
 1.  Sleep Period Time (SPT) - This refers to the total duration of the
     sleep period, which is defined as the time from the start to the end
@@ -397,6 +407,11 @@ summaries. The sleep quality summaries included several metrics:
     our analysis, a period is counted as 'awake' only if it consists of
     3 or more contiguous 30-second epochs which is also how the ZM
     summarizes WASO.
+
+Our models were trained to predict sleep quality metrics using the full
+span of accelerometer recordings, beyond the ZM recording duration. This
+approach, applied to all models and ZM prediction types, allows for
+comprehensive sleep pattern analysis on longitudinal accelerometer data.
 
 R version 4.3.0 (2023-04-21)[@R-lang] and the Tidymodels[@tidymodels]
 and Tidyverse[@tidyverse] suite of packages were used as the core tools
@@ -561,6 +576,59 @@ BA plots
 pearson regression
 
 scatterplots with identity line and best linear fit
+
+# Discussion
+
+The present study embarked on an in-depth exploration of the utility and
+comparative performance of different machine learning models in the
+analysis of pediatric sleep data. The results offer promising insights
+into the role of machine learning in enhancing the precision of sleep
+quality metrics.
+
+A significant finding was the impact of median filters on the sleep
+metrics. Implementing 5-minute and 10-minute median filters led to
+notable changes in key sleep parameters. In particular, the Total Sleep
+Time (TST), Sleep Efficiency (SE), and Latency to Persistent Sleep (LPS)
+increased, suggesting that the filters may categorize some instances of
+wakefulness as sleep and smooth out brief awakenings. This underscores
+the potential of median filters in refining sleep data and mitigating
+the potential misclassification of sleep states.
+
+Interestingly, the most marked change was observed in Wake After Sleep
+Onset (WASO), with a substantial reduction in the filtered data. This
+reduction, coupled with the decrease in the number of awakenings,
+implies a significant role of median filters in sleep-wake cycle
+characterization, potentially enhancing the reliability of sleep
+assessment.
+
+The machine learning models demonstrated high overall performance on an
+epoch-to-epoch basis, with the XGBoost model marginally outperforming
+the others. However, the models had more varied performance in
+classifying sleep conditions, as evidenced by the sleep performance
+metrics. The relatively lower Specificity values across all models
+suggest a common challenge in correctly classifying negative instances.
+
+In the precision-recall and ROC curve analyses, the Decision Tree model
+showed superior precision-recall AUC, indicating strong predictive
+accuracy. In contrast, the XGBoost model consistently demonstrated a
+high ROC AUC, indicating a robust ability to differentiate between
+classes. However, it's worth noting that the Neural Network model
+generally showed weaker performance in these areas.
+
+The three-class biLSTM multiclassifier showed overall good performance,
+further supporting the potential of machine learning in sleep study.
+However, the absence of Specificity values limits a complete assessment
+of its performance, calling for further exploration in future studies.
+
+In conclusion, this study provides compelling evidence of the utility of
+machine learning models and median filters in enhancing the precision
+and reliability of pediatric sleep assessment. However, more research is
+needed to overcome the challenge of correctly classifying negative
+instances and to fully understand the performance of these models across
+all classes and conditions. The findings underscore the potential of
+machine learning in advancing sleep medicine, paving the way for more
+accurate, reliable, and personalized sleep assessment in pediatric
+populations.
 
 \newpage
 

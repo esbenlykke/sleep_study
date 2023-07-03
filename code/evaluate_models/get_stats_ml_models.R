@@ -155,14 +155,15 @@ calculated_zm_stats <-
   
 
 all_sleep_stats_incl_zm <-
-  all_sleep_stats %>% 
+  all_sleep_stats %>%
     map(~ .x %>% mutate(
       sleep_type = case_when(sleep_type == "median_5" ~ "median5",
                              sleep_type == "median_10" ~ "median10",
                              TRUE ~ sleep_type)
     ) %>% 
     left_join(calculated_zm_stats, by = c("id", "noon_day", "month", "sleep_type" = "type")) %>%
-    drop_na())
+    drop_na()) %>%
+  map(~ .x %>% filter(!id %in% c(255704, 649105)))
 
 walk2(
   all_sleep_stats_incl_zm, model_names,

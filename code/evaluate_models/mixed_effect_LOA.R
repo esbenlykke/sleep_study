@@ -2,50 +2,65 @@
 
 library(tidyverse)
 library(arrow)
-library(SimplyAgree)
-library(furrr)
+library(boot)
+
+stats <-
+  list.files("data/data_for_modelling/chained_classifiers/sleep_stats", full.names = TRUE) %>% 
+  read_csv(id = "model") %>% 
+  mutate(
+    model = str_extract(model, "(?<=sleep_stats\\/).*(?=_stats.csv)")
+  ) %>% 
+  mutate(
+    diff_spt = spt_hrs - zm_spt,
+    diff_tst = tst_hrs - zm_tst,
+    diff_se = se_percent - zm_se,
+    diff_lps = lps_min - zm_lps,
+    diff_waso = waso_min - zm_waso
+  )
+
+stats %>% 
+  group_by(model) %>% 
+  summarise(
+    bias_spt = mean(diff_spt) * 60,
+    upper_spt = bias_spt + (1.96 * sd(diff_spt)),
+    lower_spt = bias_spt - (1.96 * sd(diff_spt)),
+    bias_tst = mean(diff_tst) * 60,
+    upper_tst = bias_tst + (1.96 * sd(diff_tst)),
+    lower_tst = bias_tst - (1.96 * sd(diff_tst)),
+    bias_se = mean(diff_se),
+    upper_se = bias_se + (1.96 * sd(diff_se)),
+    lower_se = bias_se - (1.96 * sd(diff_se)),
+    bias_lps = mean(diff_lps),
+    upper_lps = bias_lps + (1.96 * sd(diff_lps)),
+    lower_lps = bias_lps - (1.96 * sd(diff_lps)),
+    bias_waso = mean(diff_waso),
+    upper_waso = bias_waso + (1.96 * sd(diff_waso)),
+    lower_waso = bias_waso - (1.96 * sd(diff_waso)),
+  )
 
 
-crude_stats <-
-  read_parquet("data/processed/crude_stats.parquet")
+# Define a function to calculate the mean difference and LoA
+get_ba <- function(d, i) {
+  d <- d[i]  # resample with replacement
+  mean_diff <- mean(d)
+  sd_diff <- sd(d)
+  loa_upper <- mean_diff + 1.96 * sd_diff
+  loa_lower <- mean_diff - 1.96 * sd_diff
+  return(c(mean_diff, loa_upper, loa_lower))
+}
 
-multi_stats <- 
-  read_parquet("data/processed/multiclass_stats.parquet")
+# Run the bootstrap
+results <- boot(stats$diff_spt, get_ba, R=10000)
 
+# Extract the bias and LoA
+bias <- results$t0[1]
+loa_upper <- results$t0[2]
+loa_lower <- results$t0[3]
 
-get_diff_stats <-
-  function(tbl) {
-    tbl |>
-      mutate(
-        diff_spt_hrs = spt_hrs - zm_spt_hrs,
-        diff_tst_hrs = tst_hrs - zm_tst_hrs,
-        diff_se_percent = se_percent - zm_se_percent,
-        diff_lps_min = lps_min - zm_lps_min,
-        diff_waso_min = waso_min - zm_waso_min
-      ) |>
-      rowwise() |>
-      mutate(
-        avg_spt_hrs = mean(c(spt_hrs, zm_spt_hrs)),
-        avg_tst_hrs = mean(c(tst_hrs, zm_tst_hrs)),
-        avg_se_percent = mean(c(se_percent, zm_se_percent)),
-        avg_lps_min = mean(c(lps_min, zm_lps_min)),
-        avg_waso_min = mean(c(waso_min, zm_waso_min))
-      ) |>
-      ungroup()
-  }
-
-
-crude_all_diffs <-
-  get_diff_stats(crude_stats) %>%
-  group_split(model) %>%
-  set_names(c("decision_tree", "logistic_regression", "neural_network", "xgboost")) %>%
-  map(drop_na) 
-
-multi_all_diffs <- 
-  get_diff_stats(multi_stats) %>%
-  group_split(model) %>%
-  set_names(c("decision_tree", "decision_tree_SMOTE", "logistic_regression", "neural_network", "xgboost")) %>%
-  map(drop_na) 
+# Calculate the 95% confidence intervals
+bias_ci <- boot.ci(results, type="bca", index=1)$bca
+loa_upper_ci <- boot.ci(results, type="bca", index=2)$bca
+loa_lower_ci <- boot.ci(results, type="bca", index=3)$bca
 
 
 # This method is nonparametric and accounts for repeated measures. Double check with Jan!
@@ -55,7 +70,7 @@ multi_all_diffs <-
 # when there are multiple observations per subject
 
 
-get_agree <- function(df, diff, delta, x_axis) {
+get_agree <- function(df, diff, delta) {
   df %>%
     loa_mixed(
       diff = diff,
@@ -64,7 +79,7 @@ get_agree <- function(df, diff, delta, x_axis) {
       data = .,
       delta = delta,
       replicates = 1000
-    ) |>
+    ) %>% 
     pluck("loa") %>%
     rownames_to_column(var = "ba_metric") |>
     mutate(
@@ -76,6 +91,8 @@ get_agree <- function(df, diff, delta, x_axis) {
     as_tibble()
 }
 
+stats %>% 
+  loa_mixed(condition = "noon_day", id = "id", data = ., diff = "diff_spt", delta = 2)
 
 # Run in parallel
 
