@@ -1,0 +1,35 @@
+---
+title: "Supplmentary Material for DOI:"
+date: last-modified
+format:
+  pdf
+---
+
+```{r}
+#| echo: false
+#| message: false
+#| label: tbl-ba_cor
+#| tbl-cap: Summary of Bias, Limits of Agreement (LOA), and Pearson Correlation for various Sleep Parameter Predictions (SPT, TST, SE, LPS, WASO) using different Machine Learning Models (Decision Tree, Logistic Regression, Feed-Forward Neural Net, XGBoost) with Raw ZM Predictions, 5-Min and 10-Min Median as predictors. Each value is provided with its 95% Confidence Interval (CI).
+
+source(here::here("manuscript/code/table_ba_cor_statistics.R"))
+
+tbl_ba_cor
+```
+
+The analysis of precision-recall and ROC curves across different models
+and ZM prediction types shows varying performance. In terms of
+precision-recall AUC, the Decision Tree model consistently outperforms
+others, indicating its superior predictive accuracy (see
+@fig-pr_curves). Conversely, the Neural Network model generally shows
+weaker performance. However, for ROC AUC, the XGBoost model consistently
+excels across all data types, indicating a strong ability to
+differentiate between classes, while the Neural Network model tends to
+underperform (see @fig-roc_curves). The F-measure (F1 score) shows
+variable performance across different configurations but generally, the
+Decision Tree model yields higher scores. 
+
+![Precision-recall curves of the models evaluated across the different ZM predictions, including raw ZM predictions, as well as 5-minute and 10-minute median smoothing of the ZM raw predictions. The x-axis of the plot represents the proportion of true wake epochs that were correctly classified as wake, while the y-axis represents the proportion of all epochs labeled as wake by the classifier that were classified correctly. The area under the curve values are displayed as color-coded text in the plot indicate the area under the Precision-Recall curve for each model and condition.](../visuals/plot_sleep_pr.pdf){#fig-pr_curves}
+
+![Receiver operating characteristic curves of the models evaluated across the different ZM predictions, including raw ZM predictions, as well as 5-minute and 10-minute median smoothing of the ZM raw predictions. The x-axis of the plot represents the proportion of true asleep epochs that were incorrectly classified as awake, while the y-axis represents the proportion of all epochs labeled as awake by the classifier that were correctly classified. The area under the curve values displayed are displayed as color-coded text in the plot to indicate the area under the receiver operating characteristic curve for each model and condition.](../visuals/plot_sleep_roc.pdf){#fig-roc_curves}
+
+![all ba and scatterplots](../visuals/all_ba_scatterplots.pdf)

@@ -27,4 +27,4 @@ tbl_in_bed <-
   pivot_wider(names_from = .metric, values_from = .estimate) %>%
   gt() %>%
   cols_label(model = "") %>% 
-  fmt_number(decimals = 2)
+  fmt_number(decimals = 1) 

@@ -305,7 +305,7 @@ tune_wf_and_write <- function(wfs, fname, folds) {
       seed = 123,
       "tune_grid",
       resamples = folds,
-      grid = 5,
+      grid = 20,
       control = grid_ctrl,
       metrics = metric_set(f_meas),
       verbose = TRUE

@@ -44,7 +44,7 @@ plot_proxy_cos <- tibble(
     geom = "text",
     x = start_group1 - minutes(40),
     y = .5,
-    label = "10:00",
+    label = "19:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -53,7 +53,7 @@ plot_proxy_cos <- tibble(
     geom = "text",
     x = end_group1 + minutes(40),
     y = .5,
-    label = "19:00",
+    label = "10:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -62,7 +62,7 @@ plot_proxy_cos <- tibble(
     geom = "text",
     x = start_group2 - minutes(40),
     y = .5,
-    label = "10:00",
+    label = "19:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -71,7 +71,7 @@ plot_proxy_cos <- tibble(
     geom = "text",
     x = end_group2 + minutes(40),
     y = .5,
-    label = "19:00",
+    label = "10:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -116,7 +116,7 @@ plot_proxy_lin <-
     geom = "text",
     x = start_group1 - minutes(40),
     y = .5,
-    label = "10:00",
+    label = "19:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -125,7 +125,7 @@ plot_proxy_lin <-
     geom = "text",
     x = end_group1 + minutes(40),
     y = .5,
-    label = "19:00",
+    label = "10:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -134,7 +134,7 @@ plot_proxy_lin <-
     geom = "text",
     x = start_group2 - minutes(40),
     y = .5,
-    label = "10:00",
+    label = "19:00",
     color = "grey50",
     angle = 90,
     size = text_size
@@ -143,7 +143,7 @@ plot_proxy_lin <-
     geom = "text",
     x = end_group2 + minutes(40),
     y = .5,
-    label = "19:00",
+    label = "10:00",
     color = "grey50",
     angle = 90,
     size = text_size

@@ -34,7 +34,7 @@ flow <-
   ) +
   annotate("text",
            x = 30, y = 97,
-           label = "1174 night from children\nwith accelerometer recordings",
+           label = "1174 nights from children\nwith accelerometer recordings",
            size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
   ) +
   geom_rect(
@@ -42,7 +42,7 @@ flow <-
     fill = "grey80", linewidth = 0.25
   ) +
   annotate("text",
-           x = 30, y = 72, label = "1032 night with measured sleep",
+           x = 30, y = 72, label = "1032 nights with measured sleep",
            size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
   ) +
   geom_rect(
@@ -58,7 +58,7 @@ flow <-
     fill = "grey80", linewidth = 0.25
   ) +
   annotate("text",
-           x = 30, y = 22, label = "585 nights with no edge SP",
+           x = 30, y = 22, label = "585 nights were included in this study",
            size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
   ) +
   # vertical arrows
@@ -142,7 +142,7 @@ flow <-
   ) +
   annotate("text",
            x = 65, y = 59.5,
-           label = "Excluded 253 nights \n7 hrs to 14 hrs in duration",
+           label = "Excluded 253 nights not\n7 hrs to 14 hrs in duration",
            size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
   ) +
   geom_rect(
@@ -155,41 +155,41 @@ flow <-
            size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
   ) +
   # train and test boxes
-  geom_rect(
-    xmin = 10, xmax = 40, ymin = 0, ymax = 10, color = "#93A1A1",
-    fill = "grey80", linewidth = 0.25
-  ) +
-  annotate("text",
-           x = 25, y = 5, label = "437 nights, 111 subjects\nfor training",
-           size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
-  ) +
-  geom_rect(
-    xmin = 55, xmax = 85, ymin = 0, ymax = 10, color = "#93A1A1",
-    fill = "grey80", linewidth = 0.25
-  ) +
-  annotate("text",
-           x = 70, y = 5,
-           label = "148 nights, 40 subjects\nfor testing",
-           size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
-  ) +
+  # geom_rect(
+  #   xmin = 10, xmax = 40, ymin = 0, ymax = 10, color = "#93A1A1",
+  #   fill = "grey80", linewidth = 0.25
+  # ) +
+  # annotate("text",
+  #          x = 25, y = 5, label = "437 nights, 111 subjects\nfor training",
+  #          size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
+  # ) +
+  # geom_rect(
+  #   xmin = 55, xmax = 85, ymin = 0, ymax = 10, color = "#93A1A1",
+  #   fill = "grey80", linewidth = 0.25
+  # ) +
+  # annotate("text",
+  #          x = 70, y = 5,
+  #          label = "148 nights, 40 subjects\nfor testing",
+  #          size = annotate_text_size, color = "grey15", lineheight = annotate_lineheight
+  # ) +
   # final arrows
-  geom_segment(
-    x = 30, xend = 30, y = 17, yend = 10,
-    size = .15, lineend = "butt",
-    arrow = arrow(length = unit(1, "mm"), type = "closed"),
-    color = "#93A1A1"
-  ) +
-  geom_segment(
-    x = 50, xend = 65, y = 22, yend = 22,
-    size = .15, lineend = "butt",
-    color = "#93A1A1"
-  ) +
-  geom_segment(
-    x = 65, xend = 65, y = 22, yend = 10,
-    size = .15, lineend = "butt",
-    arrow = arrow(length = unit(1, "mm"), type = "closed"),
-    color = "#93A1A1"
-  ) +
+  # geom_segment(
+  #   x = 30, xend = 30, y = 17, yend = 10,
+  #   size = .15, lineend = "butt",
+  #   arrow = arrow(length = unit(1, "mm"), type = "closed"),
+  #   color = "#93A1A1"
+  # ) +
+  # geom_segment(
+  #   x = 50, xend = 65, y = 22, yend = 22,
+  #   size = .15, lineend = "butt",
+  #   color = "#93A1A1"
+  # ) +
+  # geom_segment(
+  #   x = 65, xend = 65, y = 22, yend = 10,
+  #   size = .15, lineend = "butt",
+  #   arrow = arrow(length = unit(1, "mm"), type = "closed"),
+  #   color = "#93A1A1"
+  # ) +
   theme_void() 
 
 ggsave("manuscript/visuals/flowchart_of_elligible_nights.pdf", height = 5, width = 4)

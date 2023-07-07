@@ -46,7 +46,7 @@ test_preds <-
 # write_parquet(test_preds, "data/data_for_modelling/lstm/predictions/lstm_multiclass_preds.parquet")
 
 
-my_metrics <- metric_set(f_meas, sensitivity, precision)
+my_metrics <- metric_set(f_meas, precision, npv, sensitivity, specificity)
 
 get_metrics <- function(data, truth, estimate) {
   data %>%

@@ -17,9 +17,9 @@ tbl_overview <-
   #        median_10_stat2_sleep_count_and_ratio = median_5_stat2_sleep_count_and_ratio * 100)
   transmute(
     row = row,
-    "Raw ZM Predictions" = glue("{round(raw_stat, 2)} ({round(raw_stat2, 2)})"),
-    "5-Min Median" = glue("{round(median_5_stat, 2)} ({round(median_5_stat2, 2)})"),
-    "10-Min Median" = glue("{round(median_10_stat, 2)} ({round(median_10_stat2, 2)})")
+    "Raw ZM Predictions" = glue("{round(raw_stat, 1)} ({round(raw_stat2, 1)})"),
+    "5-Min Median" = glue("{round(median_5_stat, 1)} ({round(median_5_stat2, 1)})"),
+    "10-Min Median" = glue("{round(median_10_stat, 1)} ({round(median_10_stat2, 1)})")
   ) %>%
   pivot_longer(-row) %>%
   pivot_wider(names_from = row, values_from = value) %>%
@@ -28,5 +28,4 @@ tbl_overview <-
     name = "", spt = "SPT (hrs)", tst = "TST (hrs)", se = "SE (%)", 
     lps = "LPS (min)", waso = "WASO (min)", no = "Awakenings (N)"
   ) %>%
-  fmt_number(decimals = 1) %>% 
   cols_align(align = "right", columns = -name)

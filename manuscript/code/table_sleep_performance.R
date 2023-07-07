@@ -27,10 +27,11 @@ tbl_sleep_performance <-
   pivot_wider(names_from = .metric, values_from = .estimate) %>%
   rename_with(.cols = "F1 Score":"Specificity", ~ paste(.x, "(%)")) %>% 
   gt(groupname_col = "group") |>
-  fmt_number(everything(), decimals = 2) %>% 
+  fmt_number(everything(), decimals = 1) %>% 
   tab_options(table.font.names = "ibm") |>
   cols_width(everything() ~ px(140)) |>
-  cols_align(align = "center") %>%
+  cols_align(align = "left", columns = 1:2) %>%
+  cols_align(align = "right", columns = 3:7) %>% 
   cols_label(model = "") %>%
   tab_options(
     # Configure table appearance, such as font, colors, borders, padding, and alignment
