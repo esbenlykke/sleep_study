@@ -54,78 +54,71 @@ editor_options:
 
 # Introduction
 
-An extensive array of research underlines the importance of sleep for
-both mental and physical health[@ma2017; @meyer2022; @kpavlova2019;
-@difrancesco2019]. Consequently, accurate sleep assessment methods are
-essential for tracking sleep patterns, thereby enhancing our
-comprehension of the sleep-health relationship. Furthermore, ensuring
-high user-acceptability for these methods is essential in order to
-conduct large-scale studies over prolonged periods.
+A vast body of research highlights the critical role of sleep in
+maintaining both mental and physical health[@ma2017; @meyer2022;
+@kpavlova2019; @difrancesco2019]. Consequently, accurate sleep
+assessment methods are crucial for tracking sleep patterns and improving
+our understanding of the sleep-health relationship. Furthermore, the
+ease of use and high acceptability of these methods are essential to
+facilitate large-scale, longitudinal studies.
 
-While laboratory-based polysomnography is considered the gold standard
-for objectively measuring sleep, its practicality in large-scale
-epidemiological studies is limited due to its high cost, the need for
-professional administration, and the substantial resources required for
-specialized equipment[@vandewater2011]. As an alternative, diaries is
-commonly used as low-cost and low-tech methods for sleep assessment in
-population research. However, relying solely on diary-based methods may
-introduce recall bias and other limitations[@moore2015]. A more feasible
-approach in large-scale epidemiological studies is the use of
-device-based measurement methods that can estimate sleep duration. This
-method offers the advantage of being less burdensome for participants
-and avoids potential biases associated with recall.
+While laboratory-based polysomnography (PSG) is typically considered the
+gold standard for objective sleep measurement, its practicality in
+large-scale epidemiological studies is hindered due to high costs, the
+necessity for professional administration, and it is also subject to
+potential rater bias[@vandewater2011; @lee2022]. As an alternative,
+diaries are commonly employed as cost-effective and low-tech methods for
+sleep assessment in population research. However, reliance on
+diary-based methods may lead to recall bias and other
+limitations[@moore2015]. A more feasible approach in large-scale
+epidemiological studies is to use device-based measurement methods that
+can estimate sleep duration. This approach offers the advantage of being
+less burdensome for participants and eliminates potential biases
+associated with recall.
 
-In this context, the Zmachine®️ Insight+ (ZM) emerges as a valuable
-tool. Validated against polysomnography with favorable
-results[@kaplan2014; @wang2015], the ZM provides comparable data without
-the high costs or need for professional monitoring associated with
-polysomnography. Furthermore, the ease of use of the ZM device makes it
-compliant for free-living use[@pedersen2021]. This allows for the
-analysis of multiple consecutive nights, as compared to single-night
-recordings from PSG, thereby capturing the important variations in sleep
-across multiple nights.
+Body-worn accelerometers have emerged as an effective and affordable
+alternative for objectively assessing sleep patterns at home over
+extended periods. These devices gather continuous, high-resolution data
+for several weeks without the need for recharging, thus reducing
+participant burden. Initial applications of accelerometry for sleep and
+wake stage classification were based on wrist movements, starting with
+an algorithm developed in 1982 and validated with PSG [@webster1982].
+This model was later refined in 1992 [@cole1992], giving rise to the
+widely used Cole-Kripke model. As the field advanced, an array of
+techniques, including heuristic algorithms, machine learning models,
+regression, and deep learning, were employed to analyze wrist-worn
+accelerometer data[@palotti2019; @cole1992; @sazonov2004; @sadeh1994;
+@hees2015; @sundararajan2021].
 
-The introduction of body-worn accelerometers has provided an effective
-and affordable alternative for objectively assessing sleep patterns in a
-home environment over extended periods. These accelerometers collect
-continuous, high-resolution data for several weeks without requiring
-recharging, thus minimizing participant burden. Initial applications of
-accelerometry for sleep and wake stage classification were based on
-wrist movements. The original algorithm, developed in 1982 using simple
-linear regression and validated with PSG [@webster1982], was later
-refined in 1992 [@cole1992], leading to the widely used Cole-Kripke
-model. Subsequent research on wrist-worn accelerometer data has employed
-heuristic algorithms, advanced machine learning models, as well as
-regression and deep learning techniques[@palotti2019; @cole1992;
-@sazonov2004; @sadeh1994; @hees2015; @sundararajan2021].
+While wrist and hip-worn devices have benefited from extensive
+methodological development, thigh-worn accelerometers have not seen the
+same level of advancement. Existing studies mainly focus on
+distinguishing sleep from wakefulness, with emphasis on defining 'waking
+time' and 'bedtime' [@carlson2021; @inan-eroglu2021; @vanderberg2016;
+@winkler2016]. Recent strides in estimating sleep duration using these
+devices have been made, including the introduction of a promising
+algorithm and its comparison against PSG[@johansson_development_2023].
+Despite these advancements, the application of machine learning
+techniques in this area is still relatively unexplored. Considering the
+potential of thigh-worn accelerometers for accurate physical behavior
+assessment[@skotte_detection_2014; @arvidsson2019], there is a
+significant research gap. Therefore, future studies need to develop
+techniques similar to those used for wrist and hip-worn accelerometers,
+with the ultimate goal of establishing a more holistic, accurate, and
+user-friendly method of sleep and physical activity tracking.
 
-Despite the well-developed field of accelerometer data analysis for
-sleep detection from wrist and hip-worn devices, the same level of
-advancement is not mirrored in studies utilizing thigh-worn
-accelerometers. Methods for assessing sleep using wrist and hip-worn
-accelerometers have greatly evolved over the years, employing an
-extensive range of techniques. These include heuristic algorithms,
-machine learning models, regression and deep learning techniques, all
-tailored to the specific signal characteristics of wrist and hip-worn
-devices [@palotti2019; @cole1992; @sazonov2004; @sadeh1994; @hees2015;
-@sundararajan2021; @patterson_40_2023]. However, for thigh-worn
-accelerometers, the landscape appears less mature, with only a handful
-of studies investigating sleep detection algorithms. The majority of the
-efforts are focused on delineating wakefulness from sleep, with
-particular emphasis on the definition of 'waking time' and 'bedtime'
-[@carlson2021; @inan-eroglu2021; @vanderberg2016; @winkler2016].
-Furthermore, while strides have been made recently in estimating sleep
-duration with these devices, with the introduction of a promising
-algorithm and its comparison against PSG[@johansson_development_2023],
-the field is still in its infancy when it comes to employing machine
-learning techniques. Given the potential for accurate physical behavior
-assessment that thigh-worn accelerometers
-provide[@skotte_detection_2014; @arvidsson2019], a significant research
-gap exists. Therefore, there is a pressing need for future studies to
-develop techniques similar to those used for wrist and hip-worn
-accelerometers, with the ultimate goal of establishing a more holistic,
-accurate, and user-friendly method of sleep and physical activity
-tracking.
+The Zmachine®️ Insight+ (ZM) emerges as a valuable tool within this
+landscape. Favorably validated against PSG[@kaplan2014; @wang2015], the
+ZM provides comparable data without the high costs or the need for
+professional monitoring typically associated with PSG. Crucially, the ZM
+facilitates multi-night analysis in free-living conditions due to its
+ease of use[@pedersen2021], capturing the natural variations in sleep
+patterns. This makes it advantageous over single-night PSG, particularly
+as a gold standard data source in machine learning tasks, as it provides
+multiple nights of measurements without inter-rater bias. Despite these
+benefits, the ZM, like PSG, still poses a significant participant burden
+and cost, reinforcing the need for more accessible alternatives like
+accelerometers.
 
 Our primary objective in this study was to evaluate a range of machine
 learning and deep learning models, utilizing the raw data collected from
