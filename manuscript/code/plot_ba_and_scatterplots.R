@@ -78,10 +78,11 @@ plot_ba_cor <- function(model, variable, type) {
     lstm_stats
   } else {
     ml_stats %>%
-      filter(model == {{ model }} & type == {{ type }} & 
-               !!sym(paste0("zm_", variable)) >= 0 & !!sym(variable) >= 0 
-             # & abs(!!sym(paste0("diff_", variable))) / max(abs(!!sym(paste0("diff_", variable))))  < .1
-             )
+      filter(
+        model == {{ model }} & type == {{ type }} &
+          !!sym(paste0("zm_", variable)) >= 0 & !!sym(variable) >= 0
+        # & abs(!!sym(paste0("diff_", variable))) / max(abs(!!sym(paste0("diff_", variable))))  < .1
+      )
   }
 
   x_coords <- stats_data %>% pull(!!sym(variable))
@@ -115,15 +116,29 @@ plot_ba_cor <- function(model, variable, type) {
     geom_hline(data = bias_data, aes(yintercept = loa_upper), color = "grey25", lty = 2) +
     geom_point(
       data = stats_data, aes(x = !!sym(paste0("avg_", variable)), y = !!sym(paste0("diff_", variable))),
-      color = "grey80", fill = "grey50", shape = 21, size = 2.5, stroke = .2, alpha = .7
+      color = "grey20", fill = "steelblue", shape = 21, size = 2.5, stroke = .2, alpha = .7
     ) +
     labs(
-      x = paste("Mean of Model and ZM", str_to_upper(variable), 
-                switch(variable, "spt" = "(hrs)", "tst" = "(hrs)", "se" = "(%)", 
-                "lps" = "(min)", "waso" = "(min)")),
-      y = paste("Difference between\nModel and ZM", str_to_upper(variable), 
-                switch(variable, "spt" = "(hrs)", "tst" = "(hrs)", "se" = "(%)", 
-                "lps" = "(min)", "waso" = "(min)"))
+      x = paste(
+        "Mean of Model and ZM", str_to_upper(variable),
+        switch(variable,
+          "spt" = "(hrs)",
+          "tst" = "(hrs)",
+          "se" = "(%)",
+          "lps" = "(min)",
+          "waso" = "(min)"
+        )
+      ),
+      y = paste(
+        "Difference between\nModel and ZM", str_to_upper(variable),
+        switch(variable,
+          "spt" = "(hrs)",
+          "tst" = "(hrs)",
+          "se" = "(%)",
+          "lps" = "(min)",
+          "waso" = "(min)"
+        )
+      )
     ) +
     theme_classic() +
     theme(
@@ -136,19 +151,34 @@ plot_ba_cor <- function(model, variable, type) {
   cor_plot <-
     stats_data %>%
     ggplot(aes(x = !!sym(variable), y = !!sym(paste0("zm_", variable)))) +
-    geom_point(color = "grey80", fill = "grey50", shape = 21, size = 2.5, stroke = .2, alpha = .7) +
+    geom_point(color = "grey20", fill = "steelblue", shape = 21, size = 2.5, stroke = .2, alpha = .7) +
     geom_abline(slope = 1, intercept = 0, color = "grey25", lty = 2, linewidth = .5) +
     geom_smooth(method = "lm", color = "grey25", se = FALSE, linewidth = .5) +
-    geom_label(data = cor_data, aes(x = -Inf, y = Inf, label = glue("r = {round(estimate, 2)}")),
+    geom_label(
+      data = cor_data, aes(x = -Inf, y = Inf, label = glue("r = {round(estimate, 2)}")),
       hjust = 0, vjust = 1, label.padding = unit(.3, "lines"), label.size = NA, alpha = .5, size = 4
     ) +
     labs(
-      x = paste("Model", str_to_upper(variable), 
-                switch(variable, "spt" = "(hrs)", "tst" = "(hrs)", "se" = "(%)", 
-                       "lps" = "(min)", "waso" = "(min)")),
-      y = paste("ZM", str_to_upper(variable), 
-                switch(variable, "spt" = "(hrs)", "tst" = "(hrs)", 
-                       "se" = "(%)", "lps" = "(min)", "waso" = "(min)"))
+      x = paste(
+        "Model", str_to_upper(variable),
+        switch(variable,
+          "spt" = "(hrs)",
+          "tst" = "(hrs)",
+          "se" = "(%)",
+          "lps" = "(min)",
+          "waso" = "(min)"
+        )
+      ),
+      y = paste(
+        "ZM", str_to_upper(variable),
+        switch(variable,
+          "spt" = "(hrs)",
+          "tst" = "(hrs)",
+          "se" = "(%)",
+          "lps" = "(min)",
+          "waso" = "(min)"
+        )
+      )
     ) +
     theme_classic() +
     theme(
@@ -173,19 +203,123 @@ plots <-
   pmap(plot_ba_cor) %>%
   set_names(plot_names)
 
-p1 <- plots$xgboost_spt_median5
-p2 <- plots$xgboost_tst_median5
-p3 <- plots$xgboost_se_median5
-p4 <- plots$xgboost_lps_median5
-p5 <- plots$xgboost_waso_median5
+plots$xgboost_spt_raw /
+  plots$xgboost_tst_raw /
+  plots$xgboost_se_raw /
+  plots$xgboost_lps_raw /
+  plots$xgboost_waso_raw
 
-# Create the layout
-xgb_plot <- p1 / p2 / p3 / p4 / p5 
+ggsave(filename = "manuscript/visuals/raw_xgboost_ba_cor.pdf", height = 10, width = 8)
 
-ggsave(plot = xgb_plot, filename = "manuscript/visuals/median_5_xgboost_ba_cor.pdf", height = 10, width = 8)
+plots$xgboost_spt_median5 /
+  plots$xgboost_tst_median5 /
+  plots$xgboost_se_median5 /
+  plots$xgboost_lps_median5 /
+  plots$xgboost_waso_median5
 
-# TODO put all plots into supp.mat.
+ggsave(filename = "manuscript/visuals/median_5_xgboost_ba_cor.pdf", height = 10, width = 8)
 
-wrap_plots(plots, ncol = 1)
+plots$xgboost_spt_raw /
+  plots$xgboost_tst_raw /
+  plots$xgboost_se_raw /
+  plots$xgboost_lps_raw /
+  plots$xgboost_waso_raw
 
-ggsave("manuscript/visuals/all_ba_scatterplots.pdf", height = 150, width = 8, limitsize = FALSE)
+ggsave(filename = "manuscript/visuals/median_10_xgboost_ba_cor.pdf", height = 10, width = 8)
+
+plots$decision_tree_spt_raw /
+  plots$decision_tree_tst_raw /
+  plots$decision_tree_se_raw /
+  plots$decision_tree_lps_raw /
+  plots$decision_tree_waso_raw
+
+ggsave(filename = "manuscript/visuals/raw_decision_tree_ba_cor.pdf", height = 10, width = 8)
+
+plots$decision_tree_spt_median5 /
+  plots$decision_tree_tst_median5 /
+  plots$decision_tree_se_median5 /
+  plots$decision_tree_lps_median5 /
+  plots$decision_tree_waso_median5
+
+ggsave(filename = "manuscript/visuals/median_5_decision_tree_ba_cor.pdf", height = 10, width = 8)
+
+plots$decision_tree_spt_raw /
+  plots$decision_tree_tst_raw /
+  plots$decision_tree_se_raw /
+  plots$decision_tree_lps_raw /
+  plots$decision_tree_waso_raw
+
+ggsave(filename = "manuscript/visuals/median_10_decision_tree_ba_cor.pdf", height = 10, width = 8)
+
+plots$logistic_regression_spt_raw /
+  plots$logistic_regression_tst_raw /
+  plots$logistic_regression_se_raw /
+  plots$logistic_regression_lps_raw /
+  plots$logistic_regression_waso_raw
+
+ggsave(filename = "manuscript/visuals/raw_logistic_regression_ba_cor.pdf", height = 10, width = 8)
+
+plots$logistic_regression_spt_median5 /
+  plots$logistic_regression_tst_median5 /
+  plots$logistic_regression_se_median5 /
+  plots$logistic_regression_lps_median5 /
+  plots$logistic_regression_waso_median5
+
+ggsave(filename = "manuscript/visuals/median_5_logistic_regression_ba_cor.pdf", height = 10, width = 8)
+
+plots$logistic_regression_spt_raw /
+  plots$logistic_regression_tst_raw /
+  plots$logistic_regression_se_raw /
+  plots$logistic_regression_lps_raw /
+  plots$logistic_regression_waso_raw
+
+ggsave(filename = "manuscript/visuals/median_10_logistic_regression_ba_cor.pdf", height = 10, width = 8)
+
+plots$neural_network_spt_raw /
+  plots$neural_network_tst_raw /
+  plots$neural_network_se_raw /
+  plots$neural_network_lps_raw /
+  plots$neural_network_waso_raw
+
+ggsave(filename = "manuscript/visuals/raw_neural_network_ba_cor.pdf", height = 10, width = 8)
+
+plots$neural_network_spt_median5 /
+  plots$neural_network_tst_median5 /
+  plots$neural_network_se_median5 /
+  plots$neural_network_lps_median5 /
+  plots$neural_network_waso_median5
+
+ggsave(filename = "manuscript/visuals/median_5_neural_network_ba_cor.pdf", height = 10, width = 8)
+
+plots$neural_network_spt_raw /
+  plots$neural_network_tst_raw /
+  plots$neural_network_se_raw /
+  plots$neural_network_lps_raw /
+  plots$neural_network_waso_raw
+
+ggsave(filename = "manuscript/visuals/median_10_neural_network_ba_cor.pdf", height = 10, width = 8)
+
+plots$biLSTM_spt_raw /
+  plots$biLSTM_tst_raw /
+  plots$biLSTM_se_raw /
+  plots$biLSTM_lps_raw /
+  plots$biLSTM_waso_raw
+
+ggsave(filename = "manuscript/visuals/raw_biLSTM_ba_cor.pdf", height = 10, width = 8)
+
+plots$biLSTM_spt_median5 /
+  plots$biLSTM_tst_median5 /
+  plots$biLSTM_se_median5 /
+  plots$biLSTM_lps_median5 /
+  plots$biLSTM_waso_median5
+
+ggsave(filename = "manuscript/visuals/median_5_biLSTM_ba_cor.pdf", height = 10, width = 8)
+
+plots$biLSTM_spt_raw /
+  plots$biLSTM_tst_raw /
+  plots$biLSTM_se_raw /
+  plots$biLSTM_lps_raw /
+  plots$biLSTM_waso_raw
+
+ggsave(filename = "manuscript/visuals/median_10_biLSTM_ba_cor.pdf", height = 10, width = 8)
+

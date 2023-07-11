@@ -8,6 +8,9 @@ library(showtext)
 
 all_metrics_30 <-
   read_csv(here::here("data/processed/all_metrics_sleep_30.csv")) %>% 
+  bind_rows(
+  read_csv(here::here("data/processed/biLSTM_sleep_performance_metrics.csv")) %>% 
+  rename(group = type)) %>% 
   mutate(
     group = case_when(group == "raw" ~ "Raw ZM Predictions",
                       group == "median_5" ~ "5-Min Median",

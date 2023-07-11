@@ -66,7 +66,7 @@ plots <-
   map(truth_estimate_pairs, ~ create_confusion_matrix_plot(data, .x$truth, .x$estimate))
 
 # Function to create confusion matrix and plot for the biLSTM
-create_confusion_matrix_plot <- function(target, preds) {
+create_confusion_matrix_plot_lstm <- function(target, preds) {
   table(target = target, preds = preds) %>%
     as_tibble() %>%
     mutate(
@@ -105,21 +105,21 @@ lstm_preds <-
 
 # Generate confusion matrix plots
 conf_mat_lstm_raw <-
-  create_confusion_matrix_plot(lstm_preds$score_simple, lstm_preds$predicted_class_raw)
+  create_confusion_matrix_plot_lstm(lstm_preds$score_simple, lstm_preds$predicted_class_raw)
 conf_mat_lstm_median5 <-
-  create_confusion_matrix_plot(lstm_preds$score_simple_median_5, lstm_preds$predicted_class_median_5)
+  create_confusion_matrix_plot_lstm(lstm_preds$score_simple_median_5, lstm_preds$predicted_class_median_5)
 conf_mat_lstm_median10 <-
-  create_confusion_matrix_plot(lstm_preds$score_simple_median_10, lstm_preds$predicted_class_median_10)
+  create_confusion_matrix_plot_lstm(lstm_preds$score_simple_median_10, lstm_preds$predicted_class_median_10)
 
 
 raw <-
   wrap_plots(plots[[1]][[1]], plots[[1]][[2]], plots[[1]][[3]], plots[[1]][[4]], conf_mat_lstm_raw, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(tag_levels = "i", title = "Raw")
 
 median5 <-
-  wrap_plots(plots[[2]][[1]], plots[[2]][[2]], plots[[2]][[3]], plots[[2]][[4]], conf_mat_lstm_raw, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "5-Min Median")
+  wrap_plots(plots[[2]][[1]], plots[[2]][[2]], plots[[2]][[3]], plots[[2]][[4]], conf_mat_lstm_median5, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "5-Min Median")
 
 median10 <-
-  wrap_plots(plots[[3]][[1]], plots[[3]][[2]], plots[[3]][[3]], plots[[3]][[4]], conf_mat_lstm_raw, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "10-Min Median")
+  wrap_plots(plots[[3]][[1]], plots[[3]][[2]], plots[[3]][[3]], plots[[3]][[4]], conf_mat_lstm_median10, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "10-Min Median")
 
 wrap_elements(raw) / wrap_elements(median5) / wrap_elements(median10)
 

@@ -32,4 +32,22 @@ Decision Tree model yields higher scores.
 
 ![Receiver operating characteristic curves of the models evaluated across the different ZM predictions, including raw ZM predictions, as well as 5-minute and 10-minute median smoothing of the ZM raw predictions. The x-axis of the plot represents the proportion of true asleep epochs that were incorrectly classified as awake, while the y-axis represents the proportion of all epochs labeled as awake by the classifier that were correctly classified. The area under the curve values displayed are displayed as color-coded text in the plot to indicate the area under the receiver operating characteristic curve for each model and condition.](../visuals/plot_sleep_roc.pdf){#fig-roc_curves}
 
-![all ba and scatterplots](../visuals/all_ba_scatterplots.pdf)
+![Decision tree, raw](../visuals/raw_decision_tree_ba_cor.pdf){#tbl-raw_dc}
+![Decision tree, median_5](../visuals/median_5_decision_tree_ba_cor.pdf){#tbl-m5_dc}
+![Decision tree, median_10](../visuals/median_10_decision_tree_ba_cor.pdf){#tbl-m10_dc}
+
+![Logistic regression, raw](../visuals/raw_logistic_regression_ba_cor.pdf)
+![Logistic regression, median_5](../visuals/median_5_logistic_regression_ba_cor.pdf)
+![Logistic regression, median_10](../visuals/median_10_logistic_regression_ba_cor.pdf)
+
+![Neural_network, raw](../visuals/raw_neural_network_ba_cor.pdf)
+![Neural_network, median_5](../visuals/median_5_neural_network_ba_cor.pdf)
+![Neural_network, median_10](../visuals/median_10_neural_network_ba_cor.pdf)
+
+![XGBoost, raw](../visuals/raw_xgboost_ba_cor.pdf)
+![XGBoost, median_5](../visuals/median_5_xgboost_ba_cor.pdf)
+![XGBoost, median_10](../visuals/median_10_xgboost_ba_cor.pdf)
+
+![biLSTM, raw](../visuals/raw_biLSTM_ba_cor.pdf)
+![biLSTM, median_5](../visuals/median_5_biLSTM_ba_cor.pdf)
+![biLSTM, median_10](../visuals/median_10_biLSTM_ba_cor.pdf)

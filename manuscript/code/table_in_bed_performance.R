@@ -7,7 +7,10 @@ library(gt)
 library(showtext)
 
 metrics <-
-  read_csv(here::here("data/processed/in_bed_metrics.csv"))
+  read_csv(here::here("data/processed/in_bed_metrics.csv")) %>% 
+  bind_rows(read_csv(here::here("data/processed/biLSTM_in_bed_performance_metrics.csv")) %>% 
+              filter(type == "raw") %>% 
+              select(-type))
 
 # Create a formatted table to display the metrics, grouped by epoch length
 tbl_in_bed <-
@@ -21,7 +24,8 @@ tbl_in_bed <-
     model = case_when(model == "decision_tree" ~ "Decision Tree",
                       model == "log_reg" ~ "Logistic Regression",
                       model == "mlp" ~ "Feed-Forward Neural Net",
-                      model == "xgboost" ~ "XGBoost")
+                      model == "xgboost" ~ "XGBoost",
+                      TRUE ~ model)
   ) %>%
   select(-.estimator) %>%
   pivot_wider(names_from = .metric, values_from = .estimate) %>%
