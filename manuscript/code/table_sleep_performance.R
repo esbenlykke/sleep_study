@@ -4,7 +4,7 @@ library(tidyverse)
 library(tidymodels)
 library(arrow)
 library(gt)
-library(showtext)
+library(gtExtras)
 
 all_metrics_30 <-
   read_csv(here::here("data/processed/all_metrics_sleep_30.csv")) %>% 
@@ -35,7 +35,13 @@ tbl_sleep_performance <-
   cols_width(everything() ~ px(140)) |>
   cols_align(align = "left", columns = 1:2) %>%
   cols_align(align = "right", columns = 3:7) %>% 
-  cols_label(model = "") %>%
-  tab_options(
-    # Configure table appearance, such as font, colors, borders, padding, and alignment
-  )
+  cols_label(model = "") %>% 
+    gt_theme_guardian() %>%
+    opt_table_font(font = list(
+      google_font(name = "Montserrat")
+    )) %>% 
+    tab_options(
+      table.font.size = px(12)
+    ) 
+  
+# gtsave(tbl_sleep_performance, "manuscript/visuals/tbl_sleep_performance.rtf")
