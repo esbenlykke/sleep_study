@@ -805,46 +805,56 @@ sleep detection methods are applied to 24-hour recordings, most methods
 do not have the ability to infer the SPT with sleep
 diaries[@girschik2012]. Consequently, these methods are unable to
 generate certain sleep quality parameters that rely on the
-SPT[@doherty2017; @anderson2014]. We have attempted to circumvent this
-issue by employing models able to distinguish between in-bed awake time
-and in-bed asleep time over a 24h recording making our models capable of
-estimating all commonly used sleep quality parameters. Van Hees et
-al.[@van_hees_estimating_2018] have developed an algorithm to identify
-SPT from wrist-worn devices which was recently validated by Plekhanova
-and colleagues[@plekhanova2023]. which in combination with other
-algorithms or models on said SPT can then be used infer further sleep
-quality parameters.
+SPT[@doherty2017; @anderson2014]. To overcome this limitation, we have
+incorporated models that can differentiate between in-bed awake time and
+in-bed asleep from out-bed awake time over a 24-hour recording. This
+approach allows our models to estimate all commonly used sleep quality
+parameters. Van Hees et al. [@van_hees_estimating_2018] have proposed an
+algorithm to determine SPT from data collected by wrist-worn devices.
+This algorithm was recently validated by Plekhanova and her team
+[@plekhanova2023]. By combining this algorithm with other methods,
+further sleep quality parameters can be inferred based on the identified
+SPT. Van Hees et al.[@van_hees_estimating_2018] reported good agreements
+and low mean differences compared to self-report and PSG on SPT,
+findings later confirmed by Plekhanova and colleagues. However, they
+also observed poor agreement with LPS and Wake After Sleep Onset (WASO).
+They found low reliability with PSG, indicating difficulties in
+detecting wakefulness during in-bed time. These challenges parallel
+those we experienced in our study.
 
-Strengths and limitations It is not always clear the methods for
-detecting sleep from accelerometer data is
+The study boasts several strengths, including the capacity to derive
+in-bed awake and asleep times from out-of-bed data, thereby allowing for
+the extraction of vital sleep quality parameters. Furthermore, the
+research benefits from evaluating multiple nights per subject, providing
+valuable information into intra-subject sleep variability. However,
+certain limitations exist. The use of ZM, which isn't recognized as a
+gold standard, could potentially compromise our findings' validity.
+Future research could consider using PSG as a reference for methods
+similar to ours, despite its limitations, for a more accurate
+comparison. Moreover, our models weren't validated using an external
+dataset, a process that would have showcased their broader
+applicability. Hence, our conclusions remain confined primarily to
+children.
 
-It is unclear whether Johansson et al.[@johansson_development_2023]
-provide a method for detecting the in-bed time which hinders its
-applicability for researchers that want to ...
-
-external validation dataset/generalization
-
-expand the feature set (Palotti)
-
-In conclusion, our study has advanced the methods for estimating sleep
-from thigh-worn accelerometers by evaluating various models for
-predicting in-bed and sleep time. Our results indicate that all
-sequential models and the multiclass model performed well at predicting
-in-bed time. However, all models showed difficulty in correctly
-classifying awake epochs during time in bed, highlighting the challenge
-of automating the detection of in-bed awake periods. The application of
-median filters improved the performance metrics of all models,
-suggesting that this approach may be beneficial in future studies.
-Despite these promising results, our findings also underscore the need
-for caution when applying these models to individual-level sleep
-assessments due to the high variability in derived sleep quality
-parameters. Future research should focus on refining these models to
-enhance their precision and reliability for individual sleep
-assessments.
-
-Our open-source algorithm and the inferred sleep parameters will open
-the door to future studies on sleep and sleep architecture using
-large-scale accelerometer databases.
+In conclusion, our study contributes to the ongoing efforts to improve
+sleep estimation methods using thigh-worn accelerometers. We evaluated
+different machine learning models and configurations for predicting
+in-bed and sleep times and their corresponding sleep quality parameters.
+While the sequential models generally demonstrated excellent performance
+in predicting in-bed time, they faced challenges in accurately
+distinguishing between sleep and wake epochs during in-bed time.
+Nevertheless, their performance could be substantially improved through
+the application of median filters. Among all models and configurations
+evaluated, the XGBoost model exhibited superior performance across all
+performance metrics, including epoch-to-epoch predictions and sleep
+quality parameter derivatives. Our research also highlighted the current
+limitations of sleep detection methods, such as challenges in
+effectively detecting wake periods during in-bed time and the need for
+further improvements to increase the precision of individual sleep
+assessments. We believe our work lays the groundwork for future research
+to further refine and improve the performance of these models,
+contributing to a more precise and accurate evaluation of sleep patterns
+and quality using thigh-worn accelerometers.
 
 \newpage
 
