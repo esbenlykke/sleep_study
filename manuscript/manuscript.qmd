@@ -34,7 +34,6 @@ date: last-modified
 bibliography: bibliography.bib
 format:
   elsevier-pdf:
-    pdf-engine: lualatex
     keep-tex: false
     journal:
       name: npj Digital Medicine
@@ -44,13 +43,6 @@ format:
     include-in-header: 
       text: '\usepackage{lineno}\linenumbers'
     fig-pos: 'b'
-  simple-article-pdf:
-    indent: false
-    classoption: 
-     - 9pt
-     - lucida
-     - twocolumn
-     - twoside
   docx:
     number-sections: true
 editor: 
@@ -94,9 +86,9 @@ an algorithm developed in 1982 and validated with PSG [@webster1982].
 This model was later refined in 1992 [@cole1992], giving rise to the
 widely used Cole-Kripke model. As the field advanced, an array of
 techniques, including heuristic algorithms, machine learning models,
-regression, and deep learning, were employed to analyze wrist-worn
-accelerometer data[@palotti2019; @cole1992; @sazonov2004; @sadeh1994;
-@hees2015; @sundararajan2021].
+regression, and deep learning, were employed to analyze hip
+andwrist-worn accelerometer data[@palotti2019; @cole1992; @sazonov2004;
+@sadeh1994; @hees2015; @sundararajan2021].
 
 While wrist and hip-worn devices have benefited from extensive
 methodological development, thigh-worn accelerometers have not seen the
@@ -107,8 +99,8 @@ time' and 'bedtime' [@carlson2021; @inan-eroglu2021; @vanderberg2016;
 devices have been made, including the introduction of a promising
 algorithm and its comparison against PSG[@johansson_development_2023].
 Despite these advancements, the application of machine learning
-techniques in this area is still relatively unexplored. Considering the
-potential of thigh-worn accelerometers for accurate physical behavior
+techniques in this area is still unexplored. Considering the potential
+of thigh-worn accelerometers for accurate physical behavior
 assessment[@skotte_detection_2014; @arvidsson2019], there is a
 significant research gap. Therefore, future studies need to develop
 techniques similar to those used for wrist and hip-worn accelerometers,
@@ -132,12 +124,12 @@ Our primary objective in this study was to evaluate a range of machine
 learning and deep learning models, utilizing the raw data collected from
 a tri-axial thigh-worn accelerometer to estimate in-bed and sleep time.
 To ensure the reliability and effectiveness of our models, we compared
-their outputs with an EEG-based sleep tracking device, which we
-considered the gold standard for measuring sleep. Furthermore, our
-secondary goal was to assess the developed models' performance in
-evaluating important sleep quality parameters, including sleep period
-time (SPT), total sleep time (TST), sleep efficiency (SE), latency until
-persistent sleep (LPS), and wake after sleep onset (WASO).
+their outputs with an EEG-based sleep tracking device, which we, in this
+current study, considered as the gold standard for measuring sleep.
+Furthermore, our secondary goal was to assess the developed models'
+performance in evaluating important sleep quality parameters, including
+sleep period time (SPT), total sleep time (TST), sleep efficiency (SE),
+latency until persistent sleep (LPS), and wake after sleep onset (WASO).
 
 # Methods
 
@@ -150,34 +142,37 @@ screen media usage on Danish families. For our analysis, we focused on
 data from child participants aged between 6 and 10 years within the
 SCREENS cohort. Our primary sources of data were accelerometer readings
 from Axivity AX3 devices attached to the children's thighs, and
-electroencephalography (EEG) data derived from the ZM device. The
-Axivity AX3, an unobtrusive 3-axis accelerometer, was positioned midway
-between the hip and knee on the right anterior thigh, recording
-participant movement data.
+electroencephalography data derived from the ZM device. The Axivity AX3,
+an unobtrusive 3-axis accelerometer, was positioned midway between the
+hip and knee on the right anterior thigh, recording participant movement
+data.
 
 Sleep state information was extracted using the ZM, a product of General
 Sleep Corporation. The ZM, which utilizes advanced EEG hardware and
 signal processing algorithms, employs three self-adhesive, disposable
 sensors placed outside the hairline for reliable EEG signal acquisition.
-The ZM uses two proprietary algorithms: Z-ALG and Z-PLUS. The Z-ALG is
-utilized for accurate sleep detection, showcasing its suitability for
-in-home monitoring[@kaplan2014], while the Z-PLUS effectively
-differentiates sleep stages, as evidenced by its alignment with expert
-evaluations using PSG data[@wang2015]. In the current study, we treated
-all sleep stages as a single category effectively deducing the output of
-the ZM to "awake" and "asleep" as the ability to distinguish sleep
-stages are not a necessity to derive sleep quality parameters of
-interest and to simplify the learning process of the models.
+The participants of the SCREENS study were instructed to attach the
+device when they went to bed. The ZM uses two proprietary algorithms:
+Z-ALG and Z-PLUS. The Z-ALG is utilized for accurate sleep detection,
+showcasing its suitability for in-home monitoring[@kaplan2014], while
+the Z-PLUS effectively differentiates sleep stages, as evidenced by its
+alignment with expert evaluations using PSG data[@wang2015]. In the
+current study, we treated all sleep stages as a single category
+effectively deducing the output of the ZM to "awake" and "asleep" as the
+ability to distinguish sleep stages are not a necessity to derive the
+sleep quality parameters of interest and to simplify the learning
+process of the models.
 
 @fig-flow illustrates the selection criteria applied to the children's
 recordings from the SCREENS study. We included only ZM recordings that
 were accompanied by complete accelerometer data and lasted between 7 and
-14 hours. Any night when the ZM reported sensor issues was excluded. The
-children whose recordings were considered had an average age of 9.4
-years, with a standard deviation of 2.1. In their raw form, the ZM
-predictions encompassed 696,779 epochs, each 30 seconds long. Notably,
-approximately 84% of the total ZM recording duration was classified as
-sleep, resulting in an imbalance of the dataset.
+14 hours. Any night when the ZM reported sensor issues was excluded
+yielding 585 nights included in the study. The children whose recordings
+were considered had an average age of 9.4 years, with a standard
+deviation of 2.1. In their raw form, the ZM predictions encompassed
+696,779 epochs, each 30 seconds long. Notably, approximately 84% of the
+total ZM recording duration was classified as sleep, resulting in an
+imbalance of the ZM dataset.
 
 ![Flowchart of eligible ZM recording nights included in the
 study](visuals/flowchart_of_elligible_nights.pdf){#fig-flow}
@@ -195,7 +190,7 @@ Hz cut-off frequency to eliminate high-frequency noise. Following
 filtration, data were partitioned into overlapping 2-second intervals,
 each successive interval sharing a 50% overlap with the previous one
 similar to methods described by Skotte et al.[@skotte_detection_2014].
-Any non-wear data was remove using previously described
+Any non-wear data was removed using previously described
 methods[@skovgaard2023] and data was resampled to 30-second epochs so
 every sample classified by the algorithms corresponds to a 30-second
 epoch scored during the ZM recordings. Subsequently, we performed a
@@ -203,10 +198,10 @@ feature extraction process that yielded a set of 88 features, providing
 a robust characterization of the data. Extracted from accelerometer and
 temperature signals, these features include temporal elements that use
 both lag and lead values, capturing dynamic data trends by incorporating
-measurements from preceding and upcoming intervals. Furthermore,
-inspired by Walch et al.[@walch2019], we incorporated sensor-independent
-features to encapsulate circadian rhythms. These features offer unique
-insights not directly discernible from sensor outputs and are meant to
+measurements from preceding and upcoming epochs. Furthermore, inspired
+by Walch et al.[@walch2019], we incorporated sensor-independent features
+to encapsulate circadian rhythms. These features offer unique insights
+not directly discernible from sensor outputs and are meant to
 approximate the changing drive of the circadian clock to sleep over the
 course of the night (see @fig-sensor-independent). Furthermore, the
 feature set was enriched by including signal characteristics, which
@@ -231,16 +226,17 @@ awakenings most likely occurring at the end of each
 cycle[@galland_normal_2012]. Upon examining the raw ZM predictions, we
 noted a significant overestimation in the number of awakenings per night
 for the children in our study, exceeding what would be expected based on
-typical sleep cycle patterns. In particular, many of these brief
-awakenings could be considered as noise, which when present in the data,
-can potentially hinder the learning process of machine learning models
-by obscuring the underlying patterns that the models are trying to
-learn, leading to less accurate predictions. Consequently, we elected to
-train and evaluate our models using not only the raw ZM output, but also
-versions that were subjected to 5-minute and 10-minute median filters.
-This approach, by mitigating this noise, resulted in an anticipated,
-more age-appropriate count of awakenings per night, providing a more
-accurate depiction of children's sleep patterns (see @fig-zm-median).
+typical sleep cycle patterns (see @fig-zm-median). In particular, many
+of these brief awakenings could be considered as noise, which when
+present in the data, can potentially hinder the learning process of
+machine learning models by obscuring the underlying patterns that the
+models are trying to learn, leading to less accurate predictions.
+Consequently, we elected to train and evaluate our models using not only
+the raw ZM output, but also versions that were subjected to 5-minute and
+10-minute median filters. This approach, by mitigating this noise,
+resulted in an anticipated, more age-appropriate count of awakenings per
+night, providing a more accurate depiction of children's sleep patterns
+(see @tbl-zm_overview).
 
 ![The difference in number of awakenings between the raw ZM predictions
 vs. 5-minute, and 10-minute median filtered predictions for a random
@@ -251,7 +247,7 @@ predictions.](visuals/zm_raw_vs_filtered.pdf){#fig-zm-median}
 
 ## Algorithms, Training and Validation
 
-In this study, we employed two distinct modeling strategies to analyze
+In this study, we employed two distinct learning strategies to analyze
 sleep patterns from thigh-mounted accelerometer data. We used a
 sequential strategy, comprising an ensemble of four pairs of models,
 each pair featuring the same algorithm. This strategy aimed to make the
@@ -325,8 +321,8 @@ For the models in sequence, we trained four pairs of classification
 models. Each pair was designed to distinguish between in-bed/out-of-bed
 and asleep/awake states, respectively. The dataset was randomly split
 into a training set and a testing set, each containing approximately 50%
-of the subjects. This division ensured that samples from the same night
-were never simultaneously present in both sets. To optimize
+of the subjects. This division was ensured to not have samples from the
+same night simultaneously present in both sets. To optimize
 hyperparameters, we performed a 10-fold Monte Carlo cross-validation on
 a regular grid, comprising 20 different combinations of hyperparameters.
 The F1 score served as the optimization metric. The best-performing set
@@ -784,17 +780,17 @@ with other models such as the Van Hees algorithm[@hees2015], Oakley rsc
 (rescored)[@palotti2019], and LSTM-50[@palotti2019] evaluated in the
 Patterson et al. study[@patterson_40_2023]. Furthermore, comparing the
 LOAs between our XGBoost model and the algorithm developed for
-thigh-worn devices by Johansson et al. study[@johansson2022], our
-XGBoost model showed narrower LOAs for TST , SE, LPS , and WASO, but not
-SPT. Generally, all methods, both from this study and from the reviewed
-literature, exibit wide LOAs sugesting that there is high variability in
-the derevide sleep quality parameters. These findings imply that the
-current methods, are only reasonbly reliable for assessing sleep quality
-parameters at a group level. However, caution should be exercised when
-applying the models and methods to individual-level sleep assessments.
-Therefore, further improvements and refinements are needed to enhance
-the precision and reliability of these models for individual sleep
-assessments.
+thigh-worn devices by Johansson et al.
+study[@johansson_development_2023], our XGBoost model showed narrower
+LOAs for TST , SE, LPS , and WASO, but not SPT. Generally, all methods,
+both from this study and from the reviewed literature, exibit wide LOAs
+sugesting that there is high variability in the derevide sleep quality
+parameters. These findings imply that the current methods, are only
+reasonbly reliable for assessing sleep quality parameters at a group
+level. However, caution should be exercised when applying the models and
+methods to individual-level sleep assessments. Therefore, further
+improvements and refinements are needed to enhance the precision and
+reliability of these models for individual sleep assessments.
 
 Typically, sleep detection methods are applied in two contexts: either
 to night recordings or to 24-hour recordings. In night recordings, it is
