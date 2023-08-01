@@ -57,8 +57,8 @@ tbl_ba_cor <-
   ) %>%
   gt(groupname_col = c("type", "model")) %>%
   cols_label(
-    bias = "Bias (95% CI)", lower_loa = "LOA (95% CI)",
-    upper_loa = "LOA (95% CI)", pearson = md("Pearson, _r_ (95% CI)"),
+    bias = "Bias (95% CI)", lower_loa = "lower LOA (95% CI)",
+    upper_loa = "upper LOA (95% CI)", pearson = md("Pearson, _r_ (95% CI)"),
     variable = ""
   ) %>%
   cols_align(align = "right", columns = bias:pearson) %>%
@@ -112,8 +112,8 @@ short_tbl_ba_cor <-
   filter(type == "5-Min Median") %>%
   gt(groupname_col = c("type", "model")) %>%
   cols_label(
-    bias = "Bias (95% CI)", lower_loa = "LOA (95% CI)",
-    upper_loa = "LOA (95% CI)", pearson = md("Pearson, _r_ (95% CI)"),
+    bias = "Bias (95% CI)", lower_loa = "Lower LOA (95% CI)",
+    upper_loa = "Upper LOA (95% CI)", pearson = md("Pearson, _r_ (95% CI)"),
     variable = ""
   ) %>%
   cols_align(align = "right", columns = bias:pearson) %>%

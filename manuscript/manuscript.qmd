@@ -23,7 +23,7 @@ author:
           city: Odense
           state: Denmark
           postal-code: 5230
-abstract: "LÆS IKKE! Dette er volapyk på latin. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse vitae dictum eros, ullamcorper elementum orci. Sed laoreet nulla neque, pulvinar fermentum mi iaculis at. Nulla ultricies nibh sit amet vestibulum rutrum. Nam pharetra nisl sed ipsum maximus suscipit. Duis metus nunc, ullamcorper eu mi rutrum, tempus ultricies ante. Nunc vitae lectus nisi. Aliquam efficitur ut eros ut pellentesque. Aenean blandit, nisl nec efficitur interdum, nisi ipsum fermentum dolor, at tempus sem turpis in lacus. Curabitur sollicitudin lectus sit amet velit pellentesque laoreet. Ut posuere diam lobortis nisi eleifend tincidunt. Ut at euismod sem, sed dignissim ligula. Aliquam lacinia massa libero, id eleifend velit pulvinar ac. Fusce volutpat elit eu nulla viverra, nec tempus orci pellentesque."
+abstract: "Studying sleep is vital in health research, but the gold standard, polysomnography, is costly and impractical for large-scale studies. An affordable alternative is using wearable accelerometers. While wrist and hip-worn devices are commonly used in sleep research, thigh-worn accelerometers have been relatively unexplored. Our study evaluated machine learning and deep learning models utilizing data from thigh-worn accelerometers to estimate sleep and sleep quality metrics, comparing them with an EEG-based sleep monitor. The dataset consisted of data from 585 days and nights, comprising accelerometry and EEG-based sleep estimates from children aged 6-10. We employed both sequential and multiclass model strategies on both raw and filtered data. The most effective model was XGBoost, which performed well when applied to 5-minute median filtered data, exhibiting small biases in sleep period time (0.2 minutes), total sleep time (-7 minutes), sleep efficiency (-1.1%), and wake after sleep onset (-0.9 minutes). Furthermore, the XGBoost model showed a robust correlation (0.66, 95% CI: 0.61 - 0.7) with total sleep time, indicating its potential. However, despite these favorable results in bias, our study revealed large limits of agreements in accordance with previous research on hip- and wrist-worn devices. In conclusion, we present promising results in using machine learning technieques to estimate sleep quality metrics, however, accurately classifying awake periods during in-bed time remained challenging. Moreover, additional improvements are necessary to precisely assess individual sleep quality metrics due to the notable limits of agreement."
 keywords: 
   - Sleep
   - Accelerometry
@@ -202,12 +202,11 @@ approximate the changing drive of the circadian clock to sleep over the
 course of the night (see @fig-sensor-independent). Furthermore, the
 feature set was enriched by including signal characteristics, which
 encompass vector magnitude, mean crossing rate, skewness, and kurtosis
-for each of the x, y, and z dimensions. All features are summarized in
-table ??? **in the supplementary matrials**. Subsequently, we merged the
-ZM and corresponding accelerometer recordings. Any overlapping time
-between the ZM and accelerometer data was treated as 'in-bed' time, with
-the remaining time considered 'out-of-bed'. This process yielded a
-dataset providing a around the clock temporal view of each participant's
+for each of the x, y, and z dimensions. Subsequently, we merged the ZM
+and corresponding accelerometer recordings. Any overlapping time between
+the ZM and accelerometer data was treated as 'in-bed' time, with the
+remaining time considered 'out-of-bed'. This process yielded a dataset
+providing a around the clock temporal view of each participant's
 activity and sleep patterns.
 
 ![Sensor-independent features of circadian rhythms across two
@@ -245,16 +244,19 @@ predictions.](visuals/zm_raw_vs_filtered.pdf){#fig-zm-median}
 
 We employed two different model strategies to assess sleep patterns from
 thigh-mounted accelerometer data. The first model strategy was designed
-as a sequence of two models to simplify the prediction task by
-decomposing it into two stages: first predicting 'in-bed' time, then
-'sleep' time. In the sequential model the output from the first set of
-models, which predicted in-bed time, was subjected to a 5-minute median
-filter to eliminate leading and trailing in-bed time blips. This process
-enabled us to extract a single continuous time interval that we
-identified as the sleep period time window (SPT). The SPT, in turn,
-served as the input to the second models in the sequence, enhancing
-their predictive accuracy for sleep time. We applied this sequential
-strategy using the following four machine learning algorithms:
+as a sequence of two models, each functioning as a binary classifier.
+This approach aimed to simplify the prediction task by decomposing the
+multiclass problem of classifying 'out-of-bed-awake', 'in-bed-awake',
+and 'in-bed-asleep' into two binary stages: first predicting 'in-bed'
+time, then 'sleep' time. The output from the first set of binary
+classifiers, which predicted in-bed time, was subjected to a 5-minute
+median filter to remove transient in-bed time blips. This process
+enabled us to establish a single continuous time interval that we
+identified as the sleep period time window (SPT). The SPT then served as
+the input for the second stage of binary classifiers in the sequence,
+further enhancing their predictive accuracy for sleep time." We applied
+this sequential strategy using the following four machine learning
+algorithms:
 
 1.  Logistic Regression: Logistic regression served as a simple and fast
     baseline model. However, due to its linear nature, it may struggle
@@ -264,7 +266,8 @@ strategy using the following four machine learning algorithms:
 2.  Decision Tree: Decision trees are capable of handling non-linear
     patterns and are easily interpretable. However, they are prone to
     overfitting, particularly when dealing with complex patterns that
-    require simultaneous consideration of multiple features.
+    require simultaneous consideration of multiple features. In the
+    current study, we used a maximum tree depth of 8.
 
 3.  Single-layer Feed-forward Neural Network: Single-layer feed-forward
     neural networks can effectively capture non-linear relationships,
@@ -299,29 +302,29 @@ ability to capture complex temporal patterns.
 
 ## Model Training
 
-For the models in sequence, we trained four pairs of classification
-models. Each pair was designed to distinguish between in-bed/out-of-bed
-and asleep/awake states, respectively. The dataset was randomly split
-into a training set and a testing set, each containing approximately 50%
-of the subjects. The splitting of the data was ensured to not have
-samples from the same night simultaneously present in both sets. To
-optimize hyperparameters, we performed a 10-fold Monte Carlo
-cross-validation on a regular grid, i.e., for each hyperparameter, a
-range of values at evenly-spaced intervals was selected. comprising 20
-different combinations of hyperparameters. The F1 score served as the
-optimization metric. The best-performing set of hyperparameters was then
-used to fit the models to the full training dataset. This approach
-allowed us to maximize performance by leveraging all available data. An
-imbalance was observed with the in-bed time determined in the initial
-step of the sequential model strategy which after extracting the in-bed
-time from the initial sequential models, the imbalance on the resulting
-dataset could cause biases during model training, as models may favor
-predicting the majority class. To account for this imbalance, we
-employed the Synthetic Minority Over-sampling Technique
-(SMOTE)[@chawla2002]. SMOTE generates new samples by interpolating
-random samples with their nearest neighbors. We utilized the themis R
-package[@themis] to implement SMOTE, resulting in a balanced
-distribution of training samples across both classes.
+We trained four pairs of models in sequence, with each pair
+distinguishing between in-bed/out-of-bed and asleep/awake states,
+respectively. We divided our dataset randomly into a training set and a
+testing set, with each containing roughly half of the subjects. The
+splitting of the data was ensured to not have samples from the same
+night simultaneously present in both sets. To optimize hyperparameters,
+we performed a 10-fold Monte Carlo cross-validation on a regular grid
+(i.e., for each hyperparameter, a range of values at evenly-spaced
+intervals was selected) comprising 20 different combinations of
+hyperparameters. The F1 score served as the optimization metric. The
+best-performing set of hyperparameters was then used to fit the models
+to the full training dataset. This approach allowed us to maximize
+performance by leveraging all available training data to estimate the
+model parameters. An imbalance was observed with the in-bed time
+determined in the initial step of the sequential model strategy which
+after extracting the in-bed time from the initial sequential models, the
+imbalance on the resulting dataset could cause biases during model
+training, as models may favor predicting the majority class. To account
+for this imbalance, we employed the Synthetic Minority Over-sampling
+Technique (SMOTE)[@chawla2002]. SMOTE generates new samples by
+interpolating random samples with their nearest neighbors. We utilized
+the themis R package[@themis] to implement SMOTE, resulting in a
+balanced distribution of training samples across both classes.
 
 The biLSTM model was trained to differentiate between three states:
 out-of-bed-awake, in-bed-awake, and in-bed-asleep. The data used for
@@ -376,19 +379,20 @@ To assess the performance of our models in deriving sleep quality
 metrics, we utilized Bland-Altman plots and Pearson correlations. The
 Bland-Altman method was employed specifically to determine the level of
 agreement between two measurement techniques. Given the nature of our
-dataset, which contains multiple observations per subject, we employed a
-bootstrap procedure to account for this added variability. We first
-calculated the mean difference (bias) and then defined the limits of
-agreement (LOA) as the mean difference plus or minus 1.96 times the
-standard deviation of these differences. Acknowledging the possibility
-of non-normality and potential skewness in our data, we chose to apply a
-bias-corrected and accelerated (BCa) bootstrap
-method[@diciccio_bootstrap_1996]. This approach allowed us to better
-address potential bias in our estimates and the inherent intra-subject
-variability. Utilizing 10,000 bootstrap replicates, we estimated the 95%
-confidence intervals for both the bias and the LOA, thus ensuring
-robustness in our measurements. The sleep quality parameteres included
-are defined as follows in accordance with the ZM definitions:
+dataset, which contains multiple observations per subject but
+necessarily equal number, we employed a bootstrap procedure to account
+for this added variability. We first calculated the mean difference
+(bias) and then defined the limits of agreement (LOA) as the mean
+difference plus or minus 1.96 times the standard deviation of these
+differences. Acknowledging the possibility of non-normality and
+potential skewness in our data, we chose to apply a bias-corrected and
+accelerated (BCa) bootstrap method[@diciccio_bootstrap_1996]. This
+approach allowed us to better address potential bias in our estimates
+and the inherent intra-subject variability. Utilizing 10,000 bootstrap
+replicates, we estimated the 95% confidence intervals for both the bias
+and the LOA, thus ensuring robustness in our measurements. The sleep
+quality metrics included are defined as follows in accordance with the
+ZM definitions:
 
 1.  Sleep Period Time (SPT) - This refers to the total duration of time
     in bed with the intention to sleep, which is defined as the time
@@ -469,7 +473,7 @@ marginally.
 #| echo: false
 #| message: false
 #| label: tbl-in_bed_performance
-#| tbl-cap: In-bed performance metrics
+#| tbl-cap: Performance metrics of the classification of in-bed/out-of-bed time of the included models.
 
 source("code/table_in_bed_performance.R")
 
@@ -496,7 +500,7 @@ But, specificity remains low, ranging from 57.5% (Decision Tree) to
 #| message: false
 #| tbl-colwidths: auto
 #| label: tbl-sleep_performance
-#| tbl-cap: Performance of the sleep/wake classification of the sequential models.
+#| tbl-cap: Performance metrics of the sleep/wake classification of the included models.
 
 source("code/table_sleep_performance.R")
 
@@ -504,18 +508,22 @@ tbl_sleep_performance
 ```
 
 A complete set of confusion matrices generated from data both containing
-the out-of-bed and in-bed time are presented in @fig-conf_mat. The
-figure shows favorable epoch-to-epoch performance across all sequential
-models, however, it is evident that the biLSTM is less successful in
-classifying the in-bed-awake class which cannot be deduced from the
-confusion matrices from the sequential models.
+the out-of-bed and in-bed time are presented in @fig-conf_mat. These
+matrices showcase the epoch-to-epoch performance of all sequential
+models in distinguishing between 'awake' and 'asleep' states, regardless
+of whether the subject is 'in-bed' or 'out-of-bed'. However, it's
+important to note that the binary nature of these sequential models
+means they cannot provide direct information about the classification of
+the 'in-bed-awake' state. In contrast, the biLSTM model, which also
+categorizes the 'in-bed-awake' state as a distinct class, appears to
+have less success in classifying this particular state.
 
 ![Confusion matrices for binary sleep prediction. The middle of each
-tile is the normalized count (overall percentage) and, beneath it, the
-count. The bottom number is the column percentage (target). At the right
-side of each tile is the row percentage (prediction). i) decision tree,
-ii) logistic regression, iii) feed-forward neural net, iv) XGBoost, and
-v) biLSTM.](visuals/all_conf_mats.pdf){#fig-conf_mat}
+tile is the normalized count (overall percentage). The bottom number of
+each tile is the column percentage and the right side of each tile is
+the row percentage. i) decision tree, ii) logistic regression, iii)
+feed-forward neural net, iv) XGBoost, and v)
+biLSTM.](visuals/all_conf_mats.pdf){#fig-conf_mat}
 
 ## Evaluation of sleep quality metrics
 
@@ -523,31 +531,31 @@ v) biLSTM.](visuals/all_conf_mats.pdf){#fig-conf_mat}
 to predict various sleep quality metrics (SPT, TST, SE, LPS, WASO) using
 the 5-minute median filtered ZM predictions. To see the full table
 including models developed from raw ZM predictions and 10-minute median
-filtered ZM predictions, see **\[SUPP. MAT.\]**. In terms of bias, the
-decision tree model consistently underestimated SPT, TST, and SE, and
-overestimated LPS and WASO in comparison to ZM. The logistic regression
-model had similar trends, with more pronounced underestimation in TST
-and overestimation in LPS. The feed-forward neural network also
-exhibited similar bias as the decision tree and the logistic regression
-models, but with a higher overestimation in WASO. On the other hand, the
-XGBoost model showed least bias among all, especially in its 5-minute
-median predictions. Considering LOA, the decision tree had higher
-variability across different sleep quality metrics and filtering
-techniques, particularly for LPS and WASO, which indicates lower
-agreement with ZM. Other models had comparable LOA but with notable
-exceptions. For example, TST LOA for the logistic regression model was
-particularly wide in the 5-minute median predictions. Correlation-wise,
-the pearson coefficient, revealed that the XGBoost model consistently
-had the highest correlation with ZM across all sleep quality metrics and
-filtering methods Notably, the XGBoost's 5-minute median predictions
-showed the strongest correlation (0.66) for TST among all models and
-filtering techniques.
+filtered ZM predictions, see table 1 in supplementary materials. In
+terms of bias, the decision tree model consistently underestimated SPT,
+TST, and SE, and overestimated LPS and WASO in comparison to ZM. The
+logistic regression model had similar trends, with more pronounced
+underestimation in TST and overestimation in LPS. The feed-forward
+neural network also exhibited similar bias as the decision tree and the
+logistic regression models, but with a higher overestimation in WASO. On
+the other hand, the XGBoost model showed least bias among all,
+especially in its 5-minute median predictions. Considering LOA, the
+decision tree had higher variability across different sleep quality
+metrics and filtering techniques, particularly for LPS and WASO, which
+indicates lower agreement with ZM. Other models had comparable LOA but
+with notable exceptions. For example, TST LOA for the logistic
+regression model was particularly wide in the 5-minute median
+predictions. Correlation-wise, the pearson coefficient, revealed that
+the XGBoost model consistently had the highest correlation with ZM
+across all sleep quality metrics and filtering methods Notably, the
+XGBoost's 5-minute median predictions showed the strongest correlation
+(0.66) for TST among all models and filtering techniques.
 
 ```{r}
 #| echo: false
 #| message: false
 #| label: tbl-ba_cor
-#| tbl-cap: Summary of Bias, Limits of Agreement, and Pearson Correlation for various Sleep Parameter Predictions (SPT, TST, SE, LPS, WASO) using different Machine Learning Models (Decision Tree, Logistic Regression, Feed-Forward Neural Net, XGBoost) with Raw ZM Predictions, 5-Min and 10-Min Median as predictors. Each value is provided with its 95% Confidence Interval (CI).
+#| tbl-cap: Summary of bias, limits of agreement, and pearson correlation for various sleep parameter predictions (SPT, TST,SE, LPS, WASO) using different machine learning and deep learning models (decision tree, logistic regression, feed-forward neural network, XGBoost) on raw ZM predictions, 5-minute and 10-minute median predictions. Each value is provided with its 95% confidence interval (CI).
 
 source("code/table_ba_cor_statistics.R")
 
@@ -569,16 +577,14 @@ two methods. The scatterplot for TST also shows a slightly higher
 correlation, primarily driven by the absence of extreme
 outliers.Furthermore, the remaining three sleep quality metrics, SE,
 LPS, and WASO, exhibit heteroscedasticity in contrast to SPT and TST.
-This outcome is expected as achieving 100% sleep efficiency is
+~~This outcome is expected as achieving 100% sleep efficiency is
 relatively rare, resulting in less disagreement between the methods as
 values approach the upper limit. Conversely, as sleep efficiency
 decreases, the potential for discrepancies and differing interpretations
-between the methods increases, leading to greater heteroscedasticity. A
-moderate positive linear correlation is observed between the XGBoost
+between the methods increases, leading to greater heteroscedasticity.~~
+A moderate positive linear correlation is observed between the XGBoost
 model and ZM-derived sleep quality metrics for SE, however, a poor
-correlation is observed for LPS and WASO. Similar plots for all models
-are available in the **supplementary materials (75 plots. Jeg ved ikke
-om nogen orker at bladre igennem dem).**
+correlation is observed for LPS and WASO.
 
 ![Comparison of sleep quality metrics derived from the XGBoost model
 trained on the 5-minute smoothed ZM predictions. The left column
@@ -824,21 +830,21 @@ children.
 
 In conclusion, our study contributes to the ongoing efforts to improve
 sleep estimation methods using thigh-worn accelerometers. We evaluated
-different machine learning models for predicting in-bed and sleep times
-and their corresponding sleep quality metrics. While the sequential
-models generally demonstrated excellent performance in predicting in-bed
-time, they faced challenges in accurately distinguishing between sleep
-and wake epochs during in-bed time. Among all models and configurations
-evaluated, the XGBoost model exhibited superior performance across all
-performance metrics, including epoch-to-epoch predictions and sleep
-quality parameter derivatives. Our research also highlighted the current
-limitations of sleep detection methods, such as challenges in
-effectively detecting wake periods during in-bed time and the need for
-further improvements to increase the precision of individual sleep
-assessments. We believe our work lays the groundwork for future research
-to further refine and improve the performance of these models,
-contributing to a more precise and accurate evaluation of sleep patterns
-and quality using thigh-worn accelerometers.
+different machine learning and deep learnng models for predicting in-bed
+and sleep times and their corresponding sleep quality metrics. While the
+sequential models generally demonstrated excellent performance in
+predicting in-bed time, they faced challenges in accurately
+distinguishing between sleep and wake epochs during in-bed time. Among
+all models and configurations evaluated, the XGBoost model exhibited the
+best performance, including epoch-to-epoch predictions and sleep quality
+metrics. Our research also highlighted the current limitations of sleep
+detection methods, such as challenges in effectively detecting wake
+periods during in-bed time and the need for further improvements to
+increase the precision of individual sleep assessments. We believe our
+work lays the groundwork for future research to further refine and
+improve the performance of these models, contributing to a more precise
+and accurate evaluation of sleep patterns and quality using thigh-worn
+accelerometers.
 
 \newpage
 
