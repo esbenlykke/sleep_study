@@ -1,9 +1,8 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-/data
-/models
-/depricated
-/manuscript/visuals
-/manuscript/_extensions
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!/code
+!/manuscript/code
+!/manuscript/manuscript.pdf
