@@ -3,7 +3,8 @@
 
 # But not these files...
 !.gitignore
-!/code
-!/manuscript/code
-!/manuscript/manuscript.pdf
+!code/
+!manuscript/code/
+!manuscript/manuscript.pdf/
 !README.md
+!LICENSE
