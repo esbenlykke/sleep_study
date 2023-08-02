@@ -1,5 +1,6 @@
 ---
 title: "Improving Sleep Quality Estimation: A Comparative Study of Machine Learning and Deep Learning Techniques Utilizing Free-Living Accelerometer Data from Thigh-Worn Devices and EEG-Based Sleep Tracking"
+shorttitle: "Improving Sleep Quality Estimation"
 author:
   - name: Esben Høegholm Lykke
     email: eskovgaard@health.sdu.dk
@@ -32,19 +33,27 @@ keywords:
   - Sleep quality
 date: last-modified
 bibliography: bibliography.bib
+include-in-header: 
+      text: '\usepackage{lineno}\linenumbers'
 format:
   elsevier-pdf:
     keep-tex: false
+    # fig-pos: 'b'
     journal:
       name: npj Digital Medicine
       formatting: preprint
       model: 3p
       cite-style: super
-    include-in-header: 
-      text: '\usepackage{lineno}\linenumbers'
-    fig-pos: 'b'
+  simple-article-pdf:
+    indent: false
+    classoption: 
+     - 9pt
+     - twoside
   docx:
     number-sections: true
+  html: 
+    csl: https://www.zotero.org/styles/nature
+pdf-engine: xelatex
 editor: 
   markdown: 
     wrap: 72
@@ -576,13 +585,8 @@ observed for SPT, indicating a consistent level of agreement between the
 two methods. The scatterplot for TST also shows a slightly higher
 correlation, primarily driven by the absence of extreme
 outliers.Furthermore, the remaining three sleep quality metrics, SE,
-LPS, and WASO, exhibit heteroscedasticity in contrast to SPT and TST.
-~~This outcome is expected as achieving 100% sleep efficiency is
-relatively rare, resulting in less disagreement between the methods as
-values approach the upper limit. Conversely, as sleep efficiency
-decreases, the potential for discrepancies and differing interpretations
-between the methods increases, leading to greater heteroscedasticity.~~
-A moderate positive linear correlation is observed between the XGBoost
+LPS, and WASO, exhibit heteroscedasticity in contrast to SPT and TST. A
+moderate positive linear correlation is observed between the XGBoost
 model and ZM-derived sleep quality metrics for SE, however, a poor
 correlation is observed for LPS and WASO.
 

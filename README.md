@@ -1,4 +1,4 @@
-# Sleep Quality Estimation using Accelerometer Data from Thigh-Mounted Devices During Free Living Conditions (working title)
+# Improving Sleep Quality Estimation: A Comparative Study of Machine Learning and Deep Learning Techniques Utilizing Free-Living Accelerometer Data from Thigh-Worn Devices and EEG-Based Sleep Tracking
 
 DOI: []()
 
