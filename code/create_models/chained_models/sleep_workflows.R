@@ -172,7 +172,7 @@ cat("Creating workflow sets...\n")
 #       # MARS = mars_spec, # works in parallel
 #       # random_forest = rf_spec, # works in parallel
 #       xgboost = xgtest_30 <- load_data("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_testing_data.parquet")
-b_spec # works in parallel
+#b_spec # works in parallel
 #     ),
 #     cross = TRUE
 #   ) %>%
@@ -310,4 +310,4 @@ fnames_30 <-
 
 
 # walk2(all_wfs_10, fnames_10, ~ tune_wf_and_write(.x, .y, folds_10))
-walk2(all_wfs_30, fnames_30, ~ tune_wf_and_write(.x, .y, folds_30))
+walk2(all_wfs_30$xgb_wfs_30, fnames_30[4], ~ tune_wf_and_write(.x, .y, folds_30))

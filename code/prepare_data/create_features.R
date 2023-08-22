@@ -10,10 +10,10 @@ conflicted::conflicts_prefer(dplyr::lag)
 conflicted::conflicts_prefer(dplyr::filter)
 cat("Creating sensor-independent features. This will take a while...\n")
 
-# data <-
-#   read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
 data <-
-  read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
+  read_parquet("data/processed/data_for_modelling/bsl_thigh.parquet")
+# data <-
+#   read_parquet("data/processed/zm_acc_no_edge_SP_10_sec_epochs.parquet")
 
 # The mean_crossing_rate function takes the signal as input and calculates 
 # the mean crossing rate. It counts the number of times the signal crosses 
