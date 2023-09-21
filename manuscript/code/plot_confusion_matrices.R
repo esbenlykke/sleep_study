@@ -14,14 +14,14 @@ data <-
 
 # Function to create all confusion matrices as a list of plots
 create_confusion_matrix_plot <- function(data_list, truth_col, estimate_col,
-                                         font_row_percentages = font(size = 2),
-                                         font_col_percentages = font(size = 2),
-                                         font_counts = font(size = 1.5),
-                                         font_normalized = font(size = 2),
-                                         arrow_size = .07,
+                                         font_row_percentages = font(size = 1),
+                                         font_col_percentages = font(size = 1),
+                                         font_counts = font(size = 1),
+                                         font_normalized = font(size = 1.2),
+                                         arrow_size = 1,
                                          add_counts = FALSE,
                                          arrow_nudge_from_text = .08,
-                                         palette = "Blues",
+                                         palette = "Purples",
                                          add_arrows = FALSE) {
   plot_list <- map(data_list, ~ {
     data <- .x %>%
@@ -46,9 +46,13 @@ create_confusion_matrix_plot <- function(data_list, truth_col, estimate_col,
       arrow_nudge_from_text = arrow_nudge_from_text,
       palette = palette,
       add_counts = add_counts,
-      add_arrows = add_arrows
-    ) +
-      theme(text = element_text(size = 8))
+      add_arrows = add_arrows,
+      tile_border_color = "black"
+    ) + 
+      scale_fill_gradient(low = "#EEE8D5", high = "#33B39F") +
+      theme(
+        text = element_text(size = 3)
+      )
 
     return(plot)
   })
@@ -83,19 +87,20 @@ create_confusion_matrix_plot_lstm <- function(target, preds) {
     ) %>%
     plot_confusion_matrix(
       target_col = "target", prediction_col = "preds", counts_col = "n",
-      font_row_percentages = font(size = 2),
-      font_col_percentages = font(size = 2),
-      font_counts = font(size = 1.5),
-      font_normalized = font(size = 2),
-      arrow_size = .07,
+      font_row_percentages = font(size = 1),
+      font_col_percentages = font(size = 1),
+      font_counts = font(size = 1),
+      font_normalized = font(size = 1.2),
+      arrow_size = 1,
       add_counts = FALSE,
       arrow_nudge_from_text = .08,
-      palette = "Blues",
-      add_arrows = FALSE
-    ) +
+      palette = "Purples",
+      add_arrows = FALSE,
+      tile_border_color = "black"
+    ) + 
+    scale_fill_gradient(low = "#EEE8D5", high = "#33B39F") +
     theme(
-      text = element_text(size = 8),
-      axis.text = element_markdown()
+      text = element_text(size = 3)
     )
 }
 
@@ -113,15 +118,24 @@ conf_mat_lstm_median10 <-
 
 
 raw <-
-  wrap_plots(plots[[1]][[1]], plots[[1]][[2]], plots[[1]][[3]], plots[[1]][[4]], conf_mat_lstm_raw, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(tag_levels = "i", title = "Raw")
+  wrap_plots(plots[[1]][[1]], plots[[1]][[2]], plots[[1]][[3]], plots[[1]][[4]], conf_mat_lstm_raw, nrow = 1) + 
+  plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(tag_levels = "i", title = "Raw", 
+                                                                                       theme = 
+                                                                                         theme(title = element_text(size = 6)))
 
 median5 <-
-  wrap_plots(plots[[2]][[1]], plots[[2]][[2]], plots[[2]][[3]], plots[[2]][[4]], conf_mat_lstm_median5, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "5-Min Median")
+  wrap_plots(plots[[2]][[1]], plots[[2]][[2]], plots[[2]][[3]], plots[[2]][[4]], conf_mat_lstm_median5, nrow = 1) + 
+  plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "5-Min Median", 
+                                                                                       theme = 
+                                                                                         theme(title = element_text(size = 6)))
 
 median10 <-
-  wrap_plots(plots[[3]][[1]], plots[[3]][[2]], plots[[3]][[3]], plots[[3]][[4]], conf_mat_lstm_median10, nrow = 1) + plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "10-Min Median")
+  wrap_plots(plots[[3]][[1]], plots[[3]][[2]], plots[[3]][[3]], plots[[3]][[4]], conf_mat_lstm_median10, nrow = 1) + 
+  plot_layout(widths = c(1, 1, 1, 1, 2), heights = c(1, 1, 1, 1, 2)) & plot_annotation(title = "10-Min Median", 
+                                                                                       theme = 
+                                                                                         theme(title = element_text(size = 6)))
 
 wrap_elements(raw) / wrap_elements(median5) / wrap_elements(median10)
 
-ggsave("manuscript/visuals/all_conf_mats.pdf", height = 8, width = 10)
+ggsave("~/projects/thesis/figures/all_conf_mats.pdf", height = 12.5, width = 12.5, units = "cm", dpi = 600)
 

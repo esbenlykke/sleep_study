@@ -111,12 +111,12 @@ plot_ba_cor <- function(model, variable, type) {
       ),
       fill = "grey", alpha = .5, linewidth = .1
     ) +
-    geom_hline(data = bias_data, aes(yintercept = bias), color = "grey25", lty = 2) +
-    geom_hline(data = bias_data, aes(yintercept = loa_lower), color = "grey25", lty = 2) +
-    geom_hline(data = bias_data, aes(yintercept = loa_upper), color = "grey25", lty = 2) +
+    geom_hline(data = bias_data, aes(yintercept = bias), color = "black", lty = 2) +
+    geom_hline(data = bias_data, aes(yintercept = loa_lower), color = "black", lty = 2) +
+    geom_hline(data = bias_data, aes(yintercept = loa_upper), color = "black", lty = 2) +
     geom_point(
       data = stats_data, aes(x = !!sym(paste0("avg_", variable)), y = !!sym(paste0("diff_", variable))),
-      color = "grey20", fill = "steelblue", shape = 21, size = 2.5, stroke = .2, alpha = .7
+      color = "grey20", fill = "#71C9DD", shape = 21, size = 2.5, stroke = .2, alpha = .7
     ) +
     labs(
       x = paste(
@@ -151,9 +151,9 @@ plot_ba_cor <- function(model, variable, type) {
   cor_plot <-
     stats_data %>%
     ggplot(aes(x = !!sym(variable), y = !!sym(paste0("zm_", variable)))) +
-    geom_point(color = "grey20", fill = "steelblue", shape = 21, size = 2.5, stroke = .2, alpha = .7) +
-    geom_abline(slope = 1, intercept = 0, color = "grey25", lty = 2, linewidth = .5) +
-    geom_smooth(method = "lm", color = "grey25", se = FALSE, linewidth = .5) +
+    geom_point(color = "grey20", fill = "#EB6F5D", shape = 21, size = 2.5, stroke = .2, alpha = .7) +
+    geom_abline(slope = 1, intercept = 0, color = "black", lty = 2, linewidth = .5) +
+    geom_smooth(method = "lm", color = "black", se = FALSE, linewidth = .5) +
     geom_label(
       data = cor_data, aes(x = -Inf, y = Inf, label = glue("r = {round(estimate, 2)}")),
       hjust = 0, vjust = 1, label.padding = unit(.3, "lines"), label.size = NA, alpha = .5, size = 4
@@ -209,7 +209,7 @@ plots$xgboost_spt_raw /
   plots$xgboost_lps_raw /
   plots$xgboost_waso_raw
 
-ggsave(filename = "manuscript/visuals/raw_xgboost_ba_cor.pdf", height = 10, width = 8)
+ggsave(filename = "~/projects/thesis/figures/raw_xgboost_ba_cor.pdf", height = 25, width = 20, units = "cm", dpi = 600)
 
 plots$xgboost_spt_median5 /
   plots$xgboost_tst_median5 /
