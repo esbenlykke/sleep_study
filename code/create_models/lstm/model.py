@@ -47,3 +47,16 @@ class biLSTM(nn.Module):
         out = F.softmax(out, dim=1)  # Apply softmax
 
         return out
+    
+# Initialize the model
+model = biLSTM(input_size, hidden_size, num_layers, num_classes).to(device)
+model.eval()  # Set model to evaluation mode
+
+# Create a dummy input of appropriate size
+x = torch.randn(1, sequence_length, input_size).to(device)
+
+# Convert to TorchScript via tracing
+traced_model = torch.jit.trace(model, x)
+
+# Save the traced model
+traced_model.save("biLSTM_model.pt")

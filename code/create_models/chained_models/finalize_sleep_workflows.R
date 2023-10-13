@@ -17,7 +17,8 @@ options(tidymodels.dark = TRUE)
 
 train_30 <-
   read_parquet("data/data_for_modelling/chained_classifiers/30_sec_only_in_bed_training_data.parquet") %>%
-  mutate(across(contains("sleep"), as_factor))
+  mutate(across(contains("sleep"), as_factor)) %>% 
+  drop_na()
 
 
 # Define a function to finalize and fit the best workflow from grid search results
@@ -65,14 +66,6 @@ grid_results_fnames_30 <-
 walk(grid_results_fnames_30, ~ finalize_and_fit_best_wf(.x, train_30),
   .progress = TRUE
 )
-
-# grid_results_fnames_10 <-
-#   list.files("/media/esbenlykke/My Passport/chained_models/grid_results/sleep", full.names = TRUE) %>%
-#   str_subset("10.rds")
-
-# walk(grid_results_fnames_10, ~ finalize_and_fit_best_wf(.x, train_10),
-#   .progress = TRUE
-# )
 
 # TODO this can easily be parallelized
 

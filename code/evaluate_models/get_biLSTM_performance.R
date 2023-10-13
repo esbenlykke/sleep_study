@@ -61,16 +61,24 @@ test_preds <-
 
 
 my_metrics_in_bed <- metric_set(f_meas, precision, accuracy, sensitivity, specificity)
-my_metrics_sleep <- metric_set(f_meas, precision, npv, sensitivity, specificity)
+my_metrics_sleep <- metric_set(precision, npv, sensitivity, specificity)
 
 get_metrics <- function(data, truth, estimate, filter = FALSE, filter_var) {
   if (filter) {
-    data %>%
+    f1_score <- data %>%
       filter(!!sym(filter_var) == 1) %>%
-      my_metrics_sleep(
+      f_meas(
         truth = {{ truth }}, estimate = {{ estimate }},
         event_level = "second", estimator = "macro"
       )
+    other_metrics <- data %>%
+      filter(!!sym(filter_var) == 1) %>%
+      my_metrics_sleep(
+        truth = {{ truth }}, estimate = {{ estimate }},
+        event_level = "second"
+      )
+    
+    bind_rows(f1_score, other_metrics)
   } else {
     data %>%
       my_metrics_in_bed(
